@@ -1,6 +1,6 @@
 DEBUG		= -g
-CCC		= g++ -Wall
-CC		= gcc -ansi -Wall
+CXX		= g++ -Wall -Werror
+CC		= gcc -ansi -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	=
 LDFLAGS		=
@@ -14,12 +14,12 @@ BIN		= usim
 LIBS		= -lX11
 
 $(BIN):		$(OBJS)
-	$(CCC) -o $(@) $(CCFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CXX) -o $(@) $(CCFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
 
 .SUFFIXES:	.cc
 
 .cc.o:
-	$(CCC) $(CPPFLAGS) $(CCFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c $<
 
 $(OBJS):	machdep.h
 
