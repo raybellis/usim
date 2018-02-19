@@ -1,0 +1,177 @@
+#########################################################################
+#
+#	Implementation of an MC6809 Simulator in C++
+#
+#	(C) R.P.Bellis 1993
+#
+#########################################################################
+
+I recently decided to build a microprocessor based controller,
+primarily to revise all of those techniques I learnt as a teenager on
+various 8 bit micros, and which aren't so readily practised on today's
+systems.  I had a 6809 microprocessor (used in the Dragon 32 and some
+Tandy computers) laying around and I managed to pick up a 40*2
+character LCD display module from Greenweld Electronics for £9.50
+
+At this point, I decided that it might be useful to have a machine
+simulator available before going ahead with any real hardware design.
+By doing this I could test the proposed functionality of a system
+before going through the rigours of building an entire computer using
+prototype wiring techniques.
+
+Using Linux as a development system, I decided on C++ (using the Free
+Software Foundation's GCC) rather than C since I saw from the start
+that the use of reference variables and derived classes would be of
+use.  I don't have room to describe anything like the full
+implementation in this article, so I shall describe some important
+implementation details which use nice features of C++.
+
+(1) The `mc6809' Base Class
+
+All of the processor registers and the functions that implement the
+individual instructions and other pertinent functions have private
+access.  Public member functions are provided to load IntelHex files
+into the processor memory and to execute instructions.
+
+A simple system which provides no I/O ports (and hence would be of
+limited usefulness) could be implemented thus:
+
+#include "mc6809.h"
+void main()
+{
+	mc6809		sys;	// Declare the object
+	sys.load("hexfile");	// Load an Intel hex file
+	sys.reset();		// Setup initial registers 
+	sys.run();		// Execute forever more
+}
+
+The `run' function repeatedly calls `execute' which interprets one
+complete instruction.  `Execute' first performs a memory fetch (at the
+program counter) and then uses two large switch statements to find
+first the addressing mode used by the instruction and then to call the
+function which implements the fine detail of the instruction.
+
+(2) Virtualization of I/O Devices
+
+Virtual (protected) member functions are provided to read and write
+processor memory.  The base class provides a 64 KB block of RAM and
+functions to access memory words and to fetch bytes from the memory
+location pointed to by the program counter.
+
+The two virtual functions `mc6809::read' and `mc6809::write' are
+provided to be overridden in order to simulate the required I/O
+devices.  This can be done simply by checking if the address being
+accessed corresponds to the memory locations where I/O devices are
+mapped.  If the address doesn't correspond to an I/O device then the
+base classes' memory access function is called explicitly by prefixing
+the function name with `mc6809::'.
+
+(3) Use of Reference Variables
+
+A feature common on many microprocessors are registers which can also
+be split into `high' and `low' halves.  On the 6809 microprocessor
+there are the `A' and `B' accumulators which can be joined together to
+form a single 16 bit accumulator `D' with the `A' register forming the
+upper 8 bits.
+
+In C and C++ this sort of arrangement can be implemented using `union'
+records thus:
+
+class mc6809 {
+private:
+	...
+	Word		X, Y;
+	struct {
+		Word	D;
+		union	{
+			Byte	A;
+			Byte	B;
+		} byte;
+	} acc;
+};
+
+This produces the required effect, whereby modifcation of either of
+the 8 bit accumulators also affects the value in the 16 bit `D'
+register and vice versa.  The drawback with this is that it requires cumbersome
+structure notation of the form `acc.D' or `acc.byte.A' to access the
+accumulators.  In C++ this can be got around by using additional
+member reference variables which are set to point to the same
+addresses as the relevant parts of the structure:
+
+class mc6809 {
+	...
+	Byte&		A;
+	Byte&		B;
+	Word&		D;
+	...
+};
+
+To actually set the reference variables pointing to the right place
+they must be initialized in the base class constructor using the post
+parameter list notation:
+
+mc6809::mc6809() : A(acc.byte.A), B(acc.byte.b), D(acc.D)
+{
+	...
+}
+
+Once this is done `mc6809::A' becomes a synonym for
+`mc6809::acc.byte.A'.  Although this could be done using macro
+substitution this would have the side effect of altering any use of the symbol
+`A', rather than just those uses where it's needed by the `mc6809'
+class.
+
+(4) Further Use of Reference Variables (if you've got room)
+
+Reference variables also come in useful if you don't want to use
+pointers excessively.  There are several types of instruction on the
+6809 which use a bit pattern to choose a register to act upon.
+Sometimes these registers are used as rvalues, but sometimes it's
+useful to have them as lvalues which can be modified.  An example of
+this is the `do_postincrement' function which is used to increment
+register variables after their values have been used in indexed
+addressing modes.  The `refreg' function is used to return a reference
+variable to be modified:
+
+Word& mc6809::refreg(Byte post)
+{
+	post = (post & 0x60) >> 5;
+	switch (post) {
+		case 0: return x;
+		case 1: return y;
+		case 2: return u;
+		default: return s;
+	}
+}
+
+void mc6809::do_postincrement(Byte post)
+{
+	switch (post & 0x9f) {
+		case 0x80: refreg(post) += 1; break;
+		case 0x81: refreg(post) += 2; break;
+	}
+}
+
+Thus simply by returning a reference to a variable rather than a copy
+of the variable we can use the returned value as an lvalue as well as
+an rvalue, and thus can be used with the `+=' operator.  This could of
+course been done using pointers, but it would be quite a lot
+more cumbersome.
+
+\{end of list of details}
+
+In the initial (working) version of my simulator a very simple derived
+class is used which either reads or writes a character using `getchar'
+or `putchar' whenever a memory access occurs at address 0xC000.  The
+class constructor function puts the terminal into `raw' mode to bypass
+the normal line buffering which occurs on Unix systems and `noecho'
+mode so that whatever software is running on the simulator has
+responsibilty for echoing characters back at the user.  The terminal
+is reset to its original mode on exit within the class destructor to
+make sure that users can see what is typed on the terminal when they
+return to the shell.
+
+If you would like to get hold of the pre-alpha version of my simulator
+it's available as \optional{`usim_011.zip' on this month's disk or as}
+/pub/mc6809/usim-0.11.tar.Z by Anonymous FTP from ftp.cns.ox.ac.uk if
+you have access to the Internet.

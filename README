@@ -1,0 +1,34 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+usim-0.91: mc6809 simulator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is a Motorola mc6809 simulator written in C++.   
+
+The processor simulator is implemented as a C++ class and it is
+designed to be subclassed to provide virtual I/O devices and status
+information.
+
+The `mc6809' class doesn't provide any status information, but the
+derived `mc6809_X' class shows processor status in an X Window.
+
+The simple `sys' class in main.cc adds a virtual mc6850 UART by
+overloading the `read' and `write' methods.
+
+The previously released version (0.1x) had some serious bugs in the
+instruction decoder but this latest version seems to run perfectly.
+It successfully runs the Tiny Basic interpreter that was posted
+to comp.sys.m6809 a few months ago.
+
+v0.91 adds rudimentary support for running under DOS.  To be more
+useful a minimal `conio' based terminal emulator needs to be built
+into the DOS terminal handling code.
+
+------------------------------------------------------------------------------
+R. P. Bellis				E-Mail:	<Ray.Bellis@psy.ox.ac.uk>
+Computing Officer
+MRC Centre in Brain and Behaviour
+Dept. of Experimental Psychology
+University of Oxford
+South Parks Road			Tel:	+44 865 271359
+Oxford OX1 3UD				Fax:	+44 865 310447
+------------------------------------------------------------------------------
