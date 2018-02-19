@@ -3,6 +3,10 @@
 //
 //	(C) R.P.Bellis
 //
+//	Updated from BDA and Soren Roug 12/2003 primarily
+//	with fixes for SBC / CMP / NEG instructions with
+//	incorrect carry flag settings
+//
 
 #include <stdio.h>
 #include "usim.h"
@@ -118,7 +122,7 @@ void mc6809::anda(void)
 
 void mc6809::andb(void)
 {
-	help_add(b);
+	help_and(b);
 }
 
 void mc6809::andcc(void)
@@ -387,23 +391,12 @@ void mc6809::cmpb(void)
 void mc6809::help_cmp(Byte x)
 {
 	Byte	m = fetch_operand();
-	m = (~m) + 1;
+	int	t = x - m;
 
-	{
-		Byte	t = (x & 0x7f) + (m & 0x7f);
-		cc.bit.v = btst(t, 7);
-	}
-
-	{
-		Word	t = x + m;
-		cc.bit.c = btst(t, 8);
-		x = t & 0xff;
-	}
-
-	cc.bit.v ^= cc.bit.c;
-	cc.bit.c = !cc.bit.c;
-	cc.bit.n = btst(x, 7);
-	cc.bit.z = !x;
+	cc.bit.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
+	cc.bit.c = btst((Word)t, 8);
+	cc.bit.n = btst((Byte)t, 7);
+	cc.bit.z = !t;
 }
 
 void mc6809::cmpd(void)
@@ -434,23 +427,12 @@ void mc6809::cmps(void)
 void mc6809::help_cmp(Word x)
 {
 	Word	m = fetch_word_operand();
-	m = (~m) + 1;
+	long	t = x - m;
 
-	{
-		Word	t = (x & 0x7fff) + (m & 0x7fff);
-		cc.bit.v = btst(t, 15);
-	}
-
-	{
-		DWord	t = (DWord)x + m;
-		cc.bit.c = btst(t, 16);
-		x = (Word)(t & 0xffff);
-	}
-
-	cc.bit.v ^= cc.bit.c;
-	cc.bit.c = !cc.bit.c;
-	cc.bit.n = btst(x, 15);
-	cc.bit.z = !x;
+	cc.bit.v = btst((DWord)(x ^ m ^ t ^ (t >> 1)), 15);
+	cc.bit.c = btst((DWord)t, 16);
+	cc.bit.n = btst((DWord)t, 15);
+	cc.bit.z = !t;
 }
 
 void mc6809::coma(void)
@@ -620,8 +602,8 @@ void mc6809::jmp(void)
 void mc6809::jsr(void)
 {
 	Word	addr = fetch_effective_address();
-	write(--s, pc);
-	write(--s, pc >> 8);
+	write(--s, (pc >> 0) & 0xff);
+	write(--s, (pc >> 8) & 0xff);
 	pc = addr;
 }
 
@@ -778,15 +760,14 @@ void mc6809::neg(void)
 
 void mc6809::help_neg(Byte& x)
 {
-	cc.bit.v = (x == 0x80);
-	{
-		Word	t = (Word)((~x) & 0xff) + 1;
-		cc.bit.c = btst(t, 8);
-		x = t & 0xff;
-	}
+	int	t = 0 - x;
 
-	cc.bit.n = btst(x, 7);
-	cc.bit.z = !x;
+	cc.bit.v = btst((Byte)(x ^ t ^ (t >> 1)), 7);
+	cc.bit.c = btst((Word)t, 8);
+	cc.bit.n = btst((Byte)t, 7);
+	cc.bit.z = !t;
+
+	x = t & 0xff;
 }
 
 void mc6809::nop(void)
@@ -965,24 +946,14 @@ void mc6809::sbcb(void)
 
 void mc6809::help_sbc(Byte& x)
 {
-	Byte	m = fetch_operand();
-	m = (~m) + 1 - cc.bit.c;
+	Byte    m = fetch_operand();
+	int t = x - m - cc.bit.c;
 
-	{
-		Byte	t = (x & 0x7f) + (m & 0x7f);
-		cc.bit.v = btst(t, 7);
-	}
-
-	{
-		Word	t = x + m;
-		cc.bit.c = btst(t, 8);
-		x = t & 0xff;
-	}
-
-	cc.bit.v ^= cc.bit.c;
-	cc.bit.c = !cc.bit.c;
-	cc.bit.n = btst(x, 7);
-	cc.bit.z = !x;
+	cc.bit.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
+	cc.bit.c = btst((Word)t, 8);
+	cc.bit.n = btst((Byte)t, 7);
+	cc.bit.z = !t;
+	x = t & 0xff;
 }
 
 void mc6809::sex(void)
@@ -1057,46 +1028,26 @@ void mc6809::subb(void)
 
 void mc6809::help_sub(Byte& x)
 {
-	Byte	m = fetch_operand();
-	m = (~m) + 1;
+	Byte    m = fetch_operand();
+	int t = x - m;
 
-	{
-		Byte	t = (x & 0x7f) + (m & 0x7f);
-		cc.bit.v = btst(t, 7);
-	}
-
-	{
-		Word	t = x + m;
-		cc.bit.c = btst(t, 8);
-		x = t & 0xff;
-	}
-
-	cc.bit.v ^= cc.bit.c;
-	cc.bit.c = !cc.bit.c;
-	cc.bit.n = btst(x, 7);
-	cc.bit.z = !x;
+	cc.bit.v = btst((Byte)(x^m^t^(t>>1)),7);
+	cc.bit.c = btst((Word)t,8);
+	cc.bit.n = btst((Byte)t, 7);
+	cc.bit.z = !t;
+	x = t & 0xff;
 }
 
 void mc6809::subd(void)
 {
-	Word	m = fetch_word_operand();
-	m = (~m) + 1;
+	Word    m = fetch_word_operand();
+	int t = d - m;
 
-	{
-		Word	t = (d & 0x7fff) + (m & 0x7fff);
-		cc.bit.v = btst(t, 15);
-	}
-
-	{
-		DWord	t = (DWord)d + m;
-		cc.bit.c = btst(t, 16);
-		d = (Word)(t & 0xffff);
-	}
-
-	cc.bit.v ^= cc.bit.c;
-	cc.bit.c = !cc.bit.c;
-	cc.bit.n = btst(d, 15);
-	cc.bit.z = !d;
+	cc.bit.v = btst((DWord)(d ^ m ^ t ^(t >> 1)), 15);
+	cc.bit.c = btst((DWord)t, 16);
+	cc.bit.n = btst((DWord)t, 15);
+	cc.bit.z = !t;
+	d = t & 0xffff;
 }
 
 void mc6809::swi(void)
