@@ -82,8 +82,8 @@ mc6809_X::mc6809_X()
 
 	// Set window class
 	XClassHint			xch;
-	xch.res_name = "mc6809";
-	xch.res_class = "MC6809";
+	xch.res_name = strdup("mc6809");
+	xch.res_class = strdup("MC6809");
 	XSetClassHint(dpy, win, &xch);
 
 	// Put the window on the screen
@@ -145,7 +145,7 @@ void mc6809_X::status(void)
 			strcat(tmp, " ");
 		}
 
-		for (j = 0; j < 8; ++j) {
+		for (int j = 0; j < 8; ++j) {
 			Byte		ch = memory[stk + j];
 			strcat(tmp, ascchr(ch));
 		}
