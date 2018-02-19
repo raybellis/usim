@@ -163,9 +163,11 @@ void mc6809::execute(void)
 			bvc(); break;
 		case 0x29:
 			bvs(); break;
-		case 0x4f:
+		case 0x4e: case 0x4f:
+			// 0x4e undocumented
 			clra(); break;
-		case 0x5f:
+		case 0x5e: case 0x5f:
+			// 0x5e undocumented
 			clrb(); break;
 		case 0x0f: case 0x6f: case 0x7f:
 			clr(); break;
@@ -183,19 +185,27 @@ void mc6809::execute(void)
 			cmpu(); break;
 		case 0x108c: case 0x109c: case 0x10ac: case 0x10bc:
 			cmpy(); break;
-		case 0x43:
+		case 0x42: case 0x43: case 0x1042:
+			// 0x42 / 0x1042 undocumented
 			coma(); break;
-		case 0x53:
+		case 0x52: case 0x53:
+			// 0x52 undocumented
 			comb(); break;
-		case 0x03: case 0x63: case 0x73:
+		case 0x03: case 0x62: case 0x63: case 0x73:
+			// 0x62 undocumented
 			com(); break;
 		case 0x19:
 			daa(); break;
-		case 0x4a:
+		case 0x4a: case 0x4b:
+			// 0x4b undocumented
 			deca(); break;
-		case 0x5a:
+		case 0x5a: case 0x5b:
+			// 0x5b undocumented
 			decb(); break;
-		case 0x0a: case 0x6a: case 0x7a:
+		case 0x0a: case 0x0b:
+		case 0x6a: case 0x6b:
+		case 0x7a: case 0x7b:
+			// 0x0b, 0x6b, 0x7b undocumented
 			dec(); break;
 		case 0x88: case 0x98: case 0xa8: case 0xb8:
 			eora(); break;
@@ -241,19 +251,29 @@ void mc6809::execute(void)
 			lslb(); break;
 		case 0x08: case 0x68: case 0x78:
 			lsl(); break;
-		case 0x44:
+		case 0x44: case 0x45:
+			// 0x45 undocumented
 			lsra(); break;
-		case 0x54:
+		case 0x54: case 0x55:
+			// 0x55 undocumented
 			lsrb(); break;
-		case 0x04: case 0x64: case 0x74:
+		case 0x04: case 0x05:
+		case 0x64: case 0x65:
+		case 0x74: case 0x75:
+			// 0x05, 0x65, 0x75 undocumented
 			lsr(); break;
 		case 0x3d:
 			mul(); break;
-		case 0x40:
+		case 0x40: case 0x41:
+			// 0x41 undocumented
 			nega(); break;
-		case 0x50:
+		case 0x50: case 0x51:
+			// 0x51 undocumented
 			negb(); break;
-		case 0x00: case 0x60: case 0x70:
+		case 0x00: case 0x01:
+		case 0x60: case 0x61:
+		case 0x70: case 0x71:
+			// 0x01, 0x61, 0x71 undocumented
 			neg(); break;
 		case 0x12:
 			nop(); break;
@@ -358,6 +378,7 @@ void mc6809::execute(void)
 		case 0x1029:
 			lbvs(); break;
 		default:
+			// TODO: make run-time selectable
 			invalid("instruction"); break;
 	}
 }
@@ -501,10 +522,10 @@ Word mc6809::do_effective_address(Byte post)
 				addr = refreg(post);
 				break;
 			case 0x05: case 0x15:
-				addr = b + refreg(post);
+				addr = extend8(b) + refreg(post);
 				break;
 			case 0x06: case 0x16:
-				addr = a + refreg(post);
+				addr = extend8(a) + refreg(post);
 				break;
 			case 0x08: case 0x18:
 				addr = refreg(post) + extend8(fetch());
@@ -516,10 +537,12 @@ Word mc6809::do_effective_address(Byte post)
 				addr = d + refreg(post);
 				break;
 			case 0x0c: case 0x1c:
-				addr = pc + extend8(fetch());
+				addr = extend8(fetch()); // NB: fetch first
+				addr += pc;
 				break;
 			case 0x0d: case 0x1d:
-				addr = pc + fetch_word();
+				addr = fetch_word();	 // NB: fetch first
+				addr += pc;
 				break;
 			case 0x1f:
 				addr = fetch_word();
