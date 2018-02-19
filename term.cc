@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <stdio.h>
+#include <string.h>
 
 #ifdef sun
 extern "C" int select(int, fd_set *, fd_set *, fd_set *,
@@ -27,8 +28,6 @@ extern "C" int select(int, fd_set *, fd_set *, fd_set *,
 #else
 extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 #endif
-
-extern "C" void bzero(char *, int);
 
 Terminal::Terminal()
 {
