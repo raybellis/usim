@@ -201,12 +201,12 @@ void mc6809::lbge(void)
 
 void mc6809::bgt(void)
 {
-	do_br(!(cc.bit.z & (cc.bit.n ^ cc.bit.v)));
+	do_br(!(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
 }
 
 void mc6809::lbgt(void)
 {
-	do_lbr(!(cc.bit.z & (cc.bit.n ^ cc.bit.v)));
+	do_lbr(!(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
 }
 
 void mc6809::bhi(void)
