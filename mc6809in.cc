@@ -556,7 +556,7 @@ void mc6809::exg(void)
 			return;
 		}
 		swap(wordrefreg(r2), wordrefreg(r1));
-	} else if (r1 >= 8 && r2 <= 11) {
+	} else if (r1 >= 8 && r1 <= 11) {
 		if (r2 < 8 || r2 > 11) {
 			invalid("exchange register");
 			return;
@@ -1086,7 +1086,7 @@ void mc6809::tfr(void)
 			return;
 		}
 		wordrefreg(r2) = wordrefreg(r1);
-	} else if (r1 >= 8 && r2 <= 11) {
+	} else if (r1 >= 8 && r1 <= 11) {
 		if (r2 < 8 || r2 > 11) {
 			invalid("transfer register");
 			return;
