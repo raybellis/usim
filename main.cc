@@ -7,6 +7,8 @@
 #include <signal.h>
 #include "mc6809_X.h"
 #include "mc6850.h"
+#include "aciadevice.h"
+#include "sidforth.h"
 
 #ifdef __unix
 #include <unistd.h>
@@ -21,40 +23,11 @@ extern "C" unsigned int alarm(unsigned int);
 //typedef SIG_FUNC_TYPE *SIG_FP;
 //#endif
 
-class sys : virtual public mc6809_X {
+#ifndef DEVICE
+# define DEVICE aciadevice
+#endif
 
-protected:
-
-	virtual Byte			 read(Word);
-	virtual void			 write(Word, Byte);
-
-protected:
-
-		mc6850			 uart;
-
-} sys;
-
-Byte sys::read(Word addr)
-{
-	Byte		ret = 0;
-
-	if ((addr & 0xfffe) == 0xc000) {
-		ret = uart.read(addr);
-	} else {
-		ret = mc6809_X::read(addr);
-	}
-
-	return ret;
-}
-
-void sys::write(Word addr, Byte x)
-{
-	if ((addr & 0xfffe) == 0xc000) {
-		uart.write(addr, x);
-	} else {
-		mc6809_X::write(addr, x);
-	}
-}
+class DEVICE sys;
 
 #ifdef SIGALRM
 #ifdef sun
@@ -72,7 +45,7 @@ void update(int)
 int main(int argc, char *argv[])
 {
 	if (argc != 2) {
-		fprintf(stderr, "usage: usim <hexfile>\n");
+		fprintf(stderr, "usage: usim <hexfile>\r\n");
 		return EXIT_FAILURE;
 	}
 

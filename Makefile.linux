@@ -8,6 +8,7 @@ LDFLAGS		=
 SRCS		= usim.cc misc.cc \
 		  mc6809.cc mc6809in.cc mc6809_X.cc \
 		  mc6850.cc term.cc \
+		  aciadevice.cc \
 		  main.cc
 OBJS		= $(SRCS:.cc=.o)
 BIN		= usim

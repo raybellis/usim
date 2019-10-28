@@ -21,6 +21,7 @@
 #include <sys/time.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
 
 #ifdef sun
 extern "C" int select(int, fd_set *, fd_set *, fd_set *,

@@ -50,22 +50,20 @@ public:
 
 // Function to load the processor state
 public:
-
 		void		 load_intelhex(const char *filename);
 
 };
 
-class USimMotorola : virtual public USim {
+class USimMotorola : public USim {
 
 // Memory access functions taking target byte order into account
 protected:
-
 	virtual Word		read_word(Word offset);
 	virtual void		write_word(Word offset, Word val);
 
 };
 
-class USimIntel : virtual public USim {
+class USimIntel : public USim {
 
 // Memory access functions taking target byte order into account
 protected:

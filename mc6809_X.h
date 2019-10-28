@@ -12,7 +12,7 @@
 #include <X11/Xutil.h>
 #include "mc6809.h"
 
-class mc6809_X : virtual public mc6809 {
+class mc6809_X : public mc6809 {
 
 // X11 stuff
 protected:

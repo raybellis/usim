@@ -12,7 +12,7 @@
 #include "usim.h"
 #include "machdep.h"
 
-class mc6809 : virtual public USimMotorola {
+class mc6809 :  public USimMotorola {
 
 // Processor addressing modes
 protected:
@@ -122,7 +122,7 @@ private:
 	void			jsr();
 	void			lda(), ldb();
 	void			ldd(), ldx(), ldy(), lds(), ldu();
-	void			leax(), leay(), leas(), leau(); 
+	void			leax(), leay(), leas(), leau();
 	void			lsla(), lslb(), lsl();
 	void			lsra(), lsrb(), lsr();
 	void			mul();
@@ -185,12 +185,11 @@ protected:
 	virtual void		execute(void);
 
 public:
-				mc6809();		// public constructor
+    mc6809();		// public constructor
 	virtual			~mc6809();		// public destructor
 
 	virtual void		reset(void);		// CPU reset
 	virtual void		status(void);
-
 };
 
 #endif // __mc6809_h__
