@@ -2,12 +2,12 @@
 //	main.cc
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
+#include <cstdlib>
+#include <cstdio>
+#include <csignal>
 #include "mc6809_X.h"
 #include "mc6850.h"
-#include "aciadevice.h"
+#include "uartdevice.h"
 #include "sidforth.h"
 
 #ifdef __unix
@@ -24,11 +24,12 @@ extern "C" unsigned int alarm(unsigned int);
 //#endif
 
 #ifndef DEVICE
-# define DEVICE aciadevice
+# define DEVICE uartdevice
 #endif
 
 class DEVICE sys;
 
+#ifndef DEBUG
 #ifdef SIGALRM
 #ifdef sun
 void update(int, ...)
@@ -41,6 +42,7 @@ void update(int)
 	alarm(1);
 }
 #endif // SIGALRM
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -50,11 +52,12 @@ int main(int argc, char *argv[])
 	}
 
 	(void)signal(SIGINT, SIG_IGN);
+#ifndef DEBUG
 #ifdef SIGALRM
 	(void)signal(SIGALRM, update);
 	alarm(1);
 #endif
-
+#endif
 	sys.load_intelmotorolahex(argv[1]);
 	sys.run();
 

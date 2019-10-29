@@ -8,7 +8,7 @@
 #ifndef __term_h__
 #define __term_h__
 
-#include <stdio.h>
+#include <cstdio>
 #include "typedefs.h"
 
 #ifdef __unix

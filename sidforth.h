@@ -1,17 +1,22 @@
 #ifndef SIDFORTH_H
 #define SIDFORTH_H
 
-#include "mc6809_X.h"
 #include "diskio.h"
 #include "ttyio.h"
 
+#ifdef DEBUG
+#include "mc6809_debug.h"
+# define INHERIT mc6809_debug
+#else
+#include "mc6809_X.h"
+# define INHERIT mc6809_X
+#endif
 /*
  * virtual sidforth device
  */
-class sidforth : public mc6809_X
+class sidforth : public INHERIT
 {
 protected:
-
     virtual Byte			 read(Word);
     virtual void			 write(Word, Byte);
 private:

@@ -4,8 +4,8 @@
 //	(C) R.P.Bellis
 //
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include "machdep.h"
 #include "usim.h"
 #include "mc6809.h"
@@ -292,13 +292,13 @@ void mc6809::execute(void)
 		case 0x37:
 			pulu(); break;
 		case 0x49:
-			rola(); break;	
+			rola(); break;
 		case 0x59:
 			rolb(); break;
 		case 0x09: case 0x69: case 0x79:
 			rol(); break;
 		case 0x46:
-			rora(); break;	
+			rora(); break;
 		case 0x56:
 			rorb(); break;
 		case 0x06: case 0x66: case 0x76:
@@ -307,9 +307,9 @@ void mc6809::execute(void)
 			rti(); break;
 		case 0x39:
 			rts(); break;
-		case 0x82: case 0x92: case 0xa2: case 0xb2: 
+		case 0x82: case 0x92: case 0xa2: case 0xb2:
 			sbca(); break;
-		case 0xc2: case 0xd2: case 0xe2: case 0xf2: 
+		case 0xc2: case 0xd2: case 0xe2: case 0xf2:
 			sbcb(); break;
 		case 0x1d:
 			sex(); break;

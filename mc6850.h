@@ -8,7 +8,7 @@
 #ifndef __mc6850_h__
 #define __mc6850_h__
 
-#include <stdio.h>
+#include <cstdio>
 #include "misc.h"
 #include "term.h"
 

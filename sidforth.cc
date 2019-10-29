@@ -1,7 +1,5 @@
 #include "sidforth.h"
 
-#include "mc6809_X.h"
-
 Byte sidforth::read(Word addr)
 {
     switch (addr & 0xfff0) {
@@ -10,7 +8,7 @@ Byte sidforth::read(Word addr)
     case tty_address:
         return terminal.get(addr - tty_address);
     default:
-        return mc6809_X::read(addr);
+        return INHERIT::read(addr);
     }
 }
 
@@ -22,6 +20,6 @@ void sidforth::write(Word addr, Byte c)
     case tty_address:
         terminal.set(addr - tty_address, c); return;
     default:
-        mc6809_X::write(addr, c); return;
+        INHERIT::write(addr, c); return;
     }
 }

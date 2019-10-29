@@ -5,7 +5,7 @@
 //	(C) R.P.Bellis 1994
 //
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "term.h"
 
 //------------------------------------------------------------------------
@@ -19,8 +19,8 @@
 #include <termios.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 #include <fcntl.h>
 
 #ifdef sun

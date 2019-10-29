@@ -1,26 +1,30 @@
-DEBUG		= -g
-CXX		= g++ -Wall -Werror
-CC		= gcc -ansi -Wall -Werror
-CCFLAGS		= $(DEBUG)
+DEBUG		= # -g -DDEBUG
+CXX		= g++ -ansi
+CC		= gcc -ansi
+CCFLAGS		=
 CPPFLAGS	=
 LDFLAGS		=
-
+DEVICE		= sidforth
 SRCS		= usim.cc misc.cc \
 		  mc6809.cc mc6809in.cc mc6809_X.cc \
 		  mc6850.cc term.cc \
 		  aciadevice.cc \
+		  diskio.cc ttyio.cc \
+		  sidforth.cc \
+		  mc6809_debug.cc \
 		  main.cc
+
 OBJS		= $(SRCS:.cc=.o)
 BIN		= usim
 LIBS		= -lX11
 
 $(BIN):		$(OBJS)
-	$(CXX) -o $(@) $(CCFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
+	$(CXX) -o $(@) $(DEBUG) $(CCFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
 
 .SUFFIXES:	.cc
 
 .cc.o:
-	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c $<
+	$(CXX) $(CPPFLAGS) $(CCFLAGS) -DDEVICE=$(DEVICE) $(DEBUG) -c $<
 
 $(OBJS):	machdep.h
 

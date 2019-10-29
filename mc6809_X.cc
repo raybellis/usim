@@ -99,7 +99,9 @@ mc6809_X::mc6809_X()
 	text(15, 1, "EFHINZVC");
 	text(10, 2, "  CC:");
 	text(10, 4, "   A:");
-	text(10, 5, "   B:");
+    text(10, 5, "   B:");
+
+    text(20, 4, "  DP:");
 
 	for (int i = 0; i < 6; ++i) {
 		text(4, i + 7, ":");
@@ -130,6 +132,7 @@ void mc6809_X::status(void)
 	text( 6, 5, hexstr(y));
 	text(15, 4, hexstr(a));
 	text(15, 5, hexstr(b));
+    text(25, 4, hexstr(dp));
 	text(15, 2, binstr(cc.all));
 
 	Word		stk = ((s >> 3) << 3) - 16;

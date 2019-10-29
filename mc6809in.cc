@@ -8,7 +8,7 @@
 //	incorrect carry flag settings
 //
 
-#include <stdio.h>
+#include <cstdio>
 #include "usim.h"
 #include "mc6809.h"
 
