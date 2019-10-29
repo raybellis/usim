@@ -101,7 +101,7 @@ static Word fread_word(FILE *fp)
 	return ret;
 }
 
-void USim::load_intelhex(const char *filename)
+void USim::load_intelmotorolahex(const char *filename)
 {
 	FILE		*fp;
 	int		done = 0;
@@ -116,24 +116,54 @@ void USim::load_intelhex(const char *filename)
 		Byte		n, t;
 		Word		addr;
 		Byte		b;
+        int r;
 
-		(void)fgetc(fp);
+		r = fgetc(fp);
+        switch (r) {
+        case -1:
+            done = 1;
+            continue;
+        case 'S':
+            t = (Byte)fgetc(fp); // Expect '1'
+            break;
+        case ':':
+            break;
+        default:
+            fprintf(stderr, "Invalid record type: %c, S or : expected\n", r);
+            exit(EXIT_FAILURE);
+        }
+
 		n = fread_byte(fp);
 		addr = fread_word(fp);
-		t = fread_byte(fp);
-		if (t == 0x00) {
-			while (n--) {
-				b = fread_byte(fp);
-				memory[addr++] = b;
-			}
-		} else if (t == 0x01) {
-			pc = addr;
-			done = 1;
-		}
-		// Read and discard checksum byte
-		(void)fread_byte(fp);
-		if (fgetc(fp) == '\r') (void)fgetc(fp);
+        if (r == ':') {
+            t = fread_byte(fp);
+        } else {
+            n -= 3;
+        }
+        switch (t) {
+        case 1:
+        case '9':
+            pc = addr;
+            done = 1;
+            break;
+        }
+
+        while (n--) {
+            b = fread_byte(fp);
+            switch (t) {
+            case 0:
+            case '1':
+                memory[addr++] = b;
+                break;
+            }
+        }
+        // Read and discard checksum byte
+        (void)fread_byte(fp);
+        if ((r = fgetc(fp)) == '\r') {
+            r = fgetc(fp);
+        }
 	}
+    fclose(fp);
 }
 
 //----------------------------------------------------------------------------

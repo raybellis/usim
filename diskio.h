@@ -7,8 +7,7 @@
  * Registers:
  * Base+0000: block number - write resets internal buffer pointer
  * Base+0002: disk number - write resets internal buffer pointer
- * Base+0003: data register - 1K, 1024 writes write, first read after reset reads
-buffer
+ * Base+0003: data register - 1K, 1024 writes write, first read after reset reads buffer
  */
 class diskio
 {

@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
 	alarm(1);
 #endif
 
-	sys.load_intelhex(argv[1]);
+	sys.load_intelmotorolahex(argv[1]);
 	sys.run();
 
 	return EXIT_SUCCESS;

@@ -64,7 +64,7 @@ void diskio::setWord(Byte offset, Word *target, Byte value)
 
 void diskio::read()
 {
-    size_t read_bytes = 0;
+    ssize_t read_bytes = 0;
     if (position() == 0) {
         read_bytes = ::read(fd[disk_number], transfer_buffer, sizeof(transfer_buffer));
         if (read_bytes < 0) {

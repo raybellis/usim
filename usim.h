@@ -50,7 +50,7 @@ public:
 
 // Function to load the processor state
 public:
-		void		 load_intelhex(const char *filename);
+		void		 load_intelmotorolahex(const char *filename);
 
 };
 
