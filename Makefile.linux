@@ -8,7 +8,7 @@ DEVICE		= sidforth
 SRCS		= usim.cc misc.cc \
 		  mc6809.cc mc6809in.cc mc6809_X.cc \
 		  mc6850.cc term.cc \
-		  aciadevice.cc \
+		  uartdevice.cc \
 		  diskio.cc ttyio.cc \
 		  sidforth.cc \
 		  mc6809_debug.cc \
