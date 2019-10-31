@@ -71,3 +71,6 @@ Thumbs.db
 *.dll
 *.exe
 
+machdep
+machdep.h
+usim

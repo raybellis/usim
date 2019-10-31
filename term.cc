@@ -58,14 +58,13 @@ int Terminal::poll_in(void)
 {
 	fd_set			fds;
 
-	// Uses minimal (1ms) delay in select(2) call to
-	// ensure that idling simulations don't chew
-	// up masses of CPU time
-	static struct timeval	tv = { 0L, 1000L };
+	// No delay in select(2) call
+	// Used to be 1 ms, caused issues with fifos
+	static struct timeval	tv = { 0L, 0 };
 
 	FD_ZERO(&fds);
 	FD_SET(input_fd, &fds);
-	(void)select(FD_SETSIZE, &fds, NULL, NULL, &tv);
+	(void)select(input_fd + 1, &fds, NULL, NULL, &tv);
 
 	return FD_ISSET(input_fd, &fds);
 }
@@ -78,7 +77,7 @@ int Terminal::poll_out(void)
 
 	FD_ZERO(&fds);
 	FD_SET(output_fd, &fds);
-	(void)select(FD_SETSIZE, NULL, &fds, NULL, &tv);
+	(void)select(output_fd + 1, NULL, &fds, NULL, &tv);
 
 	return FD_ISSET(output_fd, &fds);
 }
