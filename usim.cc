@@ -108,7 +108,7 @@ void USim::load_intelmotorolahex(const char *filename)
 
 	fp = fopen(filename, "r");
 	if (!fp) {
-		perror("filename");
+		perror(filename);
 		exit(EXIT_FAILURE);
 	}
 

@@ -16,14 +16,18 @@
  */
 class sidforth : public INHERIT
 {
+public:
+    sidforth();
 protected:
     virtual Byte			 read(Word);
     virtual void			 write(Word, Byte);
 private:
     static const Word disk_address = 0xFC00;
     static const Word tty_address =  disk_address + 0x10;
+    static const Word virtual_tty_address = tty_address + 0x10;
     diskio disk;
     ttyio terminal;
+    ttyio virtual_terminal;
 };
 
 #endif // SIDFORTH_H

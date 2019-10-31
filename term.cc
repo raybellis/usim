@@ -11,7 +11,6 @@
 //------------------------------------------------------------------------
 // Machine dependent Terminal implementations
 //------------------------------------------------------------------------
-
 //------------------------------------------------------------------------
 #if defined(__unix)
 
@@ -30,16 +29,10 @@ extern "C" int select(int, fd_set *, fd_set *, fd_set *,
 extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
 #endif
 
-Terminal::Terminal()
+Terminal::Terminal(int in_fd, int out_fd) :
+    input_fd(in_fd),
+    output_fd(out_fd)
 {
-	input = stdin;
-	output = stdout;
-	input_fd = fileno(input);
-
-	// Set input and output to be unbuffered
-	setbuf(input, (char *)0);
-	setbuf(output, (char *)0);
-
 	// Get copies of current terminal attributes
 	tcgetattr(input_fd, &oattr);
 	tcgetattr(input_fd, &nattr);
@@ -61,7 +54,7 @@ Terminal::~Terminal()
 	tcsetattr(input_fd, TCSANOW, &oattr);
 }
 
-int Terminal::poll()
+int Terminal::poll_in(void)
 {
 	fd_set			fds;
 
@@ -76,15 +69,34 @@ int Terminal::poll()
 
 	return FD_ISSET(input_fd, &fds);
 }
+int Terminal::poll_out(void)
+{
+	fd_set			fds;
+
+	// Uses zero delay in select(2) call to allow fluid output and minimal poll()
+	static struct timeval	tv = { 0L, 0 };
+
+	FD_ZERO(&fds);
+	FD_SET(output_fd, &fds);
+	(void)select(FD_SETSIZE, NULL, &fds, NULL, &tv);
+
+	return FD_ISSET(output_fd, &fds);
+}
+
+int Terminal::poll(void) {
+    return poll_in();
+}
 
 Byte Terminal::read()
 {
-	return (Byte)fgetc(input);
+    Byte c = 0;
+    ::read(input_fd, &c, 1);
+	return c;
 }
 
 void Terminal::write(Byte ch)
 {
-	fputc(ch, output);
+    ::write(output_fd, &ch, 1);
 }
 
 //------------------------------------------------------------------------
