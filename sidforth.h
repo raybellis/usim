@@ -18,16 +18,19 @@ class sidforth : public INHERIT
 {
 public:
     sidforth();
+    ~sidforth();
 protected:
     virtual Byte			 read(Word);
     virtual void			 write(Word, Byte);
 private:
+    int xterm(); // Return rd/wr fd of slave pty
     static const Word disk_address = 0xFC00;
-    static const Word tty_address =  disk_address + 0x10;
-    static const Word virtual_tty_address = tty_address + 0x10;
+    static const Word console_address =  disk_address + 0x10;
+    static const Word uart_address = console_address + 0x10;
     diskio disk;
-    ttyio terminal;
-    ttyio virtual_terminal;
+    ttyio *console;
+    ttyio *uart;
+    FILE *xterm_pipe;
 };
 
 #endif // SIDFORTH_H

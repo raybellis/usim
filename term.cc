@@ -52,6 +52,8 @@ Terminal::Terminal(int in_fd, int out_fd) :
 Terminal::~Terminal()
 {
 	tcsetattr(input_fd, TCSANOW, &oattr);
+    close(output_fd);
+    close(input_fd);
 }
 
 int Terminal::poll_in(void)

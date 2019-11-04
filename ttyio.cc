@@ -4,7 +4,7 @@
 ttyio::ttyio(const char *input_device, const char *output_device)
 {
     int in_fd = 0;
-    int out_fd = 0;
+    int out_fd = 1;
     if (input_device) {
         in_fd = open(input_device, O_RDONLY|O_NONBLOCK);
         if (in_fd < 0) {
@@ -18,6 +18,11 @@ ttyio::ttyio(const char *input_device, const char *output_device)
         }
     }
     term = new Terminal(in_fd, out_fd);
+}
+
+ttyio::ttyio(int ifd, int ofd)
+{
+    term = new Terminal(ifd, ofd);
 }
 
 ttyio::~ttyio()

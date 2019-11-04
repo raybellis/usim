@@ -11,7 +11,8 @@
 class ttyio
 {
 public:
-    ttyio(const char *input_device = NULL, const char *output_device = NULL);
+    ttyio(const char *input_device, const char *output_device);
+    ttyio(int ifd = 0, int ofd = 1);
     ~ttyio();
     void set(Word address, Byte value);
     Byte get(Word address);

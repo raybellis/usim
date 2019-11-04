@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <csignal>
 #include "mc6809_X.h"
+#include "mc6809.h"
 #include "mc6850.h"
 #include "uartdevice.h"
 #include "sidforth.h"
@@ -27,7 +28,7 @@ extern "C" unsigned int alarm(unsigned int);
 # define DEVICE uartdevice
 #endif
 
-class DEVICE sys;
+class DEVICE *sys;
 
 #ifndef DEBUG
 #ifdef SIGALRM
@@ -37,9 +38,11 @@ void update(int, ...)
 void update(int)
 #endif
 {
-	sys.status();
-	(void)signal(SIGALRM, update);
-	alarm(1);
+    if (sys) {
+        sys->status();
+        (void)signal(SIGALRM, update);
+        alarm(1);
+    }
 }
 #endif // SIGALRM
 #endif
@@ -50,7 +53,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "usage: usim <hexfile>\r\n");
 		return EXIT_FAILURE;
 	}
-
+    sys = new DEVICE();
 	(void)signal(SIGINT, SIG_IGN);
 #ifndef DEBUG
 #ifdef SIGALRM
@@ -58,8 +61,14 @@ int main(int argc, char *argv[])
 	alarm(1);
 #endif
 #endif
-	sys.load_intelmotorolahex(argv[1]);
-	sys.run();
-
-	return EXIT_SUCCESS;
+    if (sys) {
+        sys->load_intelmotorolahex(argv[1]);
+        sys->run();
+        delete sys;
+        sys = NULL;
+        return EXIT_SUCCESS;
+    } else {
+        fprintf(stderr, "Failed to create device\n");
+        return EXIT_FAILURE;
+    }
 }
