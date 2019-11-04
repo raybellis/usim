@@ -37,9 +37,8 @@ public:
 
 // Public constructor and destructor
 public:
-
 					 mc6809_X();
-					~mc6809_X();
+                    virtual ~mc6809_X();
 
 };
 

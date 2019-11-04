@@ -63,6 +63,10 @@ void USim::invalid(const char *msg)
 //----------------------------------------------------------------------------
 
 // Single byte read
+USim::~USim()
+{
+}
+
 Byte USim::read(Word offset)
 {
 	return memory[offset];
@@ -170,6 +174,10 @@ void USim::load_intelmotorolahex(const char *filename)
 // Word memory access routines for big-endian (Motorola type)
 //----------------------------------------------------------------------------
 
+USimMotorola::~USimMotorola()
+{
+}
+
 Word USimMotorola::read_word(Word offset)
 {
 	Word		tmp;
@@ -190,6 +198,10 @@ void USimMotorola::write_word(Word offset, Word val)
 //----------------------------------------------------------------------------
 // Word memory access routines for little-endian (Intel type)
 //----------------------------------------------------------------------------
+
+USimIntel::~USimIntel()
+{
+}
 
 Word USimIntel::read_word(Word offset)
 {

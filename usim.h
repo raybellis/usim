@@ -14,7 +14,8 @@
 #include "misc.h"
 
 class USim {
-
+public:
+        virtual ~USim();
 // Generic processor state
 protected:
 
@@ -56,6 +57,8 @@ public:
 
 class USimMotorola : public USim {
 
+public:
+    virtual ~USimMotorola();
 // Memory access functions taking target byte order into account
 protected:
 	virtual Word		read_word(Word offset);
@@ -68,7 +71,8 @@ class USimIntel : public USim {
 // Memory access functions taking target byte order into account
 protected:
 
-	virtual Word		read_word(Word offset);
+    virtual ~USimIntel();
+    virtual Word		read_word(Word offset);
 	virtual void		write_word(Word offset, Word val);
 
 };

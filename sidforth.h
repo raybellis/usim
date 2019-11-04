@@ -18,7 +18,7 @@ class sidforth : public INHERIT
 {
 public:
     sidforth();
-    ~sidforth();
+    virtual ~sidforth();
 protected:
     virtual Byte			 read(Word);
     virtual void			 write(Word, Byte);
