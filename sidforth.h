@@ -27,6 +27,7 @@ private:
     static const Word disk_address = 0xFC00;
     static const Word console_address =  disk_address + 0x10;
     static const Word uart_address = console_address + 0x10;
+    static const Word halt_address = 0xFFF0; // Write to FFF0 is a request to halt. SWI2 does this
     diskio disk;
     ttyio *console;
     ttyio *uart;

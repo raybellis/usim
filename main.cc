@@ -47,6 +47,15 @@ void update(int)
 #endif // SIGALRM
 #endif
 
+void killed(int sig) {
+    fprintf(stderr, "\r\nKilled with %d\r\n", sig);
+    if (sys) {
+        sys->halt();
+    } else {
+        exit (EXIT_FAILURE);
+    }
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc != 2) {
@@ -54,7 +63,9 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
     sys = new DEVICE();
-	(void)signal(SIGINT, SIG_IGN);
+	(void)signal(SIGINT, killed);
+    (void)signal(SIGTERM, killed);
+    (void)signal(SIGHUP, killed);
 #ifndef DEBUG
 #ifdef SIGALRM
 	(void)signal(SIGALRM, update);

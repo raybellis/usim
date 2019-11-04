@@ -66,6 +66,8 @@ void sidforth::write(Word addr, Byte c)
         console->set(addr - console_address, c); return;
     case uart_address:
         uart->set(addr - uart_address, c); return;
+    case halt_address:
+        INHERIT::halt(); return;
     default:
         INHERIT::write(addr, c); return;
     }
