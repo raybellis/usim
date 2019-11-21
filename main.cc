@@ -2,26 +2,15 @@
 //	main.cc
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <signal.h>
-#include "mc6809_X.h"
+#include <cstdlib>
+#include <cstdio>
+#include <csignal>
+#include <unistd.h>
+
+#include "mc6809.h"
 #include "mc6850.h"
 
-#ifdef __unix
-#include <unistd.h>
-#endif
-
-#ifdef __osf__
-extern "C" unsigned int alarm(unsigned int);
-#endif
-
-//#ifndef sun
-//typedef void SIG_FUNC_TYP(int);
-//typedef SIG_FUNC_TYPE *SIG_FP;
-//#endif
-
-class sys : virtual public mc6809_X {
+class sys : virtual public mc6809 {
 
 protected:
 
@@ -41,7 +30,7 @@ Byte sys::read(Word addr)
 	if ((addr & 0xfffe) == 0xc000) {
 		ret = uart.read(addr);
 	} else {
-		ret = mc6809_X::read(addr);
+		ret = mc6809::read(addr);
 	}
 
 	return ret;
@@ -52,16 +41,12 @@ void sys::write(Word addr, Byte x)
 	if ((addr & 0xfffe) == 0xc000) {
 		uart.write(addr, x);
 	} else {
-		mc6809_X::write(addr, x);
+		mc6809::write(addr, x);
 	}
 }
 
 #ifdef SIGALRM
-#ifdef sun
-void update(int, ...)
-#else
 void update(int)
-#endif
 {
 	sys.status();
 	(void)signal(SIGALRM, update);
