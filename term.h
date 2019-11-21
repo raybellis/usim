@@ -11,17 +11,17 @@
 #include <stdio.h>
 #include "typedefs.h"
 
-#ifdef __unix
+#ifdef _POSIX_SOURCE
 #include <termios.h>
 #endif
 
 class Terminal {
 
-#ifdef __unix
+#ifdef _POSIX_SOURCE
 	FILE			*input, *output;
 	int			 input_fd;
 	struct termios		 oattr, nattr;
-#endif // __unix
+#endif // _POSIX_SOURCE
 
 public:
 

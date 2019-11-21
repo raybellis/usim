@@ -13,9 +13,10 @@
 //------------------------------------------------------------------------
 
 //------------------------------------------------------------------------
-#if defined(__unix)
+#if defined(_POSIX_SOURCE)
 
 #include <unistd.h>
+#include <ncurses.h>
 #include <termios.h>
 #include <sys/types.h>
 #include <sys/time.h>
