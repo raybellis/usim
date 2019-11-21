@@ -5,8 +5,7 @@
 //	(C) R.P.Bellis 1994
 //
 
-#ifndef __mc6850_h__
-#define __mc6850_h__
+#pragma once
 
 #include <stdio.h>
 #include "misc.h"
@@ -42,5 +41,3 @@ public:
 				~mc6850();
 
 };
-
-#endif // __mc6850_h__

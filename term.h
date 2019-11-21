@@ -5,8 +5,7 @@
 //	(C) R.P.Bellis 1994
 //
 
-#ifndef __term_h__
-#define __term_h__
+#pragma once
 
 #include <stdio.h>
 #include "typedefs.h"
@@ -35,5 +34,3 @@ public:
 				~Terminal();
 
 };
-
-#endif // __term_h__

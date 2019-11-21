@@ -5,8 +5,7 @@
 //	(C) R.P.Bellis 1994
 //
 
-#ifndef __mc6809_X__h
-#define __mc6809_X__h
+#pragma once
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -42,5 +41,3 @@ public:
 					~mc6809_X();
 
 };
-
-#endif // __mc6809_X__h

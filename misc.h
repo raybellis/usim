@@ -6,8 +6,7 @@
 //
 //
 
-#ifndef __misc_h__
-#define __misc_h__
+#pragma once
 
 #include "typedefs.h"
 
@@ -30,5 +29,3 @@ extern char	*binstr(Byte x);
 extern char	*hexstr(Byte x);
 extern char	*hexstr(Word x);
 extern char	*ascchr(Byte x);
-
-#endif // __misc_h__

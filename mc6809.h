@@ -6,8 +6,7 @@
 //	(C) R.P.Bellis 1993
 //
 
-#ifndef __mc6809_h__
-#define __mc6809_h__
+#pragma once
 
 #include "usim.h"
 #include "machdep.h"
@@ -192,5 +191,3 @@ public:
 	virtual void		status(void);
 
 };
-
-#endif // __mc6809_h__

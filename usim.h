@@ -6,8 +6,7 @@
 //
 //
 
-#ifndef __usim_h__
-#define __usim_h__
+#pragma once
 
 #include "machdep.h"
 #include "typedefs.h"
@@ -74,5 +73,3 @@ protected:
 	virtual void		write_word(Word offset, Word val);
 
 };
-
-#endif // __usim_h__
