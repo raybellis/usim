@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <stdio.h>
+#include <cstdio>
 #include "typedefs.h"
 
 #ifdef _POSIX_SOURCE

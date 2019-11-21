@@ -4,8 +4,8 @@
 //	(C) R.P.Bellis 1994
 //
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <cstdlib>
+#include <cstdio>
 #include <string.h>
 #include "mc6809_X.h"
 

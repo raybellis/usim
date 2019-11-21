@@ -5,9 +5,6 @@
 //	(C) R.P.Bellis 1994
 //
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "mc6850.h"
 #include "term.h"
 

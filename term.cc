@@ -5,7 +5,7 @@
 //	(C) R.P.Bellis 1994
 //
 
-#include <stdlib.h>
+#include <cstdlib>
 #include "term.h"
 
 //------------------------------------------------------------------------
@@ -15,20 +15,13 @@
 //------------------------------------------------------------------------
 #if defined(_POSIX_SOURCE)
 
+#include <cstdio>
 #include <unistd.h>
 #include <ncurses.h>
 #include <termios.h>
+#include <sys/select.h>
 #include <sys/types.h>
-#include <sys/time.h>
-#include <stdio.h>
 #include <string.h>
-
-#ifdef sun
-extern "C" int select(int, fd_set *, fd_set *, fd_set *,
-		const struct timeval *);
-#else
-extern "C" int select(int, fd_set *, fd_set *, fd_set *, struct timeval *);
-#endif
 
 Terminal::Terminal()
 {

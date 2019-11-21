@@ -4,8 +4,6 @@
 //	(C) R.P.Bellis
 //
 
-#include <stdlib.h>
-#include <stdio.h>
 #include "machdep.h"
 #include "usim.h"
 #include "mc6809.h"

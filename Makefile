@@ -1,9 +1,9 @@
-DEBUG		= -g
-CXX		= g++ --std=c++14 -Wall -Werror
+DEBUG		= -O3
+CXX		= g++ --std=c++14 -Wall -Werror -flto
 CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
-LDFLAGS		=
+LDFLAGS		= -flto
 
 SRCS		= usim.cc misc.cc \
 		  mc6809.cc mc6809in.cc \
