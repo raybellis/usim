@@ -395,7 +395,7 @@ void mc6809::help_cmp(Byte x)
 	cc.bit.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
 	cc.bit.c = btst((Word)t, 8);
 	cc.bit.n = btst((Byte)t, 7);
-	cc.bit.z = !t;
+	cc.bit.z = !(t & 0xff);
 }
 
 void mc6809::cmpd(void)
@@ -431,7 +431,7 @@ void mc6809::help_cmp(Word x)
 	cc.bit.v = btst((DWord)(x ^ m ^ t ^ (t >> 1)), 15);
 	cc.bit.c = btst((DWord)t, 16);
 	cc.bit.n = btst((DWord)t, 15);
-	cc.bit.z = !t;
+	cc.bit.z = !(t & 0xffff);
 }
 
 void mc6809::coma(void)
@@ -764,9 +764,8 @@ void mc6809::help_neg(Byte& x)
 	cc.bit.v = btst((Byte)(x ^ t ^ (t >> 1)), 7);
 	cc.bit.c = btst((Word)t, 8);
 	cc.bit.n = btst((Byte)t, 7);
-	cc.bit.z = !t;
-
 	x = t & 0xff;
+	cc.bit.z = !x;
 }
 
 void mc6809::nop(void)
@@ -953,8 +952,8 @@ void mc6809::help_sbc(Byte& x)
 	cc.bit.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
 	cc.bit.c = btst((Word)t, 8);
 	cc.bit.n = btst((Byte)t, 7);
-	cc.bit.z = !t;
 	x = t & 0xff;
+	cc.bit.z = !x;
 }
 
 void mc6809::sex(void)
@@ -1035,8 +1034,8 @@ void mc6809::help_sub(Byte& x)
 	cc.bit.v = btst((Byte)(x^m^t^(t>>1)),7);
 	cc.bit.c = btst((Word)t,8);
 	cc.bit.n = btst((Byte)t, 7);
-	cc.bit.z = !t;
 	x = t & 0xff;
+	cc.bit.z = !x;
 }
 
 void mc6809::subd(void)
@@ -1047,8 +1046,8 @@ void mc6809::subd(void)
 	cc.bit.v = btst((DWord)(d ^ m ^ t ^(t >> 1)), 15);
 	cc.bit.c = btst((DWord)t, 16);
 	cc.bit.n = btst((DWord)t, 15);
-	cc.bit.z = !t;
 	d = t & 0xffff;
+	cc.bit.z = !d;
 }
 
 void mc6809::swi(void)
