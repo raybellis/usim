@@ -479,7 +479,7 @@ void mc6809::daa(void)
 
 	{
 		Word	t = (Word)a + c;
-		cc.bit.c = btst(t, 8);
+		cc.bit.c |= btst(t, 8);
 		a = (Byte)t;
 	}
 
