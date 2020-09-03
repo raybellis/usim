@@ -9,7 +9,10 @@
 #pragma once
 
 #include "usim.h"
-#include "machdep.h"
+
+#define MACH_BYTE_ORDER_MSB_FIRST
+#define MACH_BITFIELDS_LSB_FIRST
+
 
 class mc6809 : virtual public USimMotorola {
 
