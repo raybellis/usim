@@ -8,7 +8,6 @@
 #pragma once
 
 #include "misc.h"
-#include "term.h"
 
 class mc6850 {
 
