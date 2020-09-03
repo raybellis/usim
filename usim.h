@@ -45,7 +45,7 @@ public:
 	virtual void		 halt(void);
 	virtual void		 reset(void) = 0;
 	virtual void		 status(void) = 0;
-	virtual void		 invalid(const char * = 0);
+	virtual void		 invalid(const char * = 0) = 0;
 
 // Function to load the processor state
 public:
