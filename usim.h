@@ -19,11 +19,6 @@ protected:
 		int		 halted;
 		Byte		*port;
 
-// Generic internal registers that we assume all CPUs have
-
-		Word		ir;
-		Word		pc;
-
 // Generic read/write/execute functions
 protected:
 
@@ -37,6 +32,11 @@ protected:
 
 // Functions to start and stop the virtual processor
 public:
+
+// Generic internal registers that we assume all CPUs have
+
+		Word		ir;
+		Word		pc;
 
 	virtual void		 run(void);
 	virtual void		 step(void);
