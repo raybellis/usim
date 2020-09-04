@@ -150,10 +150,6 @@ private:
 	void			do_br(int);
 	void			do_lbr(int);
 
-	void			do_nmi(void);
-	void			do_firq(void);
-	void			do_irq(void);
-
 	void			help_adc(Byte&);
 	void			help_add(Byte&);
 	void			help_and(Byte&);
@@ -192,5 +188,9 @@ public:
 
 	virtual void		reset(void);		// CPU reset
 	virtual void		status(void);
+
+	virtual bool		firq(void);
+	virtual bool		nmi(void);
+	virtual bool		irq(void);
 
 };

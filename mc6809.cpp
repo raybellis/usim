@@ -584,3 +584,103 @@ void mc6809::do_predecrement(Byte post)
 			break;
 	}
 }
+
+bool mc6809::firq(void) {
+	if (cc.bit.f) {
+		// interrupt cannot execute because interrupts are disabled
+		return false;
+	}
+
+	// push PC onto stack
+	write(--s, (Byte)pc);
+	write(--s, (Byte)(pc >> 8));
+	
+	// push CCR onto stack
+	write(--s, (Byte)cc.all);
+
+	// clear e flag to indicate fast interrupt
+	cc.bit.e = 0;
+
+	// disable interrupts
+	cc.bit.f = 1;
+	cc.bit.i = 1;
+
+	// jump to isr
+	pc = read_word(0xFFF6);
+
+	// yes the interrupt will be executed
+	return true;
+}
+
+bool mc6809::nmi(void) {
+
+	// push PC onto stack
+	write(--s, (Byte)pc);
+	write(--s, (Byte)(pc >> 8));
+	
+	// push other registers
+	write(--s, (Byte)u);
+	write(--s, (Byte)(u >> 8));
+	write(--s, (Byte)y);
+	write(--s, (Byte)(y >> 8));
+	write(--s, (Byte)x);
+	write(--s, (Byte)(x >> 8));
+	write(--s, dp);
+	write(--s, b);
+	write(--s, a);
+	
+
+	// set e flag to indicate normal interrupt
+	cc.bit.e = 1;
+
+	// push CCR onto stack
+	write(--s, (Byte)cc.all);
+
+	// disable interrupts
+	cc.bit.f = 1;
+	cc.bit.i = 1;
+
+	// jump to isr
+	pc = read_word(0xFFFC);
+
+	// yes the interrupt will be executed
+	return true;
+}
+
+bool mc6809::irq(void) {
+	if (cc.bit.i) {
+		// interrupt cannot execute because interrupts are disabled
+		return false;
+	}
+
+	// push PC onto stack
+	write(--s, (Byte)pc);
+	write(--s, (Byte)(pc >> 8));
+	
+	// push other registers
+	write(--s, (Byte)u);
+	write(--s, (Byte)(u >> 8));
+	write(--s, (Byte)y);
+	write(--s, (Byte)(y >> 8));
+	write(--s, (Byte)x);
+	write(--s, (Byte)(x >> 8));
+	write(--s, dp);
+	write(--s, b);
+	write(--s, a);
+	
+
+	// set e flag to indicate normal interrupt
+	cc.bit.e = 1;
+
+	// push CCR onto stack
+	write(--s, (Byte)cc.all);
+
+	// disable interrupts
+	cc.bit.i = 1;
+
+	// jump to isr
+	pc = read_word(0xFFF8);
+
+	// yes the interrupt will be executed
+	return true;
+}
