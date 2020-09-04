@@ -9,7 +9,6 @@
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
-	reset();
 }
 
 mc6809::~mc6809()
