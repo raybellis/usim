@@ -8,7 +8,6 @@
 
 #pragma once
 
-#include "machdep.h"
 #include "typedefs.h"
 #include "misc.h"
 
