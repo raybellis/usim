@@ -17,7 +17,6 @@ class USim {
 protected:
 
 		int		 halted;
-		Byte		*memory;
 		Byte		*port;
 
 // Generic internal registers that we assume all CPUs have
@@ -28,9 +27,9 @@ protected:
 // Generic read/write/execute functions
 protected:
 
-	virtual Byte		read(Word offset);
+	virtual Byte		read(Word offset) = 0;
 	virtual Word		read_word(Word offset) = 0;
-	virtual void		write(Word offset, Byte val);
+	virtual void		write(Word offset, Byte val) = 0;
 	virtual void		write_word(Word offset, Word val) = 0;
 	virtual Byte		fetch(void);
 	virtual Word		fetch_word(void);

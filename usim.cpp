@@ -49,22 +49,6 @@ Word USim::fetch_word(void)
 }
 
 //----------------------------------------------------------------------------
-// Primitive (byte) memory access routines
-//----------------------------------------------------------------------------
-
-// Single byte read
-Byte USim::read(Word offset)
-{
-	return memory[offset];
-}
-
-// Single byte write
-void USim::write(Word offset, Byte val)
-{
-	memory[offset] = val;
-}
-
-//----------------------------------------------------------------------------
 // Word memory access routines for big-endian (Motorola type)
 //----------------------------------------------------------------------------
 

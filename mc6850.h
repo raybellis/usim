@@ -17,21 +17,11 @@ protected:
 
 	Byte			 td, rd, cr, sr;
 
-// Access to real IO device
-
-	Terminal		 term;
-
 // Initialisation functions
 
 protected:
 
 	void			 reset(void);
-
-// Read and write functions
-public:
-
-	Byte			 read(Word offset);
-	void			 write(Word offset, Byte val);
 
 // Public constructor and destructor
 
