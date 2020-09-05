@@ -7,6 +7,8 @@
 #include "usim.h"
 #include "mc6809.h"
 
+#include <stdio.h>
+
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
 }
@@ -93,22 +95,16 @@ void mc6809::execute(void)
 	switch (ir) {
 		case 0x3a:
 			abx(); break;
-		case 0x89: case 0x99: case 0xa9: case 0xb9:
-			adca(); break;
-		case 0xc9: case 0xd9: case 0xe9: case 0xf9:
-			adcb(); break;
-		case 0x8b: case 0x9b: case 0xab: case 0xbb:
-			adda(); break;
-		case 0xcb: case 0xdb: case 0xeb: case 0xfb:
-			addb(); break;
-		case 0xc3: case 0xd3: case 0xe3: case 0xf3:
-			addd(); break;
-		case 0x84: case 0x94: case 0xa4: case 0xb4:
-			anda(); break;
-		case 0xc4: case 0xd4: case 0xe4: case 0xf4:
-			andb(); break;
 		case 0x1c:
 			andcc(); break;
+		case 0x1f:
+			tfr(); break;
+		case 0x4d:
+			tsta(); break;
+		case 0x5d:
+			tstb(); break;
+		case 0x0d: case 0x6d: case 0x7d:
+			tst(); break;
 		case 0x47:
 			asra(); break;
 		case 0x57:
@@ -127,10 +123,6 @@ void mc6809::execute(void)
 			bgt(); break;
 		case 0x22:
 			bhi(); break;
-		case 0x85: case 0x95: case 0xa5: case 0xb5:
-			bita(); break;
-		case 0xc5: case 0xd5: case 0xe5: case 0xf5:
-			bitb(); break;
 		case 0x2f:
 			ble(); break;
 		case 0x23:
@@ -329,51 +321,63 @@ void mc6809::execute(void)
 			subd(); break;
 		case 0x3f:
 			swi(); break;
-		case 0x103f:
-			swi2(); break;
-		case 0x113f:
-			swi3(); break;
-		case 0x1f:
-			tfr(); break;
-		case 0x4d:
-			tsta(); break;
-		case 0x5d:
-			tstb(); break;
-		case 0x0d: case 0x6d: case 0x7d:
-			tst(); break;
+		case 0x89: case 0x99: case 0xa9: case 0xb9:
+			adca(); break;
+		case 0xc9: case 0xd9: case 0xe9: case 0xf9:
+			adcb(); break;
+		case 0x8b: case 0x9b: case 0xab: case 0xbb:
+			adda(); break;
+		case 0xcb: case 0xdb: case 0xeb: case 0xfb:
+			addb(); break;
+		case 0xc3: case 0xd3: case 0xe3: case 0xf3:
+			addd(); break;
+		case 0x84: case 0x94: case 0xa4: case 0xb4:
+			anda(); break;
+		case 0xc4: case 0xd4: case 0xe4: case 0xf4:
+			andb(); break;
+		case 0x85: case 0x95: case 0xa5: case 0xb5:
+			bita(); break;
+		case 0xc5: case 0xd5: case 0xe5: case 0xf5:
+			bitb(); break;
+		case 0x1021:
+			lbrn(); break;
+		case 0x1022:
+			lbhi(); break;
+		case 0x1023:
+			lbls(); break;
 		case 0x1024:
 			lbcc(); break;
 		case 0x1025:
 			lbcs(); break;
-		case 0x1027:
-			lbeq(); break;
-		case 0x102c:
-			lbge(); break;
-		case 0x102e:
-			lbgt(); break;
-		case 0x1022:
-			lbhi(); break;
-		case 0x102f:
-			lble(); break;
-		case 0x1023:
-			lbls(); break;
-		case 0x102d:
-			lblt(); break;
-		case 0x102b:
-			lbmi(); break;
 		case 0x1026:
 			lbne(); break;
-		case 0x102a:
-			lbpl(); break;
-		case 0x1021:
-			lbrn(); break;
+		case 0x1027:
+			lbeq(); break;
 		case 0x1028:
 			lbvc(); break;
 		case 0x1029:
 			lbvs(); break;
+		case 0x102a:
+			lbpl(); break;
+		case 0x102b:
+			lbmi(); break;
+		case 0x102c:
+			lbge(); break;
+		case 0x102d:
+			lblt(); break;
+		case 0x102e:
+			lbgt(); break;
+		case 0x102f:
+			lble(); break;
+		case 0x103f:
+			swi2(); break;
+		case 0x113f:
+			swi3(); break;
 		default:
 			// TODO: make run-time selectable
-			invalid("instruction"); break;
+			char tmp[48];
+			sprintf(tmp, "invalid opcode %02x", ir);
+			invalid(tmp); break;
 	}
 }
 
