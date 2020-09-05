@@ -605,6 +605,8 @@ bool mc6809::firq(void) {
 	cc.bit.f = 1;
 	cc.bit.i = 1;
 
+	on_firq(pc, read_word(0xFFFC));
+
 	// jump to isr
 	pc = read_word(0xFFF6);
 
@@ -639,6 +641,8 @@ bool mc6809::nmi(void) {
 	// disable interrupts
 	cc.bit.f = 1;
 	cc.bit.i = 1;
+
+	on_nmi(pc, read_word(0xFFFC));
 
 	// jump to isr
 	pc = read_word(0xFFFC);
@@ -677,6 +681,8 @@ bool mc6809::irq(void) {
 
 	// disable interrupts
 	cc.bit.i = 1;
+
+	on_irq(pc, read_word(0xFFFC));
 
 	// jump to isr
 	pc = read_word(0xFFF8);

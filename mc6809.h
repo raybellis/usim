@@ -180,7 +180,12 @@ private:
 	void			help_tst(Byte);
 
 protected:
-	virtual void		execute(void);
+	virtual void	execute(void);
+	virtual void	on_branch(char* opcode, uint16_t src, uint16_t dst) {}
+	virtual void	on_branch_subroutine(char* opcode, uint16_t src, uint16_t dst) {}
+	virtual void	on_nmi(uint16_t src, uint16_t dst) {}
+	virtual void	on_irq(uint16_t src, uint16_t dst) {}
+	virtual void	on_firq(uint16_t src, uint16_t dst) {}
 
 public:
 				mc6809();		// public constructor

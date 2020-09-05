@@ -298,12 +298,16 @@ void mc6809::lbpl(void)
 
 void mc6809::bra(void)
 {
+	uint16_t tmp_pc = pc;
 	do_br(1);
+	on_branch("bra", tmp_pc, pc);
 }
 
 void mc6809::lbra(void)
 {
+	uint16_t tmp_pc = pc;
 	do_lbr(1);
+	on_branch("lbra", tmp_pc, pc);
 }
 
 void mc6809::brn(void)
@@ -321,6 +325,7 @@ void mc6809::bsr(void)
 	Byte	x = fetch();
 	write(--s, (Byte)pc);
 	write(--s, (Byte)(pc >> 8));
+	on_branch_subroutine("bsr", pc, pc + extend8(x));
 	pc += extend8(x);
 }
 
@@ -329,6 +334,7 @@ void mc6809::lbsr(void)
 	Word	x = fetch_word();
 	write(--s, (Byte)pc);
 	write(--s, (Byte)(pc >> 8));
+	on_branch_subroutine("lbsr", pc, pc + x);
 	pc += x;
 }
 
