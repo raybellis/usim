@@ -74,6 +74,9 @@ protected:
 		} bit;
 	} cc;
 
+	bool was_doing_sync = false;
+	bool had_interrupt;
+
 private:
 
 	Word&			refreg(Byte);
@@ -194,8 +197,18 @@ public:
 	virtual void		reset(void);		// CPU reset
 	virtual void		status(void);
 
+	/*
+		The service flag tells the CPU weather the interrupt lasts 3 or more cycles
+		If a sync instruction is in progress:
+			if service = true
+				forces CPU to stack the registers and go to the nmi handler
+			else
+				exit sync command
+		else
+			stack the registers and go to the nmi handler
+	*/
+	virtual bool		nmi(bool service);
 	virtual bool		firq(void);
-	virtual bool		nmi(void);
 	virtual bool		irq(void);
 
 };

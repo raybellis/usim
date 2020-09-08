@@ -1078,6 +1078,19 @@ void mc6809::swi3(void)
 	pc = read_word(0xfff2);
 }
 
+void mc6809::sync(void) {
+	pc--;
+	if (was_doing_sync) {
+		if (had_interrupt) {
+			pc++;
+			was_doing_sync = false;
+		}
+	} else {
+		had_interrupt = false;
+		was_doing_sync = true;
+	}
+}
+
 void mc6809::tfr(void)
 {
 	int	r1, r2;
