@@ -322,6 +322,7 @@ void mc6809::lbrn(void)
 
 void mc6809::bsr(void)
 {
+	check_stack_ovf("bsr");
 	Byte	x = fetch();
 	write(--s, (Byte)pc);
 	write(--s, (Byte)(pc >> 8));
@@ -331,6 +332,7 @@ void mc6809::bsr(void)
 
 void mc6809::lbsr(void)
 {
+	check_stack_ovf("lbsr");
 	Word	x = fetch_word();
 	write(--s, (Byte)pc);
 	write(--s, (Byte)(pc >> 8));
@@ -426,6 +428,7 @@ void mc6809::cmpu(void)
 
 void mc6809::cmps(void)
 {
+	check_stack_ovf("cmps");
 	help_cmp(s);
 }
 
@@ -648,6 +651,7 @@ void mc6809::ldy(void)
 void mc6809::lds(void)
 {
 	help_ld(s);
+	check_stack_ovf("lds");
 }
 
 void mc6809::ldu(void)
@@ -678,6 +682,7 @@ void mc6809::leay(void)
 void mc6809::leas(void)
 {
 	s = fetch_effective_address();
+	check_stack_ovf("leas");
 }
 
 void mc6809::leau(void)
@@ -813,6 +818,8 @@ void mc6809::pshu(void)
 
 void mc6809::help_psh(Byte w, Word& s, Word& u)
 {
+	check_stack_ovf("pre_psh*");
+
 	if (btst(w, 7)) {
 		write(--s, (Byte)pc);
 		write(--s, (Byte)(pc >> 8));
@@ -833,6 +840,8 @@ void mc6809::help_psh(Byte w, Word& s, Word& u)
 	if (btst(w, 2)) write(--s, (Byte)b);
 	if (btst(w, 1)) write(--s, (Byte)a);
 	if (btst(w, 0)) write(--s, (Byte)cc.all);
+
+	check_stack_ovf("post_psh*");
 }
 
 void mc6809::puls(void)
@@ -849,6 +858,8 @@ void mc6809::pulu(void)
 
 void mc6809::help_pul(Byte w, Word& s, Word& u)
 {
+	check_stack_ovf("pul*");
+
 	if (btst(w, 0)) cc.all = read(s++);
 	if (btst(w, 1)) a = read(s++);
 	if (btst(w, 2)) b = read(s++);
@@ -926,6 +937,7 @@ void mc6809::help_ror(Byte& x)
 
 void mc6809::rti(void)
 {
+	check_stack_ovf("rti");
 	help_pul(0x01, s, u);
 	if (cc.bit.e) {
 		help_pul(0xfe, s, u);
@@ -936,6 +948,7 @@ void mc6809::rti(void)
 
 void mc6809::rts(void)
 {
+	check_stack_ovf("rts");
 	pc = read_word(s);
 	s += 2;
 }
@@ -1005,6 +1018,7 @@ void mc6809::sty(void)
 
 void mc6809::sts(void)
 {
+	check_stack_ovf("sts");
 	help_st(s);
 }
 

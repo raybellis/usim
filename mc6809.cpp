@@ -383,6 +383,14 @@ void mc6809::execute(void)
 	}
 }
 
+void mc6809::check_stack_ovf(const char* desc) {
+	char tmp[48];
+	if (s < stack_ovf) {
+		sprintf(tmp, "Stack Overflow detected at %s. %04x < %04x", desc, s, stack_ovf);
+		invalid(tmp);
+	}
+}
+
 Word& mc6809::refreg(Byte post)
 {
 	post &= 0x60;
@@ -598,12 +606,14 @@ bool mc6809::firq(void) {
 			return false;
 		}
 
+		check_stack_ovf("firq_pre_psh");
 		// push PC onto stack
 		write(--s, (Byte)pc);
 		write(--s, (Byte)(pc >> 8));
 		
 		// push CCR onto stack
 		write(--s, (Byte)cc.all);
+		check_stack_ovf("firq_post_psh");
 
 		// clear e flag to indicate fast interrupt
 		cc.bit.e = 0;
@@ -626,6 +636,7 @@ bool mc6809::firq(void) {
 
 bool mc6809::nmi(bool service) {
 
+	check_stack_ovf("nmi_pre_psh");
 	// push PC onto stack
 	write(--s, (Byte)pc);
 	write(--s, (Byte)(pc >> 8));
@@ -647,6 +658,7 @@ bool mc6809::nmi(bool service) {
 
 	// push CCR onto stack
 	write(--s, (Byte)cc.all);
+	check_stack_ovf("nmi_post_psh");
 
 	// disable interrupts
 	cc.bit.f = 1;
@@ -670,6 +682,7 @@ bool mc6809::irq(void) {
 			return false;
 		}
 
+		check_stack_ovf("irq_pre_psh");
 		// push PC onto stack
 		write(--s, (Byte)pc);
 		write(--s, (Byte)(pc >> 8));
@@ -691,6 +704,7 @@ bool mc6809::irq(void) {
 
 		// push CCR onto stack
 		write(--s, (Byte)cc.all);
+		check_stack_ovf("irq_post_psh");
 
 		// disable interrupts
 		cc.bit.i = 1;

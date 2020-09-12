@@ -77,6 +77,8 @@ protected:
 	bool was_doing_sync = false;
 	bool had_interrupt;
 
+	Word stack_ovf = 0;
+
 private:
 
 	Word&			refreg(Byte);
@@ -183,6 +185,7 @@ private:
 	void			help_tst(Byte);
 
 protected:
+	virtual void	check_stack_ovf(const char* desc);
 	virtual void	execute(void);
 	virtual void	on_branch(char* opcode, uint16_t src, uint16_t dst) {}
 	virtual void	on_branch_subroutine(char* opcode, uint16_t src, uint16_t dst) {}
@@ -210,5 +213,9 @@ public:
 	virtual bool		nmi(bool service);
 	virtual bool		firq(void);
 	virtual bool		irq(void);
+
+	// if S drops below the argument then an emergency will initiate with the invalid() function
+	// set to 0 to disable
+	virtual void		set_stack_overflow(uint16_t s) { stack_ovf = s; };
 
 };
