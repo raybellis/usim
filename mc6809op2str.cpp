@@ -1,9 +1,209 @@
 
 #include "string.h"
+#include "stdio.h"
 #include "mc6809.h"
+#include "misc.h"
+
+#define MODE_DIRECT 0
+#define MODE_RELATIVE 0
+#define MODE_INDEXED 1
+#define MODE_IMMEDIATE 2
+#define MODE_INHERENT 3
+#define MODE_EXTENDED 4
+
+// get the mode and increment the instruction pointer to the byte after the opcode
+int decode_mode(char** instruction) {
+	int mode = -1;
+
+	Word ir = (*instruction)[0];
+	(*instruction)++;
+
+	switch (ir & 0xf0) {
+		case 0x00: case 0x90: case 0xd0:
+			mode = MODE_DIRECT; break;
+		case 0x20:
+			mode = MODE_RELATIVE; break;
+		case 0x30: case 0x40: case 0x50:
+			if (ir < 0x34) {
+				mode = MODE_INDEXED;
+			} else if (ir < 0x38) {
+				mode = MODE_IMMEDIATE;
+			} else {
+				mode = MODE_INHERENT;
+			}
+			break;
+		case 0x60: case 0xa0: case 0xe0:
+			mode = MODE_INDEXED; break;
+		case 0x70: case 0xb0: case 0xf0:
+			mode = MODE_EXTENDED; break;
+		case 0x80: case 0xc0:
+			if (ir == 0x8d) {
+				mode = MODE_RELATIVE;
+			} else {
+				mode = MODE_IMMEDIATE;
+			}
+			break;
+		case 0x10:
+			switch (ir & 0x0f) {
+				case 0x02: case 0x03: case 0x09:
+				case 0x0d: case 0x0e: case 0x0f:
+					mode = MODE_INHERENT; break;
+				case 0x06: case 0x07:
+					mode = MODE_RELATIVE; break;
+				case 0x0a: case 0x0c:
+					mode = MODE_IMMEDIATE; break;
+				case 0x00: case 0x01:
+					ir <<= 8;
+					ir |= (*instruction)[1];
+					(*instruction)++;
+					switch (ir & 0xf0) {
+						case 0x20:
+							mode = MODE_RELATIVE; break;
+						case 0x30:
+							mode = MODE_INHERENT; break;
+						case 0x80: case 0xc0:
+							mode = MODE_IMMEDIATE; break;
+						case 0x90: case 0xd0:
+							mode = MODE_DIRECT; break;
+						case 0xa0: case 0xe0:
+							mode = MODE_INDEXED; break;
+						case 0xb0: case 0xf0:
+							mode = MODE_EXTENDED; break;
+					}
+					break;
+			}
+			break;
+	}
+	return mode;
+}
+
+const char* regname(Byte post)
+{
+	post &= 0x60;
+	post >>= 5;
+
+	if (post == 0) {
+		return "x";
+	} else if (post == 1) {
+		return "y";
+	} else if (post == 2) {
+		return "u";
+	} else {
+		return "s";
+	}
+}
+
+// copy the effective address to the destination
+void decode_effective_address(char* data, char* dst, int n)
+{
+	char buffer[16];
+	Byte post = data[0];
+
+	char decs[3] = {0, 0, 0};
+	char incs[3] = {0, 0, 0};
+	if (n <= -1) decs[0] = '-';
+	if (n <= -2) decs[1] = '-';
+	if (n >= 1) incs[0] = '+';
+	if (n >= 2) incs[1] = '+';
+
+	if ((post & 0x80) == 0x00) {
+		sprintf(buffer, "%hhi,%s%s%s", extend5(post & 0x1f), decs, regname(post), incs);
+	} else {
+		switch (post & 0x1f) {
+			case 0x00: case 0x02:
+				sprintf(buffer, ",%s%s%s", decs, regname(post), incs);
+				break;
+			case 0x05: case 0x15:
+				sprintf(buffer, "b,%s%s%s", decs, regname(post), incs);
+				break;
+			case 0x06: case 0x16:
+				sprintf(buffer, "a,%s%s%s", decs, regname(post), incs);
+				break;
+			case 0x08: case 0x18:
+				sprintf(buffer, "%hhi,%s%s%s", data[1], decs, regname(post), incs);
+				break;
+			case 0x09: case 0x19:
+				sprintf(buffer, "%hi,%s%s%s", (data[1] << 8) | data[2], decs, regname(post), incs);
+				break;
+			case 0x0b: case 0x1b:
+				sprintf(buffer, "d,%s%s%s", decs, regname(post), incs);
+				break;
+			case 0x0c: case 0x1c:
+				sprintf(buffer, "%hhi,pc", data[1]);
+				break;
+			case 0x0d: case 0x1d:
+				sprintf(buffer, "%hi,pc", (data[1] << 8) | data[2]);
+				break;
+			case 0x1f:
+				sprintf(buffer, "%hi,", (data[1] << 8) | data[2]);
+				break;
+			default:
+				sprintf(dst, "INVALID_ADR_POST=%02x", post);
+				return; // don't add extra data after
+		}
+
+		*dst = 0;
+		/* Do extra indirection */
+		if (post & 0x10)
+			strcat(dst, "[");
+		strcat(dst, buffer);
+		if (post & 0x10)
+			strcat(dst, "]");
+	}
+}
+
+void decode_operand(char* buf, char* instruction, bool is_word) {
+	int mode = decode_mode(&instruction);
+
+	if (mode == MODE_IMMEDIATE) {
+		if (is_word) {
+			sprintf(buf, "#%04x", (instruction[0] << 8) | instruction[1]);
+		} else {
+			sprintf(buf, "#%02x", instruction[0]);
+		}
+	} else if (mode == MODE_RELATIVE) {
+		if (is_word) {
+			sprintf(buf, "$%04x", (instruction[0] << 8) | instruction[1]);
+		} else {
+			sprintf(buf, "$%02x", instruction[0]);
+		}
+	} else if (mode == MODE_EXTENDED) {
+		sprintf(buf, "e$%04x", (instruction[0] << 8) | instruction[1]);
+	} else if (mode == MODE_DIRECT) {
+		sprintf(buf, "$dp.#%02x", instruction[0]);
+	} else if (mode == MODE_INDEXED) {
+		Byte post = instruction[0];
+		int n = 0;
+		switch (post & 0x9f) {
+			case 0x82:
+				n = -1;
+				break;
+			case 0x92:
+				strcpy(buf, "INVALID_PREDEC");
+				return;
+			case 0x83: case 0x93:
+				n = -2;
+				break;
+			case 0x80:
+				n = 1;
+				break;
+			case 0x90:
+				strcpy(buf, "INVALID_PSTINC");
+				return;
+			case 0x81: case 0x91:
+				n = 2;
+				break;
+		}
+		decode_effective_address(instruction, buf, n);
+	} else {
+		strcpy(buf, "INVALID");
+	}
+}
 
 void Instruction::decode(char* string) {
-	const char* name;
+	const char*		name;
+	bool			do_decode_operand = false;
+	bool			is_word;
 
 	Word ir = bytes[0];
 	if (ir == 0x10) {
@@ -130,19 +330,40 @@ void Instruction::decode(char* string) {
 		case 0x9d: case 0xad: case 0xbd:
 			name = "jsr"; break;
 		case 0x86: case 0x96: case 0xa6: case 0xb6:
-			name = "lda"; break;
+			do_decode_operand = true;
+			is_word = false;
+			name = "lda";
+			break;
 		case 0xc6: case 0xd6: case 0xe6: case 0xf6:
-			name = "ldb"; break;
+			do_decode_operand = true;
+			is_word = false;
+			name = "ldb";
+			break;
 		case 0xcc: case 0xdc: case 0xec: case 0xfc:
-			name = "ldd"; break;
+			do_decode_operand = true;
+			is_word = false;
+			name = "ldd";
+			break;
 		case 0x10ce: case 0x10de: case 0x10ee: case 0x10fe:
-			name = "lds"; break;
+			do_decode_operand = true;
+			is_word = true;
+			name = "lds";
+			break;
 		case 0xce: case 0xde: case 0xee: case 0xfe:
-			name = "ldu"; break;
+			do_decode_operand = true;
+			is_word = true;
+			name = "ldu";
+			break;
 		case 0x8e: case 0x9e: case 0xae: case 0xbe:
-			name = "ldx"; break;
+			do_decode_operand = true;
+			is_word = true;
+			name = "ldx";
+			break;
 		case 0x108e: case 0x109e: case 0x10ae: case 0x10be:
-			name = "ldy"; break;
+			do_decode_operand = true;
+			is_word = true;
+			name = "ldy";
+			break;
 		case 0x32:
 			name = "leas"; break;
 		case 0x33:
@@ -220,19 +441,40 @@ void Instruction::decode(char* string) {
 		case 0x1d:
 			name = "sex"; break;
 		case 0x97: case 0xa7: case 0xb7:
-			name = "sta"; break;
+			name = "sta";
+			do_decode_operand = true;
+			is_word = false;
+			break;
 		case 0xd7: case 0xe7: case 0xf7:
-			name = "stb"; break;
+			name = "stb";
+			do_decode_operand = true;
+			is_word = false;
+			break;
 		case 0xdd: case 0xed: case 0xfd:
-			name = "std"; break;
+			name = "std";
+			do_decode_operand = true;
+			is_word = false;
+			break;
 		case 0x10df: case 0x10ef: case 0x10ff:
-			name = "sts"; break;
+			name = "sts";
+			do_decode_operand = true;
+			is_word = true;
+			break;
 		case 0xdf: case 0xef: case 0xff:
-			name = "stu"; break;
+			name = "stu";
+			do_decode_operand = true;
+			is_word = true;
+			break;
 		case 0x9f: case 0xaf: case 0xbf:
-			name = "stx"; break;
+			name = "stx";
+			do_decode_operand = true;
+			is_word = true;
+			break;
 		case 0x109f: case 0x10af: case 0x10bf:
-			name = "sty"; break;
+			name = "sty";
+			do_decode_operand = true;
+			is_word = true;
+			break;
 		case 0x80: case 0x90: case 0xa0: case 0xb0:
 			name = "suba"; break;
 		case 0xc0: case 0xd0: case 0xe0: case 0xf0:
@@ -296,5 +538,13 @@ void Instruction::decode(char* string) {
 		default:
 			name = "INVALID"; break;
 	};
+
 	strcpy(string, name);
+
+	if (do_decode_operand) {
+		char buf[16];
+		buf[0] = ' ';
+		decode_operand(buf + 1, bytes, is_word);
+		strcat(string, buf);
+	}
 }
