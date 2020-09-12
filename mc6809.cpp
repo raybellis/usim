@@ -32,7 +32,14 @@ void mc6809::status(void)
 
 void mc6809::execute(void)
 {
+	Word oldpc = pc;
 	ir = fetch();
+
+	if (instruction_loc == -1 || last_instructions[instruction_loc].address != oldpc) {
+		last_instructions[next_ins_loc] = Instruction(oldpc, s, ir);
+		instruction_loc = next_ins_loc;
+		next_ins_loc = (next_ins_loc + 1) % INSTRUCTION_RECORD_SIZE;
+	}
 
 	/* Select addressing mode */
 	switch (ir & 0xf0) {
@@ -72,6 +79,7 @@ void mc6809::execute(void)
 				case 0x00: case 0x01:
 					ir <<= 8;
 					ir |= fetch();
+					last_instructions[instruction_loc].append(ir & 255);
 					switch (ir & 0xf0) {
 						case 0x20:
 							mode = relative; break;
@@ -381,6 +389,7 @@ void mc6809::execute(void)
 			sprintf(tmp, "invalid opcode %02x", ir);
 			invalid(tmp); break;
 	}
+	instruction_loc = next_ins_loc;
 }
 
 void mc6809::check_stack_ovf(const char* desc) {
@@ -444,16 +453,22 @@ Byte mc6809::fetch_operand(void)
 
 	if (mode == immediate) {
 		ret = fetch();
+		last_instructions[instruction_loc].append(ret);
 	} else if (mode == relative) {
 		ret = fetch();
+		last_instructions[instruction_loc].append(ret);
 	} else if (mode == extended) {
 		addr = fetch_word();
 		ret = read(addr);
+		last_instructions[instruction_loc].append(addr >> 8);
+		last_instructions[instruction_loc].append(addr & 255);
 	} else if (mode == direct) {
 		addr = ((Word)dp << 8) | fetch();
 		ret = read(addr);
+		last_instructions[instruction_loc].append(addr & 255);
 	} else if (mode == indexed) {
 		Byte		post = fetch();
+		last_instructions[instruction_loc].append(post);
 		do_predecrement(post);
 		addr = do_effective_address(post);
 		ret = read(addr);
@@ -471,16 +486,24 @@ Word mc6809::fetch_word_operand(void)
 
 	if (mode == immediate) {
 		ret = fetch_word();
+		last_instructions[instruction_loc].append(ret >> 8);
+		last_instructions[instruction_loc].append(ret & 255);
 	} else if (mode == relative) {
 		ret = fetch_word();
+		last_instructions[instruction_loc].append(ret >> 8);
+		last_instructions[instruction_loc].append(ret & 255);
 	} else if (mode == extended) {
 		addr = fetch_word();
+		last_instructions[instruction_loc].append(addr >> 8);
+		last_instructions[instruction_loc].append(addr & 255);
 		ret = read_word(addr);
 	} else if (mode == direct) {
 		addr = (Word)dp << 8 | fetch();
 		ret = read_word(addr);
+		last_instructions[instruction_loc].append(addr & 255);
 	} else if (mode == indexed) {
 		Byte	post = fetch();
+		last_instructions[instruction_loc].append(post);
 		do_predecrement(post);
 		addr = do_effective_address(post);
 		do_postincrement(post);
@@ -498,10 +521,14 @@ Word mc6809::fetch_effective_address(void)
 
 	if (mode == extended) {
 		addr = fetch_word();
+		last_instructions[instruction_loc].append(addr >> 8);
+		last_instructions[instruction_loc].append(addr & 255);
 	} else if (mode == direct) {
 		addr = (Word)dp << 8 | fetch();
+		last_instructions[instruction_loc].append(addr & 255);
 	} else if (mode == indexed) {
 		Byte		post = fetch();
+		last_instructions[instruction_loc].append(post);
 		do_predecrement(post);
 		addr = do_effective_address(post);
 		do_postincrement(post);
@@ -515,6 +542,8 @@ Word mc6809::fetch_effective_address(void)
 Word mc6809::do_effective_address(Byte post)
 {
 	Word		addr = 0;
+	Word		tmp;
+	Byte		tmpb;
 
 	if ((post & 0x80) == 0x00) {
 		addr = refreg(post) + extend5(post & 0x1f);
@@ -539,21 +568,30 @@ Word mc6809::do_effective_address(Byte post)
 				addr = refreg(post) + extend8(fetch());
 				break;
 			case 0x09: case 0x19:
-				addr = refreg(post) + fetch_word();
+				tmp = fetch_word();
+				last_instructions[instruction_loc].append(tmp >> 8);
+				last_instructions[instruction_loc].append(tmp & 255);
+				addr = refreg(post) + tmp;
 				break;
 			case 0x0b: case 0x1b:
 				addr = d + refreg(post);
 				break;
 			case 0x0c: case 0x1c:
-				addr = extend8(fetch()); // NB: fetch first
+				tmpb = fetch();
+				last_instructions[instruction_loc].append(tmpb);
+				addr = extend8(tmpb); // NB: fetch first
 				addr += pc;
 				break;
 			case 0x0d: case 0x1d:
 				addr = fetch_word();	 // NB: fetch first
+				last_instructions[instruction_loc].append(addr >> 8);
+				last_instructions[instruction_loc].append(addr & 255);
 				addr += pc;
 				break;
 			case 0x1f:
 				addr = fetch_word();
+				last_instructions[instruction_loc].append(addr >> 8);
+				last_instructions[instruction_loc].append(addr & 255);
 				break;
 			default:
 				invalid("indirect addressing postbyte");

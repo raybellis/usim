@@ -13,6 +13,31 @@
 #define MACH_BYTE_ORDER_MSB_FIRST
 #define MACH_BITFIELDS_LSB_FIRST
 
+#define INSTRUCTION_RECORD_SIZE 64
+
+class Instruction {
+public:
+	char byte_length;
+	char bytes[8];
+	Word address;
+	Word s;
+
+	Instruction() {}
+
+	Instruction(Word pc, Word ss, char firstByte) {
+		bytes[0] = firstByte;
+		byte_length = 1;
+		address = pc;
+		s = ss;
+	}
+
+	void decode(char* string);
+
+	void append(char newbyte) {
+		if (byte_length < 8)
+			bytes[byte_length++] = newbyte;
+	}
+};
 
 class mc6809 : virtual public USimMotorola {
 
@@ -78,6 +103,10 @@ protected:
 	bool had_interrupt;
 
 	Word stack_ovf = 0;
+
+	Instruction last_instructions[INSTRUCTION_RECORD_SIZE];
+	int instruction_loc = -1;
+	int next_ins_loc = 0;
 
 private:
 
@@ -187,8 +216,8 @@ private:
 protected:
 	virtual void	check_stack_ovf(const char* desc);
 	virtual void	execute(void);
-	virtual void	on_branch(char* opcode, uint16_t src, uint16_t dst) {}
-	virtual void	on_branch_subroutine(char* opcode, uint16_t src, uint16_t dst) {}
+	virtual void	on_branch(const char* opcode, uint16_t src, uint16_t dst) {}
+	virtual void	on_branch_subroutine(const char* opcode, uint16_t src, uint16_t dst) {}
 	virtual void	on_nmi(uint16_t src, uint16_t dst) {}
 	virtual void	on_irq(uint16_t src, uint16_t dst) {}
 	virtual void	on_firq(uint16_t src, uint16_t dst) {}
