@@ -54,8 +54,7 @@ protected:
 	} mode;
 
 // Processor registers
-protected:
-
+public:
 	Word			u, s;		// Stack pointers
 	Word			x, y;		// Index registers
 	Byte			dp;		// Direct Page register
@@ -98,6 +97,8 @@ protected:
 #endif
 		} bit;
 	} cc;
+
+protected:
 
 	bool was_doing_sync = false;
 	bool had_interrupt;
