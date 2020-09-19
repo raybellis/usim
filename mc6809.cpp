@@ -24,6 +24,7 @@ void mc6809::reset(void)
 	cc.all = 0x00;		/* Clear all flags */
 	cc.bit.i = 1;		/* IRQ disabled */
 	cc.bit.f = 1;		/* FIRQ disabled */
+	was_doing_sync = false;
 }
 
 void mc6809::status(void)
@@ -664,6 +665,8 @@ bool mc6809::firq(void) {
 
 		// jump to isr
 		pc = read_word(0xFFF6);
+	} else {
+		on_firq(pc, pc + 1);
 	}
 
 	had_interrupt = true;
@@ -707,7 +710,8 @@ bool mc6809::nmi(bool service) {
 	// jump to isr
 	pc = read_word(0xFFFC);
 
-	had_interrupt = true;
+	//had_interrupt = true;
+	was_doing_sync = false;
 
 	// yes the interrupt will be executed
 	return true;
@@ -751,6 +755,8 @@ bool mc6809::irq(void) {
 
 		// jump to isr
 		pc = read_word(0xFFF8);
+	} else {
+		on_irq(pc, pc + 1);
 	}
 
 	had_interrupt = true;
