@@ -10,7 +10,7 @@
 
 #include "usim.h"
 
-#define MACH_BYTE_ORDER_MSB_FIRST
+//#define MACH_BYTE_ORDER_MSB_FIRST
 #define MACH_BITFIELDS_LSB_FIRST
 
 #define INSTRUCTION_RECORD_SIZE 64
