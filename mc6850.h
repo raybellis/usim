@@ -7,36 +7,38 @@
 
 #pragma once
 
+#include "usim.h"
 #include "misc.h"
 #include "term.h"
 
-class mc6850 {
+class mc6850 : public Device {
 
 // Internal registers
 
 protected:
 
-	Byte			 td, rd, cr, sr;
+	Byte			td, rd, cr, sr;
 
 // Access to real IO device
 
-	Terminal		 term;
+	Word			tickcount;
+	Terminal		term;
 
 // Initialisation functions
 
 protected:
-
-	void			 reset(void);
+	void			tick(void);
+	void			reset(void);
 
 // Read and write functions
 public:
 
-	Byte			 read(Word offset);
-	void			 write(Word offset, Byte val);
+	virtual Byte		read(Word offset);
+	virtual void		write(Word offset, Byte val);
 
 // Public constructor and destructor
 
-				 mc6850();
-				~mc6850();
+				mc6850();
+	virtual			~mc6850();
 
 };

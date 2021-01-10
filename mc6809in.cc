@@ -8,8 +8,8 @@
 //	incorrect carry flag settings
 //
 
-#include "usim.h"
 #include "mc6809.h"
+#include "misc.h"
 
 void mc6809::abx(void)
 {

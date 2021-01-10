@@ -9,50 +9,7 @@
 
 #include "mc6809.h"
 #include "mc6850.h"
-
-class sys : virtual public mc6809 {
-
-protected:
-
-	virtual Byte			 read(Word);
-	virtual void			 write(Word, Byte);
-
-protected:
-
-		mc6850			 uart;
-
-} sys;
-
-Byte sys::read(Word addr)
-{
-	Byte		ret = 0;
-
-	if ((addr & 0xfffe) == 0xc000) {
-		ret = uart.read(addr);
-	} else {
-		ret = mc6809::read(addr);
-	}
-
-	return ret;
-}
-
-void sys::write(Word addr, Byte x)
-{
-	if ((addr & 0xfffe) == 0xc000) {
-		uart.write(addr, x);
-	} else {
-		mc6809::write(addr, x);
-	}
-}
-
-#ifdef SIGALRM
-void update(int)
-{
-	sys.status();
-	(void)signal(SIGALRM, update);
-	alarm(1);
-}
-#endif // SIGALRM
+#include "memory.h"
 
 int main(int argc, char *argv[])
 {
@@ -62,10 +19,15 @@ int main(int argc, char *argv[])
 	}
 
 	(void)signal(SIGINT, SIG_IGN);
-#ifdef SIGALRM
-	(void)signal(SIGALRM, update);
-	alarm(1);
-#endif
+
+	mc6809	sys;
+	RAM	ram(0x8000);
+	RAM	rom(0x1000);
+	mc6850	acia;
+
+	sys.attach(ram, 0x0000, 0x8000);
+	sys.attach(rom, 0xf000, 0xf000);
+	sys.attach(acia, 0xc000, 0xfffe);
 
 	sys.load_intelhex(argv[1]);
 	sys.run();

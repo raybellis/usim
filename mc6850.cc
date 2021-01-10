@@ -23,10 +23,14 @@ void mc6850::reset()
 	sr = 0;		// Clear all status bits
 
 	bset(sr, 1);	// Set TDRE to true
+	tickcount = 0;
 }
 
-Byte mc6850::read(Word offset)
+void mc6850::tick()
 {
+	if (tickcount++ < 1000) return;
+	tickcount = 0;
+
 	// Check for a received character if one isn't available
 	if (!btst(sr, 0)) {
 		Byte			ch;
@@ -44,7 +48,10 @@ Byte mc6850::read(Word offset)
 			bset(sr, 0);		// Set RDRF
 		}
 	}
+}
 
+Byte mc6850::read(Word offset)
+{
 	// Now return the relevant value
 	if (offset & 1) {
 		bclr(sr, 0);		// Clear RDRF
@@ -70,4 +77,3 @@ void mc6850::write(Word offset, Byte val)
 		}
 	}
 }
-

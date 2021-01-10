@@ -8,18 +8,21 @@
 
 #pragma once
 
+#include "device.h"
 #include "machdep.h"
-#include "typedefs.h"
-#include "misc.h"
 
+/*
+ * main system wide base class for CPU emulators
+ *
+ * assumes an 8 bit Von-Neumann architecture with a 16 bit
+ * address space and memory mapped peripherals
+ */
 class USim {
 
 // Generic processor state
 protected:
 
-		int		 halted;
-		Byte		*memory;
-		Byte		*port;
+		int		halted;
 
 // Generic internal registers that we assume all CPUs have
 
@@ -37,20 +40,27 @@ protected:
 	virtual Word		fetch_word(void);
 	virtual void		execute(void) = 0;
 
+// Device handling:
+protected:
+		Devices		devices;
+
+public:
+	virtual void		attach(Device& dev, Word base, Word mask);
+
 // Functions to start and stop the virtual processor
 public:
 
-	virtual void		 run(void);
-	virtual void		 step(void);
-	virtual void		 halt(void);
-	virtual void		 reset(void) = 0;
-	virtual void		 status(void) = 0;
-	virtual void		 invalid(const char * = 0);
+	virtual void		run(void);
+	virtual void		tick(void);
+	virtual void		halt(void);
+	virtual void		reset(void) = 0;
+	virtual void		status(void) = 0;
+	virtual void		invalid(const char * = 0);
 
 // Function to load the processor state
 public:
 
-		void		 load_intelhex(const char *filename);
+		void		load_intelhex(const char *filename);
 
 };
 

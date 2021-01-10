@@ -5,7 +5,7 @@ CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
 LDFLAGS		= -flto
 
-SRCS		= usim.cc misc.cc \
+SRCS		= usim.cc misc.cc memory.cc \
 		  mc6809.cc mc6809in.cc \
 		  mc6850.cc term.cc \
 		  main.cc

@@ -17,13 +17,18 @@ void USim::run(void)
 {
 	halted = 0;
 	while (!halted) {
-		execute();
+		tick();
 	}
 	status();
 }
 
-void USim::step(void)
+void USim::tick(void)
 {
+	// update all attached devices
+	for (auto& d : devices) {
+		d.device->tick();
+	}
+
 	execute();
 	status();
 }
@@ -58,19 +63,34 @@ void USim::invalid(const char *msg)
 }
 
 //----------------------------------------------------------------------------
-// Primitive (byte) memory access routines
+// Device handling
 //----------------------------------------------------------------------------
+
+void USim::attach(Device& dev, Word base, Word mask)
+{
+	devices.push_back(DeviceEntry { &dev, base, mask });
+}
 
 // Single byte read
 Byte USim::read(Word offset)
 {
-	return memory[offset];
+	for (auto& d : devices) {
+		if ((offset & d.mask) == d.base) {
+			return d.device->read(offset - d.base);
+		}
+	}
+	return 0xff;
 }
 
 // Single byte write
 void USim::write(Word offset, Byte val)
 {
-	memory[offset] = val;
+	for (auto& d : devices) {
+		if ((offset & d.mask) == d.base) {
+			d.device->write(offset - d.base, val);
+			break;
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -123,7 +143,7 @@ void USim::load_intelhex(const char *filename)
 		if (t == 0x00) {
 			while (n--) {
 				b = fread_byte(fp);
-				memory[addr++] = b;
+				write(addr++, b);
 			}
 		} else if (t == 0x01) {
 			pc = addr;

@@ -4,19 +4,17 @@
 //	(C) R.P.Bellis
 //
 
-#include "machdep.h"
 #include "usim.h"
+#include "misc.h"
 #include "mc6809.h"
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
-	memory = new Byte[0x10000L];
 	reset();
 }
 
 mc6809::~mc6809()
 {
-	delete[] memory;
 }
 
 void mc6809::reset(void)
