@@ -37,7 +37,6 @@ int main(int argc, char *argv[])
 	rom.load_intelhex(argv[1], rom_base);
 
 	cpu.reset();
-	cpu.debug = 1;
 	cpu.run();
 
 	return EXIT_SUCCESS;

@@ -21,7 +21,7 @@ handle_reset	lds	#system_stack
 		ldx	#system_ready
 		lbsr	putstr
 
-		; swi
+		swi
 
 		andcc	#$bf		; enable FIRQ
 		lda	#$80		; enable ACIA interrupt
@@ -30,6 +30,7 @@ handle_reset	lds	#system_stack
 loop		sync
 		lda	inchar
 		jsr	puthexbyte
+		swi
 		bra	loop
 
 ;-- Status printing software interrupt

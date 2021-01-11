@@ -44,7 +44,6 @@ void mc6809::tick(void)
 	if (waiting_sync) {
 		// if NMI or IRQ or FIRQ asserts (flags don't matter)
 		if (nmi_triggered || !firq || !irq) {
-			debug = 1;
 			waiting_sync = false;
 		} else {
 			return;
@@ -72,8 +71,8 @@ void mc6809::tick(void)
 void mc6809::do_nmi()
 {
 	if (!waiting_cwai) {
-		help_psh(0xff, s, u);
 		cc.bit.e = 1;
+		help_psh(0xff, s, u);
 	}
 	cc.bit.f = cc.bit.i = 1;
 	pc = read_word(0xfffc);
@@ -82,6 +81,7 @@ void mc6809::do_nmi()
 void mc6809::do_firq()
 {
 	if (!waiting_cwai) {
+		cc.bit.e = 0;
 		help_psh(0x81, s, u);
 	}
 	cc.bit.f = cc.bit.i = 1;
@@ -91,6 +91,7 @@ void mc6809::do_firq()
 void mc6809::do_irq()
 {
 	if (!waiting_cwai) {
+		cc.bit.e = 1;
 		help_psh(0xff, s, u);
 	}
 	cc.bit.f = cc.bit.i = 1;
