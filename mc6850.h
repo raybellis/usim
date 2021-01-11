@@ -18,6 +18,7 @@ class mc6850 : public Device {
 protected:
 
 	Byte			td, rd, cr, sr;
+	OutputPin		irq;
 
 // Access to real IO device
 

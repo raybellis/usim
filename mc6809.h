@@ -71,15 +71,21 @@ protected:
 		} bit;
 	} cc;
 
+// internal processor state
+private:
+	bool			waiting_sync;
+	bool			waiting_cwai;
+	bool			nmi_previous;	// previous state of the NMI line
+
 private:
 
 	Word&			refreg(Byte);
 	Byte&			byterefreg(int);
 	Word&			wordrefreg(int);
 
-	Byte			fetch_operand(void);
-	Word			fetch_word_operand(void);
-	Word			fetch_effective_address(void);
+	Byte			fetch_operand();
+	Word			fetch_word_operand();
+	Word			fetch_effective_address();
 	Word			do_effective_address(Byte);
 	void			do_predecrement(Byte);
 	void			do_postincrement(Byte);
@@ -147,9 +153,9 @@ private:
 	void			do_br(int);
 	void			do_lbr(int);
 
-	void			do_nmi(void);
-	void			do_firq(void);
-	void			do_irq(void);
+	void			do_nmi();
+	void			do_firq();
+	void			do_irq();
 
 	void			help_adc(Byte&);
 	void			help_add(Byte&);
@@ -181,13 +187,16 @@ private:
 	void			help_tst(Byte);
 
 protected:
-	virtual void		execute(void);
+	virtual void		tick();
+	virtual void		execute();
+
+public:
+	InputPin		irq, firq, nmi;
 
 public:
 				mc6809();		// public constructor
 	virtual			~mc6809();		// public destructor
 
-	virtual void		reset(void);		// CPU reset
-	virtual void		status(void);
+	virtual void		reset();		// CPU reset
 
 };

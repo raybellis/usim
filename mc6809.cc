@@ -24,10 +24,73 @@ void mc6809::reset(void)
 	cc.all = 0x00;		/* Clear all flags */
 	cc.bit.i = 1;		/* IRQ disabled */
 	cc.bit.f = 1;		/* FIRQ disabled */
+	waiting_sync = false;	/* not in SYNC */
+	waiting_cwai = false;	/* not in CWAI */
+	nmi_previous = true;	/* no NMI present */
 }
 
-void mc6809::status(void)
+void mc6809::tick(void)
 {
+	// handle attached devices
+	USim::tick();
+
+	// check for NMI falling edge
+	bool nmi_triggered = !nmi && nmi_previous;
+	nmi_previous = nmi;
+
+	if (waiting_sync) {
+		// if NMI or IRQ or FIRQ asserts (flags don't matter)
+		if (nmi_triggered || !firq || !irq) {
+			waiting_sync = false;
+		} else {
+			return;
+		}
+	}
+
+	// look for external interrupts
+	if (nmi_triggered) {
+		do_nmi();
+	} else if (!firq && !cc.bit.f) {
+		do_firq();
+	} else if (!irq && !cc.bit.i) {
+		do_irq();
+	} else if (waiting_cwai) {
+		return;
+	}
+
+	// if we got here, then CWAI is no longer in effect
+	waiting_cwai = false;
+
+	// process the next instruction
+	execute();
+}
+
+void mc6809::do_nmi()
+{
+	if (!waiting_cwai) {
+		help_psh(0xff, s, u);
+		cc.bit.e = 1;
+	}
+	cc.bit.f = cc.bit.i = 1;
+	pc = read_word(0xfffc);
+}
+
+void mc6809::do_firq()
+{
+	if (!waiting_cwai) {
+		help_psh(0x81, s, u);
+	}
+	cc.bit.f = cc.bit.i = 1;
+	pc = read_word(0xfff6);
+}
+
+void mc6809::do_irq()
+{
+	if (!waiting_cwai) {
+		help_psh(0xff, s, u);
+	}
+	cc.bit.f = cc.bit.i = 1;
+	pc = read_word(0xfff8);
 }
 
 void mc6809::execute(void)
@@ -35,6 +98,7 @@ void mc6809::execute(void)
 	ir = fetch();
 
 	/* Select addressing mode */
+	// if we got here, then CWAI was not in effect
 	switch (ir & 0xf0) {
 		case 0x00: case 0x90: case 0xd0:
 			mode = direct; break;
@@ -190,6 +254,8 @@ void mc6809::execute(void)
 		case 0x03: case 0x62: case 0x63: case 0x73:
 			// 0x62 undocumented
 			com(); break;
+		case 0x3c:
+			cwai(); break;
 		case 0x19:
 			daa(); break;
 		case 0x4a: case 0x4b:
@@ -335,6 +401,8 @@ void mc6809::execute(void)
 			swi2(); break;
 		case 0x113f:
 			swi3(); break;
+		case 0x13:
+			sync(); break;
 		case 0x1f:
 			tfr(); break;
 		case 0x4d:

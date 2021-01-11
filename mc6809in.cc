@@ -11,6 +11,19 @@
 #include "mc6809.h"
 #include "misc.h"
 
+
+void mc6809::do_br(int test)
+{
+	Word offset = extend8(fetch_operand());
+	if (test) pc += offset;
+}
+
+void mc6809::do_lbr(int test)
+{
+	Word offset = fetch_word_operand();
+	if (test) pc += offset;
+}
+
 void mc6809::abx(void)
 {
 	x += b;
@@ -421,6 +434,15 @@ void mc6809::cmpu(void)
 void mc6809::cmps(void)
 {
 	help_cmp(s);
+}
+
+void mc6809::cwai(void)
+{
+	Byte	n = fetch();
+	cc.all &= n;
+	cc.bit.e = 1;
+	help_psh(0xff, s, u);
+	waiting_cwai = true;
 }
 
 void mc6809::help_cmp(Word x)
@@ -1072,6 +1094,11 @@ void mc6809::swi3(void)
 	pc = read_word(0xfff2);
 }
 
+void mc6809::sync()
+{
+	waiting_sync = true;
+}
+
 void mc6809::tfr(void)
 {
 	int	r1, r2;
@@ -1118,16 +1145,4 @@ void mc6809::help_tst(Byte x)
 	cc.bit.v = 0;
 	cc.bit.n = btst(x, 7);
 	cc.bit.z = !x;
-}
-
-void mc6809::do_br(int test)
-{
-	Word offset = extend8(fetch_operand());
-	if (test) pc += offset;
-}
-
-void mc6809::do_lbr(int test)
-{
-	Word offset = fetch_word_operand();
-	if (test) pc += offset;
 }

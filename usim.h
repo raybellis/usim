@@ -22,7 +22,7 @@ class USim {
 // Generic processor state
 protected:
 
-		int		halted;
+		bool		halted;
 
 // Generic internal registers that we assume all CPUs have
 
@@ -36,9 +36,9 @@ protected:
 	virtual Word		read_word(Word offset) = 0;
 	virtual void		write(Word offset, Byte val);
 	virtual void		write_word(Word offset, Word val) = 0;
-	virtual Byte		fetch(void);
-	virtual Word		fetch_word(void);
-	virtual void		execute(void) = 0;
+	virtual Byte		fetch();
+	virtual Word		fetch_word();
+	virtual void		execute() = 0;
 
 // Device handling:
 protected:
@@ -50,11 +50,10 @@ public:
 // Functions to start and stop the virtual processor
 public:
 
-	virtual void		run(void);
-	virtual void		tick(void);
-	virtual void		halt(void);
-	virtual void		reset(void) = 0;
-	virtual void		status(void) = 0;
+	virtual void		run();
+	virtual void		tick();
+	virtual void		halt();
+	virtual void		reset() = 0;
 	virtual void		invalid(const char * = 0);
 
 // Function to load the processor state

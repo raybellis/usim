@@ -22,11 +22,11 @@ int main(int argc, char *argv[])
 
 	mc6809	sys;
 	RAM	ram(0x8000);
-	RAM	rom(0x1000);
+	RAM	rom(0x2000);
 	mc6850	acia;
 
 	sys.attach(ram, 0x0000, 0x8000);
-	sys.attach(rom, 0xf000, 0xf000);
+	sys.attach(rom, 0xe000, 0xe000);
 	sys.attach(acia, 0xc000, 0xfffe);
 
 	sys.load_intelhex(argv[1]);

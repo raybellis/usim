@@ -15,11 +15,10 @@
 //----------------------------------------------------------------------------
 void USim::run(void)
 {
-	halted = 0;
+	halted = false;
 	while (!halted) {
 		tick();
 	}
-	status();
 }
 
 void USim::tick(void)
@@ -28,14 +27,11 @@ void USim::tick(void)
 	for (auto& d : devices) {
 		d.device->tick();
 	}
-
-	execute();
-	status();
 }
 
 void USim::halt(void)
 {
-	halted = 1;
+	halted = true;
 }
 
 Byte USim::fetch(void)
