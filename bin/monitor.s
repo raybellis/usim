@@ -23,11 +23,10 @@ handle_reset	lds	#system_stack
 
 		swi
 
-		andcc	#$bf		; enable FIRQ
 		lda	#$80		; enable ACIA interrupt
 		sta	acia
 
-loop		sync
+loop		cwai	#$bf
 		lda	inchar
 		jsr	puthexbyte
 		swi

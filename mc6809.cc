@@ -264,6 +264,7 @@ void mc6809::execute(void)
 			// 0x62 undocumented
 			com(); break;
 		case 0x3c:
+			cwai(); break;
 		case 0x19:
 			daa(); break;
 		case 0x4a: case 0x4b:
