@@ -40,6 +40,6 @@ public:
 
 public:
 				ROM(Word size);
-		void		load_intelhex(const char *filename);
+		void		load_intelhex(const char *filename, Word base);
 
 };

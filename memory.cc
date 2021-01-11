@@ -14,7 +14,7 @@ RAM::RAM(Word size) : Memory(size) {
 ROM::ROM(Word size) : Memory(size) {
 }
 
-static Byte fread_byte(FILE *fp)
+static Byte fread_hex_byte(FILE *fp)
 {
 	char			str[3];
 	long			l;
@@ -27,18 +27,18 @@ static Byte fread_byte(FILE *fp)
 	return (Byte)(l & 0xff);
 }
 
-static Word fread_word(FILE *fp)
+static Word fread_hex_word(FILE *fp)
 {
 	Word		ret;
 
-	ret = fread_byte(fp);
+	ret = fread_hex_byte(fp);
 	ret <<= 8;
-	ret |= fread_byte(fp);
+	ret |= fread_hex_byte(fp);
 
 	return ret;
 }
 
-void ROM::load_intelhex(const char *filename)
+void ROM::load_intelhex(const char *filename, Word base)
 {
 	FILE		*fp;
 	int		done = 0;
@@ -55,20 +55,20 @@ void ROM::load_intelhex(const char *filename)
 		Byte		b;
 
 		(void)fgetc(fp);
-		n = fread_byte(fp);
-		addr = fread_word(fp);
-		t = fread_byte(fp);
+		n = fread_hex_byte(fp);
+		addr = fread_hex_word(fp);
+		t = fread_hex_byte(fp);
 		if (t == 0x00) {
 			while (n--) {
-				b = fread_byte(fp);
-				memory[addr++] = b;
+				b = fread_hex_byte(fp);
+				memory[addr - base] = b;
+				++addr;
 			}
 		} else if (t == 0x01) {
-			// pc = addr;
 			done = 1;
 		}
 		// Read and discard checksum byte
-		(void)fread_byte(fp);
+		(void)fread_hex_byte(fp);
 		if (fgetc(fp) == '\r') (void)fgetc(fp);
 	}
 }

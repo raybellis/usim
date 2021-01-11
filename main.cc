@@ -20,16 +20,22 @@ int main(int argc, char *argv[])
 
 	(void)signal(SIGINT, SIG_IGN);
 
+	const Word ram_size = 0x8000;
+	const Word rom_base = 0xe000;
+	const Word rom_size = 0x10000 - rom_base;
+
 	mc6809	sys;
-	RAM	ram(0x8000);
-	RAM	rom(0x2000);
+	RAM	ram(ram_size);
+	ROM	rom(rom_size);
 	mc6850	acia;
 
-	sys.attach(ram, 0x0000, 0x8000);
-	sys.attach(rom, 0xe000, 0xe000);
+	sys.attach(ram, 0x0000, ~(ram_size - 1));
+	sys.attach(rom, rom_base, ~(rom_size - 1));
 	sys.attach(acia, 0xc000, 0xfffe);
 
-	sys.load_intelhex(argv[1]);
+	rom.load_intelhex(argv[1], rom_base);
+
+	sys.reset();
 	sys.run();
 
 	return EXIT_SUCCESS;
