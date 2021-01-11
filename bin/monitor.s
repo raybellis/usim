@@ -4,6 +4,12 @@ user_stack	equ	$0400
 vector_table	equ	$fff0
 rom_start	equ	$e000
 
+acia		equ	$c000
+
+inchar		equ	$00
+
+		setdp	$00
+
 ;
 ;		Start of System ROM
 ;
@@ -11,19 +17,23 @@ rom_start	equ	$e000
 
 handle_reset	lds	#system_stack
 		ldu	#user_stack
-		andcc	#$f0
-		orcc	#$60
+		andcc	#$50		; disable interrupts
 		ldx	#system_ready
 		lbsr	putstr
 
-		include	"test.s"
+		; swi
 
-		sync
+		andcc	#$bf		; enable FIRQ
+		lda	#$80		; enable ACIA interrupt
+		sta	acia
+
+loop		sync
+		lda	inchar
+		jsr	puthexbyte
+		bra	loop
 
 ;-- Status printing software interrupt
-status		
-
-		ldx	#str_cc
+status		ldx	#str_cc
 		lbsr	putstr
 		lda	,s
 		anda	#$7f
@@ -63,14 +73,14 @@ status
 
 		rti
 
-str_cc		fcc	" CC:\0"
-str_a		fcc	"  A:\0"
-str_b		fcc	"  B:\0"
-str_dp		fcc	" DP:\0"
-str_x		fcc	"  X:\0"
-str_y		fcc	"  Y:\0"
+str_cc		fcn	" CC:"
+str_a		fcn	"  A:"
+str_b		fcn	"  B:"
+str_dp		fcn	" DP:"
+str_x		fcn	"  X:"
+str_y		fcn	"  Y:"
 
-str_nl		fcc	"\015\012\0"
+str_nl		fcc	13,10,0
 
 package_io
 
@@ -141,12 +151,25 @@ tolower		pshs	cc
 tolower_done	puls	cc
 		rts
 
-prompt_str	string	"> \0"
-system_ready	string	"System loaded and ready\015\012\0"
+prompt_str	fcn	"> "
+system_ready	fcn	"System loaded and ready",13,10
+
+handle_irq	rti
+
+handle_firq	pshs	a
+		lda	acia		; status register
+		bpl	irq_done	; done if IRQ = 0
+		lsra			; shift RDRF -> C
+		bcc	irq_done	; done if clear
+		lda	acia + 1
+		sta	inchar
+irq_done	puls	a
+		rti
 
 handle_undef	rti
 
 handle_swi	equ	status
+
 handle_swi2
 handle_swi3
 handle_nmi	rti
@@ -155,13 +178,13 @@ handle_nmi	rti
 ;		System vector specification
 ;
 		org	vector_table
-		dw	handle_undef	; $fff0
-		dw	handle_swi3	; $fff2
-		dw	handle_swi2	; $fff4
-		dw	handle_undef	; $fff6
-		dw	handle_undef	; $fff8
-		dw	handle_swi	; $fffa
-		dw	handle_nmi	; $fffc
-		dw	handle_reset	; $fffe
+		fdb	handle_undef	; $fff0
+		fdb	handle_swi3	; $fff2
+		fdb	handle_swi2	; $fff4
+		fdb	handle_firq	; $fff6
+		fdb	handle_irq	; $fff8
+		fdb	handle_swi	; $fffa
+		fdb	handle_nmi	; $fffc
+		fdb	handle_reset	; $fffe
 
-handle_reset	end
+		end	handle_reset

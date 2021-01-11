@@ -24,19 +24,21 @@ int main(int argc, char *argv[])
 	const Word rom_base = 0xe000;
 	const Word rom_size = 0x10000 - rom_base;
 
-	mc6809	sys;
+	mc6809	cpu;
 	RAM	ram(ram_size);
 	ROM	rom(rom_size);
 	mc6850	acia;
 
-	sys.attach(ram, 0x0000, ~(ram_size - 1));
-	sys.attach(rom, rom_base, ~(rom_size - 1));
-	sys.attach(acia, 0xc000, 0xfffe);
+	cpu.attach(ram, 0x0000, ~(ram_size - 1));
+	cpu.attach(rom, rom_base, ~(rom_size - 1));
+	cpu.attach(acia, 0xc000, 0xfffe);
+	cpu.firq.attach(acia.irq);
 
 	rom.load_intelhex(argv[1], rom_base);
 
-	sys.reset();
-	sys.run();
+	cpu.reset();
+	cpu.debug = 1;
+	cpu.run();
 
 	return EXIT_SUCCESS;
 }

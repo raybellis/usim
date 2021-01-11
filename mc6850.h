@@ -18,7 +18,6 @@ class mc6850 : public Device {
 protected:
 
 	Byte			td, rd, cr, sr;
-	OutputPin		irq;
 
 // Access to real IO device
 
@@ -36,6 +35,10 @@ public:
 
 	virtual Byte		read(Word offset);
 	virtual void		write(Word offset, Byte val);
+
+// Other exposed interfaces
+public:
+	OutputPin		irq;
 
 // Public constructor and destructor
 

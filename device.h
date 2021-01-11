@@ -57,7 +57,7 @@ public:
 				}
 };
 
-typedef std::vector<OutputPin> OutputPins;
+typedef std::vector<OutputPin*> OutputPins;
 
 class InputPin {
 
@@ -66,12 +66,12 @@ protected:
 
 public:
 	void			attach(OutputPin& input) {
-					inputs.push_back(input);
+					inputs.push_back(&input);
 				}
 
 	operator		bool() const {
 					for (auto& i : inputs) {
-						if (!i) {
+						if (!(*i)) {
 							return false;
 						}
 					}

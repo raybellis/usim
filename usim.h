@@ -56,6 +56,8 @@ public:
 	virtual void		reset() = 0;
 	virtual void		invalid(const char * = 0);
 
+		bool		debug = false;
+
 // Function to load the processor state
 public:
 

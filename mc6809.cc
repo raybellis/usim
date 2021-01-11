@@ -21,6 +21,9 @@ void mc6809::reset(void)
 {
 	pc = read_word(0xfffe);
 	dp = 0x00;		/* Direct page register = 0x00 */
+	d = 0x0000;
+	x = 0x0000;
+	y = 0x0000;
 	cc.all = 0x00;		/* Clear all flags */
 	cc.bit.i = 1;		/* IRQ disabled */
 	cc.bit.f = 1;		/* FIRQ disabled */
@@ -41,6 +44,7 @@ void mc6809::tick(void)
 	if (waiting_sync) {
 		// if NMI or IRQ or FIRQ asserts (flags don't matter)
 		if (nmi_triggered || !firq || !irq) {
+			debug = 1;
 			waiting_sync = false;
 		} else {
 			return;
@@ -95,10 +99,10 @@ void mc6809::do_irq()
 
 void mc6809::execute(void)
 {
+	Word old_pc = pc;
 	ir = fetch();
 
 	/* Select addressing mode */
-	// if we got here, then CWAI was not in effect
 	switch (ir & 0xf0) {
 		case 0x00: case 0x90: case 0xd0:
 			mode = direct; break;
@@ -153,6 +157,10 @@ void mc6809::execute(void)
 					break;
 			}
 			break;
+	}
+
+	if (debug) {
+		fprintf(stderr, "pc = 0x%04x, ir = 0x%04x, cc = 0x%02x\r\n", old_pc, ir, cc.all);
 	}
 
 	/* Select instruction */
@@ -255,7 +263,6 @@ void mc6809::execute(void)
 			// 0x62 undocumented
 			com(); break;
 		case 0x3c:
-			cwai(); break;
 		case 0x19:
 			daa(); break;
 		case 0x4a: case 0x4b:
