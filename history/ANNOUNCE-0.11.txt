@@ -1,0 +1,29 @@
+From: rpb@psy.ox.ac.uk (Ray Bellis)
+Newsgroups: comp.sys.m6809
+Subject: New version of mc6809 simulator available
+Message-ID: <RPB.93Feb8160407@brain.psy.ox.ac.uk>
+Date: 8 Feb 93 16:04:07 GMT
+Organization: Dept. of Experimental Psychology, Oxford, England.
+Lines: 21
+
+
+I've put a new version (0.11) of my mc6809 simulator on
+ftp.cns.ox.ac.uk:/pub/mc6809/usim-0.11.tar.Z
+
+There are no bug fixes or things like that in there, just
+some modifications to the way in which the A, B & D registers
+are handled.
+
+There is also some documentation, which forms the first article
+in a possible series describing the implementation in `CVu',
+the Journal of the C User's Group (UK)
+
+Ray.
+--
+------------------------------------------------------------------------------
+R. P. Bellis                            E-Mail: <rpb@psy.ox.ac.uk>
+Dept. of Experimental Psychology        Whois:  (RB83)
+University of Oxford                    Tel:    +44 865 271419
+South Parks Road                        Fax:    +44 865 310447
+Oxford OX1 3UD
+------------------------------------------------------------------------------

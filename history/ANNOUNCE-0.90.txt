@@ -1,0 +1,50 @@
+Newsgroups: comp.sys.m6809
+Path: bga.com!news.sprintlink.net!demon!uknet!comlab.ox.ac.uk!newshost!rpb
+From: rpb@psy.ox.ac.uk (Ray Bellis)
+Subject: Announce: New version of usim (mc6809 simulator)
+Message-ID: <RPB.94May25141953@axp01.ox.ac.uk>
+Organization: O.U. Dept. of Experimental Psychology
+Date: 25 May 1994 13:19:53 GMT
+Lines: 39
+
+Available from URL:
+
+<file://ftp.mrc-bbc.ox.ac.uk/pub/mc6809/usim-0.90.tar.gz>
+  or
+<http://www.mrc-bbc.ox.ac.uk/ftp/mc6809>
+
+This is a Motorola mc6809 simulator written in C++.   
+
+The processor simulator is implemented as a C++ class and it is
+designed to be subclassed to provide virtual I/O devices and status
+information.
+
+The `mc6809' class doesn't provide any status information, but the
+derived `mc6809_X' class shows processor status in an X Window.
+
+The simple `sys' class in main.cc adds a virtual mc6850 UART by
+overloading the `read' and `write' methods.
+
+The previously released version (0.1x) had some serious bugs in the
+instruction decoder but this latest version seems to run perfectly.
+It successfully runs the Tiny Basic interpreter that was posted
+to comp.sys.m6809 a few months ago.
+
+Please excuse the lack of decent release notes, but I felt that I
+needed to make this available but I don't have the time to do much
+in the way of packaging.
+
+Ray.
+
+
+
+--
+------------------------------------------------------------------------------
+R. P. Bellis                            E-Mail: <rpb@psy.ox.ac.uk>
+Dept. of Experimental Psychology        Whois:  (RB83)
+University of Oxford                    Tel:    +44 865 271419
+South Parks Road                        Fax:    +44 865 310447
+Oxford OX1 3UD
+------------------------------------------------------------------------------
+
+
