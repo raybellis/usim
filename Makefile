@@ -1,4 +1,4 @@
-DEBUG		= -O0 -g
+DEBUG		= -O3
 CXX		= g++ --std=c++14 -Wall -Werror -flto
 CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)

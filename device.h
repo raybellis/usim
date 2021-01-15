@@ -27,6 +27,17 @@ public:
 };
 
 /*
+ * an abstract device with no-op functions for reset and tick
+ */
+class PassiveDevice : public Device {
+
+public:
+	virtual void		reset() final {};
+	virtual void		tick() final {};
+
+};
+
+/*
  * a mapping from memory locations to Devices
  */
 struct DeviceEntry {

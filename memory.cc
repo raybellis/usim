@@ -8,12 +8,6 @@
 
 #include "memory.h"
 
-RAM::RAM(Word size) : Memory(size) {
-}
-
-ROM::ROM(Word size) : Memory(size) {
-}
-
 static Byte fread_hex_byte(FILE *fp)
 {
 	char			str[3];
@@ -61,7 +55,9 @@ void ROM::load_intelhex(const char *filename, Word base)
 		if (t == 0x00) {
 			while (n--) {
 				b = fread_hex_byte(fp);
-				memory[addr - base] = b;
+				if ((addr >= base) && (addr < ((DWord)base + size))) {
+					memory[addr - base] = b;
+				}
 				++addr;
 			}
 		} else if (t == 0x01) {
