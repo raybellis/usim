@@ -9,8 +9,7 @@
 //
 
 #include "mc6809.h"
-#include "misc.h"
-
+#include "bits.h"
 
 void mc6809::do_br(int test)
 {

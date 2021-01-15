@@ -17,20 +17,11 @@ inchar		equ	$00
 
 handle_reset	lds	#system_stack
 		ldu	#user_stack
-		andcc	#$50		; disable interrupts
+		orcc	#$50		; disable interrupts
 		ldx	#system_ready
 		lbsr	putstr
 
-		swi
-
-		lda	#$80		; enable ACIA interrupt
-		sta	acia
-
-loop		cwai	#$bf
-		lda	inchar
-		jsr	puthexbyte
-		swi
-		bra	loop
+		include "test.s"
 
 ;-- Status printing software interrupt
 status		ldx	#str_cc

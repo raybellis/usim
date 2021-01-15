@@ -7,8 +7,7 @@
 
 #pragma once
 
-#include "usim.h"
-#include "misc.h"
+#include "device.h"
 #include "term.h"
 
 class mc6850 : public Device {

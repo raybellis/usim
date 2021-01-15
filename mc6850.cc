@@ -6,7 +6,7 @@
 //
 
 #include "mc6850.h"
-#include "term.h"
+#include "bits.h"
 
 mc6850::mc6850()
 {

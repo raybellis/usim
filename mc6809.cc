@@ -4,9 +4,8 @@
 //	(C) R.P.Bellis
 //
 
-#include "usim.h"
-#include "misc.h"
 #include "mc6809.h"
+#include "bits.h"
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
