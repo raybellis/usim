@@ -6,6 +6,8 @@
 //
 //
 
+#pragma once
+
 #include "typedefs.h"
 
 //  8 bit operations

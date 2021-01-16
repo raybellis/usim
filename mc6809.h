@@ -9,6 +9,7 @@
 #pragma once
 
 #include "usim.h"
+#include "bits.h"
 #include "machdep.h"
 
 class mc6809 : virtual public USimMotorola {
@@ -205,3 +206,37 @@ public:
 	virtual void		reset();		// CPU reset
 
 };
+
+inline void mc6809::do_br(bool test)
+{
+	Word offset = extend8(fetch_operand());
+	if (test) pc += offset;
+}
+
+inline void mc6809::do_lbr(bool test)
+{
+	Word offset = fetch_word_operand();
+	if (test) pc += offset;
+}
+
+inline void mc6809::do_psh(Word& sp, Byte val)
+{
+	write(--sp, val);
+}
+
+inline void mc6809::do_psh(Word& sp, Word val)
+{
+	write(--sp, (Byte)val);
+	write(--sp, (Byte)(val >> 8));
+}
+
+inline void mc6809::do_pul(Word& sp, Byte& val)
+{
+	val = read(sp++);
+}
+
+inline void mc6809::do_pul(Word& sp, Word& val)
+{
+	val  = read(sp++) << 8;
+	val |= read(sp++);
+}
