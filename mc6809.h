@@ -90,8 +90,8 @@ private:
 	void			do_predecrement(Byte);
 	void			do_postincrement(Byte);
 
-	void			do_br(int);
-	void			do_lbr(int);
+	void			do_br(bool);
+	void			do_lbr(bool);
 
 	void			do_psh(Word& sp, Byte);
 	void			do_psh(Word& sp, Word);

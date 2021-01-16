@@ -11,13 +11,13 @@
 #include "mc6809.h"
 #include "bits.h"
 
-void mc6809::do_br(int test)
+void mc6809::do_br(bool test)
 {
 	Word offset = extend8(fetch_operand());
 	if (test) pc += offset;
 }
 
-void mc6809::do_lbr(int test)
+void mc6809::do_lbr(bool test)
 {
 	Word offset = fetch_word_operand();
 	if (test) pc += offset;
