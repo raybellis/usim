@@ -90,6 +90,14 @@ private:
 	void			do_predecrement(Byte);
 	void			do_postincrement(Byte);
 
+	void			do_br(int);
+	void			do_lbr(int);
+
+	void			do_psh(Word& sp, Byte);
+	void			do_psh(Word& sp, Word);
+	void			do_pul(Word& sp, Byte&);
+	void			do_pul(Word& sp, Word&);
+
 	void			abx();
 	void			adca(), adcb();
 	void			adda(), addb(), addd();
@@ -149,9 +157,6 @@ private:
 	void			sync();
 	void			tfr();
 	void			tsta(), tstb(), tst();
-
-	void			do_br(int);
-	void			do_lbr(int);
 
 	void			do_nmi();
 	void			do_firq();

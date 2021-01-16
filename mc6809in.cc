@@ -23,6 +23,28 @@ void mc6809::do_lbr(int test)
 	if (test) pc += offset;
 }
 
+void mc6809::do_psh(Word& sp, Byte val)
+{
+	write(--sp, val);
+}
+
+void mc6809::do_psh(Word& sp, Word val)
+{
+	write(--sp, (Byte)val);
+	write(--sp, (Byte)(val >> 8));
+}
+
+void mc6809::do_pul(Word& sp, Byte& val)
+{
+	val = read(sp++);
+}
+
+void mc6809::do_pul(Word& sp, Word& val)
+{
+	val  = read(sp++) << 8;
+	val |= read(sp++);
+}
+
 void mc6809::abx(void)
 {
 	x += b;
@@ -331,16 +353,14 @@ void mc6809::lbrn(void)
 void mc6809::bsr(void)
 {
 	Byte	x = fetch();
-	write(--s, (Byte)pc);
-	write(--s, (Byte)(pc >> 8));
+	do_psh(s, pc);
 	pc += extend8(x);
 }
 
 void mc6809::lbsr(void)
 {
 	Word	x = fetch_word();
-	write(--s, (Byte)pc);
-	write(--s, (Byte)(pc >> 8));
+	do_psh(s, pc);
 	pc += x;
 }
 
@@ -622,8 +642,7 @@ void mc6809::jmp(void)
 void mc6809::jsr(void)
 {
 	Word	addr = fetch_effective_address();
-	write(--s, (pc >> 0) & 0xff);
-	write(--s, (pc >> 8) & 0xff);
+	do_psh(s, pc);
 	pc = addr;
 }
 
@@ -828,26 +847,14 @@ void mc6809::pshu(void)
 
 void mc6809::help_psh(Byte w, Word& s, Word& u)
 {
-	if (btst(w, 7)) {
-		write(--s, (Byte)pc);
-		write(--s, (Byte)(pc >> 8));
-	}
-	if (btst(w, 6)) {
-		write(--s, (Byte)u);
-		write(--s, (Byte)(u >> 8));
-	}
-	if (btst(w, 5)) {
-		write(--s, (Byte)y);
-		write(--s, (Byte)(y >> 8));
-	}
-	if (btst(w, 4)) {
-		write(--s, (Byte)x);
-		write(--s, (Byte)(x >> 8));
-	}
-	if (btst(w, 3)) write(--s, (Byte)dp);
-	if (btst(w, 2)) write(--s, (Byte)b);
-	if (btst(w, 1)) write(--s, (Byte)a);
-	if (btst(w, 0)) write(--s, (Byte)cc.all);
+	if (btst(w, 7)) do_psh(s, pc);
+	if (btst(w, 6)) do_psh(s, u);
+	if (btst(w, 5)) do_psh(s, y);
+	if (btst(w, 4)) do_psh(s, x);
+	if (btst(w, 3)) do_psh(s, dp);
+	if (btst(w, 2)) do_psh(s, b);
+	if (btst(w, 1)) do_psh(s, a);
+	if (btst(w, 0)) do_psh(s, cc.all);
 }
 
 void mc6809::puls(void)
@@ -864,22 +871,14 @@ void mc6809::pulu(void)
 
 void mc6809::help_pul(Byte w, Word& s, Word& u)
 {
-	if (btst(w, 0)) cc.all = read(s++);
-	if (btst(w, 1)) a = read(s++);
-	if (btst(w, 2)) b = read(s++);
-	if (btst(w, 3)) dp = read(s++);
-	if (btst(w, 4)) {
-		x = read_word(s); s += 2;
-	}
-	if (btst(w, 5)) {
-		y = read_word(s); s += 2;
-	}
-	if (btst(w, 6)) {
-		u = read_word(s); s += 2;
-	}
-	if (btst(w, 7)) {
-		pc = read_word(s); s += 2;
-	}
+	if (btst(w, 0)) do_pul(s, cc.all);
+	if (btst(w, 1)) do_pul(s, a);
+	if (btst(w, 2)) do_pul(s, b);
+	if (btst(w, 3)) do_pul(s, dp);
+	if (btst(w, 4)) do_pul(s, x);
+	if (btst(w, 5)) do_pul(s, y);
+	if (btst(w, 6)) do_pul(s, u);
+	if (btst(w, 7)) do_pul(s, pc);
 }
 
 void mc6809::rola(void)
