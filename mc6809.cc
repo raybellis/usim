@@ -16,7 +16,7 @@ mc6809::~mc6809()
 {
 }
 
-void mc6809::reset(void)
+void mc6809::reset()
 {
 	pc = read_word(0xfffe);
 	dp = 0x00;		/* Direct page register = 0x00 */
@@ -31,7 +31,7 @@ void mc6809::reset(void)
 	nmi_previous = true;	/* no NMI present */
 }
 
-void mc6809::tick(void)
+void mc6809::tick()
 {
 	// handle attached devices
 	USim::tick();
@@ -97,7 +97,7 @@ void mc6809::do_irq()
 	pc = read_word(0xfff8);
 }
 
-void mc6809::execute(void)
+void mc6809::execute()
 {
 	Word old_pc = pc;
 	ir = fetch();
@@ -501,7 +501,7 @@ Word& mc6809::wordrefreg(int r)
 	}
 }
 
-Byte mc6809::fetch_operand(void)
+Byte mc6809::fetch_operand()
 {
 	Byte		ret = 0;
 	Word		addr;
@@ -529,7 +529,7 @@ Byte mc6809::fetch_operand(void)
 	return ret;
 }
 
-Word mc6809::fetch_word_operand(void)
+Word mc6809::fetch_word_operand()
 {
 	Word		addr, ret = 0;
 
@@ -556,7 +556,7 @@ Word mc6809::fetch_word_operand(void)
 	return ret;
 }
 
-Word mc6809::fetch_effective_address(void)
+Word mc6809::fetch_effective_address()
 {
 	Word		addr = 0;
 

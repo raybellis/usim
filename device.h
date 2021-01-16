@@ -17,8 +17,8 @@
 class Device {
 
 public:
-	virtual void		reset(void) = 0;
-	virtual void		tick(void) = 0;
+	virtual void		reset() = 0;
+	virtual void		tick() = 0;
 
 public:
 	virtual Byte		read(Word offset) = 0;

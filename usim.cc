@@ -13,7 +13,7 @@
 //----------------------------------------------------------------------------
 // Generic processor run state routines
 //----------------------------------------------------------------------------
-void USim::run(void)
+void USim::run()
 {
 	halted = false;
 	while (!halted) {
@@ -21,7 +21,7 @@ void USim::run(void)
 	}
 }
 
-void USim::tick(void)
+void USim::tick()
 {
 	// update all attached devices
 	for (auto& d : devices) {
@@ -29,12 +29,12 @@ void USim::tick(void)
 	}
 }
 
-void USim::halt(void)
+void USim::halt()
 {
 	halted = true;
 }
 
-Byte USim::fetch(void)
+Byte USim::fetch()
 {
 	Byte		val = read(pc);
 	pc += 1;
@@ -42,7 +42,7 @@ Byte USim::fetch(void)
 	return val;
 }
 
-Word USim::fetch_word(void)
+Word USim::fetch_word()
 {
 	Word		val = read_word(pc);
 	pc += 2;

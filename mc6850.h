@@ -26,8 +26,8 @@ protected:
 // Initialisation functions
 
 protected:
-	void			tick(void);
-	void			reset(void);
+	void			tick();
+	void			reset();
 
 // Read and write functions
 public:

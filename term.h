@@ -24,9 +24,9 @@ class Terminal {
 
 public:
 
-	int			 poll(void);
+	int			 poll();
 	void			 write(Byte);
-	Byte			 read(void);
+	Byte			 read();
 
 // Public constructor and destructor
 
