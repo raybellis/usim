@@ -5,6 +5,7 @@
 //
 
 #include "mc6809.h"
+#include <cstdio>
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {

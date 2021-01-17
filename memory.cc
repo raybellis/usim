@@ -6,6 +6,8 @@
 //
 //
 
+#include <cstdio>
+#include <cstdlib>
 #include "memory.h"
 
 static Byte fread_hex_byte(FILE *fp)
