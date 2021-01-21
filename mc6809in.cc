@@ -968,8 +968,7 @@ void mc6809::rti()
 
 void mc6809::rts()
 {
-	pc = read_word(s);
-	s += 2;
+	do_pul(s, pc);
 }
 
 void mc6809::sbca()
