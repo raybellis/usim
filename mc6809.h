@@ -91,14 +91,6 @@ private:
 	void			do_predecrement(Byte);
 	void			do_postincrement(Byte);
 
-	void			do_br(bool);
-	void			do_lbr(bool);
-
-	void			do_psh(Word& sp, Byte);
-	void			do_psh(Word& sp, Word);
-	void			do_pul(Word& sp, Byte&);
-	void			do_pul(Word& sp, Word&);
-
 	void			abx();
 	void			adca(), adcb();
 	void			adda(), addb(), addd();
@@ -159,10 +151,6 @@ private:
 	void			tfr();
 	void			tsta(), tstb(), tst();
 
-	void			do_nmi();
-	void			do_firq();
-	void			do_irq();
-
 	void			help_adc(Byte&);
 	void			help_add(Byte&);
 	void			help_and(Byte&);
@@ -191,6 +179,19 @@ private:
 	void			help_sub(Byte&);
 	void			help_sub(Word&);
 	void			help_tst(Byte);
+
+protected:
+	virtual void		do_br(bool);
+	virtual void		do_lbr(bool);
+
+	virtual void		do_psh(Word& sp, Byte);
+	virtual void		do_psh(Word& sp, Word);
+	virtual void		do_pul(Word& sp, Byte&);
+	virtual void		do_pul(Word& sp, Word&);
+
+	virtual void		do_nmi();
+	virtual void		do_firq();
+	virtual void		do_irq();
 
 protected:
 	virtual void		tick();
