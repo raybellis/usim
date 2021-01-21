@@ -181,8 +181,8 @@ private:
 	void			help_tst(Byte);
 
 protected:
-	virtual void		do_br(bool);
-	virtual void		do_lbr(bool);
+	virtual void		do_br(const char *, bool);
+	virtual void		do_lbr(const char *, bool);
 
 	virtual void		do_psh(Word& sp, Byte);
 	virtual void		do_psh(Word& sp, Word);
@@ -208,13 +208,13 @@ public:
 
 };
 
-inline void mc6809::do_br(bool test)
+inline void mc6809::do_br(const char *mnemonic, bool test)
 {
 	Word offset = extend8(fetch_operand());
 	if (test) pc += offset;
 }
 
-inline void mc6809::do_lbr(bool test)
+inline void mc6809::do_lbr(const char *mnemonic, bool test)
 {
 	Word offset = fetch_word_operand();
 	if (test) pc += offset;

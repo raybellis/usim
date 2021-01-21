@@ -379,62 +379,62 @@ void mc6809::asr()
 
 void mc6809::bcc()
 {
-	do_br(!cc.bit.c);
+	do_br("cc", !cc.bit.c);
 }
 
 void mc6809::lbcc()
 {
-	do_lbr(!cc.bit.c);
+	do_lbr("cc", !cc.bit.c);
 }
 
 void mc6809::bcs()
 {
-	do_br(cc.bit.c);
+	do_br("cs", cc.bit.c);
 }
 
 void mc6809::lbcs()
 {
-	do_lbr(cc.bit.c);
+	do_lbr("cs", cc.bit.c);
 }
 
 void mc6809::beq()
 {
-	do_br(cc.bit.z);
+	do_br("eq", cc.bit.z);
 }
 
 void mc6809::lbeq()
 {
-	do_lbr(cc.bit.z);
+	do_lbr("eq", cc.bit.z);
 }
 
 void mc6809::bge()
 {
-	do_br(!(cc.bit.n ^ cc.bit.v));
+	do_br("ge", !(cc.bit.n ^ cc.bit.v));
 }
 
 void mc6809::lbge()
 {
-	do_lbr(!(cc.bit.n ^ cc.bit.v));
+	do_lbr("ge", !(cc.bit.n ^ cc.bit.v));
 }
 
 void mc6809::bgt()
 {
-	do_br(!(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
+	do_br("gt", !(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
 }
 
 void mc6809::lbgt()
 {
-	do_lbr(!(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
+	do_lbr("gt", !(cc.bit.z | (cc.bit.n ^ cc.bit.v)));
 }
 
 void mc6809::bhi()
 {
-	do_br(!(cc.bit.c | cc.bit.z));
+	do_br("hi", !(cc.bit.c | cc.bit.z));
 }
 
 void mc6809::lbhi()
 {
-	do_lbr(!(cc.bit.c | cc.bit.z));
+	do_lbr("hi", !(cc.bit.c | cc.bit.z));
 }
 
 void mc6809::bita()
@@ -449,82 +449,82 @@ void mc6809::bitb()
 
 void mc6809::ble()
 {
-	do_br(cc.bit.z | (cc.bit.n ^ cc.bit.v));
+	do_br("le", cc.bit.z | (cc.bit.n ^ cc.bit.v));
 }
 
 void mc6809::lble()
 {
-	do_lbr(cc.bit.z | (cc.bit.n ^ cc.bit.v));
+	do_lbr("le", cc.bit.z | (cc.bit.n ^ cc.bit.v));
 }
 
 void mc6809::bls()
 {
-	do_br(cc.bit.c | cc.bit.z);
+	do_br("ls", cc.bit.c | cc.bit.z);
 }
 
 void mc6809::lbls()
 {
-	do_lbr(cc.bit.c | cc.bit.z);
+	do_lbr("ls", cc.bit.c | cc.bit.z);
 }
 
 void mc6809::blt()
 {
-	do_br(cc.bit.n ^ cc.bit.v);
+	do_br("lt", cc.bit.n ^ cc.bit.v);
 }
 
 void mc6809::lblt()
 {
-	do_lbr(cc.bit.n ^ cc.bit.v);
+	do_lbr("lt", cc.bit.n ^ cc.bit.v);
 }
 
 void mc6809::bmi()
 {
-	do_br(cc.bit.n);
+	do_br("mi", cc.bit.n);
 }
 
 void mc6809::lbmi()
 {
-	do_lbr(cc.bit.n);
+	do_lbr("mi", cc.bit.n);
 }
 
 void mc6809::bne()
 {
-	do_br(!cc.bit.z);
+	do_br("ne", !cc.bit.z);
 }
 
 void mc6809::lbne()
 {
-	do_lbr(!cc.bit.z);
+	do_lbr("ne", !cc.bit.z);
 }
 
 void mc6809::bpl()
 {
-	do_br(!cc.bit.n);
+	do_br("pl", !cc.bit.n);
 }
 
 void mc6809::lbpl()
 {
-	do_lbr(!cc.bit.n);
+	do_lbr("pl", !cc.bit.n);
 }
 
 void mc6809::bra()
 {
-	do_br(1);
+	do_br("ra", 1);
 }
 
 void mc6809::lbra()
 {
-	do_lbr(1);
+	do_lbr("ra", 1);
 }
 
 void mc6809::brn()
 {
-	do_br(0);
+	do_br("rn", 0);
 }
 
 void mc6809::lbrn()
 {
-	do_lbr(0);
+	do_lbr("rn", 0);
 }
 
 void mc6809::bsr()
@@ -543,22 +543,22 @@ void mc6809::lbsr()
 
 void mc6809::bvc()
 {
-	do_br(!cc.bit.v);
+	do_br("vc", !cc.bit.v);
 }
 
 void mc6809::lbvc()
 {
-	do_lbr(!cc.bit.v);
+	do_lbr("vc", !cc.bit.v);
 }
 
 void mc6809::bvs()
 {
-	do_br(cc.bit.v);
+	do_br("vs", cc.bit.v);
 }
 
 void mc6809::lbvs()
 {
-	do_lbr(cc.bit.v);
+	do_lbr("vs", cc.bit.v);
 }
 
 void mc6809::clra()
