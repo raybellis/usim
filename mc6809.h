@@ -197,7 +197,6 @@ protected:
 	virtual void		do_irq();
 
 protected:
-	virtual void		tick();
 	virtual void		execute();
 
 public:
@@ -208,6 +207,7 @@ public:
 	virtual			~mc6809();		// public destructor
 
 	virtual void		reset();		// CPU reset
+	virtual void		tick();
 
 };
 
