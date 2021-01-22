@@ -1,5 +1,5 @@
 //
-//	mc6809.cc
+//	mc6809.cpp
 //
 //	(C) R.P.Bellis
 //

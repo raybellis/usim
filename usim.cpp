@@ -1,6 +1,6 @@
 //
 //
-//	usim.cc
+//	usim.cpp
 //
 //	(C) R.P.Bellis 1994
 //

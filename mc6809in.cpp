@@ -1,5 +1,5 @@
 //
-//	mc6809ins.cc
+//	mc6809ins.cpp
 //
 //	(C) R.P.Bellis
 //

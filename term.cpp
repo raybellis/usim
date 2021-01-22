@@ -1,6 +1,6 @@
 //
 //
-//	term.cc
+//	term.cpp
 //
 //	(C) R.P.Bellis 1994
 //

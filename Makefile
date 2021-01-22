@@ -5,19 +5,19 @@ CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
 LDFLAGS		= -flto
 
-SRCS		= usim.cc mc6809.cc mc6809in.cc \
-		  memory.cc mc6850.cc term.cc \
-		  main.cc
-OBJS		= $(SRCS:.cc=.o)
+SRCS		= usim.cpp mc6809.cpp mc6809in.cpp \
+		  memory.cpp mc6850.cpp term.cpp \
+		  main.cpp
+OBJS		= $(SRCS:.cpp=.o)
 BIN		= usim
 LIBS		=
 
 $(BIN):		$(OBJS)
 	$(CXX) -o $(@) $(CCFLAGS) $(LDFLAGS) $(OBJS) $(LIBS)
 
-.SUFFIXES:	.cc
+.SUFFIXES:	.cpp
 
-.cc.o:
+.cpp.o:
 	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c $<
 
 $(OBJS):	machdep.h

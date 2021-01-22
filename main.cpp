@@ -1,5 +1,5 @@
 //
-//	main.cc
+//	main.cpp
 //
 
 #include <cstdlib>

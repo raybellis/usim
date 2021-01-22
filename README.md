@@ -14,5 +14,5 @@ issues.
 As of January 2021 (!) support for interrupts has been implemented, and
 the code has been refactored so that complete machines are generated
 by creating instances of a CPU, memory devices and peripherals and then
-"attaching" those to each other.   See main.cc for an example of how
+"attaching" those to each other.   See main.cpp for an example of how
 this is done.
