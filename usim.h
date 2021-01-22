@@ -9,7 +9,6 @@
 #pragma once
 
 #include "device.h"
-#include "machdep.h"
 
 /*
  * main system wide base class for CPU emulators
