@@ -25,7 +25,7 @@ void USim::tick()
 {
 	// update all attached devices
 	for (auto& d : devices) {
-		d.device->tick();
+		d.device->tick(cycles);
 	}
 }
 
@@ -70,6 +70,7 @@ void USim::attach(Device& dev, Word base, Word mask)
 // Single byte read
 Byte USim::read(Word offset)
 {
+	++cycles;
 	for (auto& d : devices) {
 		if ((offset & d.mask) == d.base) {
 			return d.device->read(offset - d.base);
@@ -81,6 +82,7 @@ Byte USim::read(Word offset)
 // Single byte write
 void USim::write(Word offset, Byte val)
 {
+	++cycles;
 	for (auto& d : devices) {
 		if ((offset & d.mask) == d.base) {
 			d.device->write(offset - d.base, val);

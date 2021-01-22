@@ -22,6 +22,7 @@ class USim {
 protected:
 
 		bool		halted;
+		uint64_t	cycles;
 
 // Generic internal registers that we assume all CPUs have
 

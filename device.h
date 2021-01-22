@@ -18,7 +18,7 @@ class Device {
 
 public:
 	virtual void		reset() = 0;
-	virtual void		tick() = 0;
+	virtual void		tick(uint64_t cycles) = 0;
 
 public:
 	virtual Byte		read(Word offset) = 0;
@@ -33,7 +33,7 @@ class PassiveDevice : public Device {
 
 public:
 	virtual void		reset() final {};
-	virtual void		tick() final {};
+	virtual void		tick(uint64_t cycles) final {};
 
 };
 

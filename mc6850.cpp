@@ -24,13 +24,13 @@ void mc6850::reset()
 	irq.set(1);	// Clear external ~IRQ pin
 
 	bset(sr, 1);	// Set TDRE to true
-	tickcount = 0;
+	next_poll = 0;
 }
 
-void mc6850::tick()
+void mc6850::tick(uint64_t cycles)
 {
-	if (tickcount++ < 1000) return;
-	tickcount = 0;
+	if (cycles < next_poll) return;
+	next_poll = cycles + 1000;
 
 	// Check for a received character if one isn't available
 	if (!btst(sr, 0)) {

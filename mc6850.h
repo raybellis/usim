@@ -20,14 +20,14 @@ protected:
 
 // Access to real IO device
 
-	Word			tickcount;
+	uint64_t		next_poll;
 	Terminal		term;
 
 // Initialisation functions
 
 protected:
-	void			tick();
-	void			reset();
+	virtual void		tick(uint64_t);
+	virtual void		reset();
 
 // Read and write functions
 public:

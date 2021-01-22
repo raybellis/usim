@@ -1,4 +1,5 @@
 //
+//
 //	mc6809.cpp
 //
 //	(C) R.P.Bellis
@@ -19,6 +20,7 @@ mc6809::~mc6809()
 void mc6809::reset()
 {
 	pc = read_word(0xfffe);
+	cycles = 0;
 	dp = 0x00;		/* Direct page register = 0x00 */
 	d = 0x0000;
 	x = 0x0000;
