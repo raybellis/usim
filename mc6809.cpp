@@ -38,6 +38,9 @@ void mc6809::tick()
 	// handle attached devices
 	USim::tick();
 
+	// every tick we count at least one cycle
+	++cycles;
+
 	// check for NMI falling edge
 	bool nmi_triggered = !nmi && nmi_previous;
 	nmi_previous = nmi;
