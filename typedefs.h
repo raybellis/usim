@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 
 typedef uint8_t		Byte;
