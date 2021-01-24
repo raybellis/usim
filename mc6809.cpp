@@ -172,8 +172,8 @@ void mc6809::execute()
 		if (cc.bit.i) flags[3] = 'I';
 		if (cc.bit.n) flags[4] = 'N';
 		if (cc.bit.z) flags[5] = 'Z';
-		if (cc.bit.v) flags[7] = 'V';
-		if (cc.bit.c) flags[8] = 'C';
+		if (cc.bit.v) flags[6] = 'V';
+		if (cc.bit.c) flags[7] = 'C';
 		fprintf(stderr, "pc:%04x ir:%04x cc:%s s:%04x u:%04x d:%02x:%02x x:%04x y:%04x\r\n",
 			old_pc, ir, flags, s, u, a, b, x, y);
 	}
