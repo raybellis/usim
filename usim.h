@@ -21,6 +21,7 @@ class USim {
 // Generic processor state
 protected:
 
+		bool		m_trace;
 		bool		halted;
 		uint64_t	cycles;
 
@@ -54,9 +55,12 @@ public:
 	virtual void		tick();
 	virtual void		halt();
 	virtual void		reset() = 0;
-	virtual void		invalid(const char * = 0);
 
-		bool		debug = false;
+// Debugging
+		void		tron() { m_trace = true; };
+		void		troff() { m_trace = false; };
+
+	virtual void		invalid(const char * = 0);
 
 // Function to load the processor state
 public:

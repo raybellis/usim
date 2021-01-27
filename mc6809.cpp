@@ -104,7 +104,6 @@ void mc6809::do_irq()
 
 void mc6809::execute()
 {
-	Word old_pc = pc;
 	ir = fetch();
 
 	/* Select addressing mode */
@@ -164,7 +163,11 @@ void mc6809::execute()
 			break;
 	}
 
-	if (debug) {
+	if (m_trace) {
+		Word old_pc = pc - 1;
+		if (ir >= 0x0100) {
+			--old_pc;
+		}
 		char flags[] = "--------";
 		if (cc.bit.e) flags[0] = 'E';
 		if (cc.bit.f) flags[1] = 'F';
@@ -174,7 +177,7 @@ void mc6809::execute()
 		if (cc.bit.z) flags[5] = 'Z';
 		if (cc.bit.v) flags[6] = 'V';
 		if (cc.bit.c) flags[7] = 'C';
-		fprintf(stderr, "pc:%04x ir:%04x cc:%s s:%04x u:%04x d:%02x:%02x x:%04x y:%04x\r\n",
+		fprintf(stderr, "PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
 			old_pc, ir, flags, s, u, a, b, x, y);
 	}
 
