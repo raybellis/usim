@@ -13,6 +13,7 @@
 //----------------------------------------------------------------------------
 // Generic processor run state routines
 //----------------------------------------------------------------------------
+
 void USim::run()
 {
 	halted = false;
@@ -36,18 +37,7 @@ void USim::halt()
 
 Byte USim::fetch()
 {
-	Byte		val = read(pc);
-	pc += 1;
-
-	return val;
-}
-
-Word USim::fetch_word()
-{
-	Word		val = read_word(pc);
-	pc += 2;
-
-	return val;
+	return read(pc++);
 }
 
 void USim::invalid(const char *msg)
@@ -95,12 +85,21 @@ void USim::write(Word offset, Byte val)
 // Word memory access routines for big-endian (Motorola type)
 //----------------------------------------------------------------------------
 
+Word USimMotorola::fetch_word()
+{
+	Word		tmp;
+
+	tmp  = fetch() << 8;
+	tmp |= fetch();
+
+	return tmp;
+}
+
 Word USimMotorola::read_word(Word offset)
 {
 	Word		tmp;
 
-	tmp = read(offset++);
-	tmp <<= 8;
+	tmp  = read(offset++) << 8;
 	tmp |= read(offset);
 
 	return tmp;
@@ -115,6 +114,16 @@ void USimMotorola::write_word(Word offset, Word val)
 //----------------------------------------------------------------------------
 // Word memory access routines for little-endian (Intel type)
 //----------------------------------------------------------------------------
+
+Word USimIntel::fetch_word()
+{
+	Word		tmp;
+
+	tmp  = fetch();
+	tmp |= fetch() << 8;
+
+	return tmp;
+}
 
 Word USimIntel::read_word(Word offset)
 {

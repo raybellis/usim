@@ -38,7 +38,6 @@ protected:
 	virtual void		write(Word offset, Byte val);
 	virtual void		write_word(Word offset, Word val) = 0;
 	virtual Byte		fetch();
-	virtual Word		fetch_word();
 	virtual void		execute() = 0;
 
 // Device handling:
@@ -73,6 +72,7 @@ class USimMotorola : virtual public USim {
 
 // Memory access functions taking target byte order into account
 protected:
+	virtual Word		fetch_word();
 
 	virtual Word		read_word(Word offset);
 	virtual void		write_word(Word offset, Word val);
@@ -83,6 +83,7 @@ class USimIntel : virtual public USim {
 
 // Memory access functions taking target byte order into account
 protected:
+	virtual Word		fetch_word();
 
 	virtual Word		read_word(Word offset);
 	virtual void		write_word(Word offset, Word val);
