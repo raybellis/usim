@@ -8,6 +8,7 @@
 //	incorrect carry flag settings
 //
 
+#include <utility>
 #include "mc6809.h"
 
 //-- helper functions
@@ -695,39 +696,18 @@ void mc6809::eorb()
 	help_eor(b);
 }
 
-static void swap(Byte& r1, Byte &r2)
-{
-	Byte	t;
-	t = r1; r1 = r2; r2 = t;
-}
-
-static void swap(Word& r1, Word &r2)
-{
-	Word	t;
-	t = r1; r1 = r2; r2 = t;
-}
-
 void mc6809::exg()
 {
 	int	r1, r2;
 	Byte	w = fetch();
 	r1 = (w & 0xf0) >> 4;
 	r2 = (w & 0x0f) >> 0;
-	if (r1 <= 5) {
-		if (r2 > 5) {
-			invalid("exchange register");
-			return;
-		}
-		swap(wordrefreg(r2), wordrefreg(r1));
-	} else if (r1 >= 8 && r1 <= 11) {
-		if (r2 < 8 || r2 > 11) {
-			invalid("exchange register");
-			return;
-		}
-		swap(byterefreg(r2), byterefreg(r1));
-	} else  {
-		invalid("exchange register");
-		return;
+	if (r1 <= 5 && r2 <= 5) {
+		std::swap(wordrefreg(r2), wordrefreg(r1));
+	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
+		std::swap(byterefreg(r2), byterefreg(r1));
+	} else {
+		throw execution_error("invalid EXG operand");
 	}
 }
 
@@ -1078,21 +1058,12 @@ void mc6809::tfr()
 	Byte	w = fetch();
 	r1 = (w & 0xf0) >> 4;
 	r2 = (w & 0x0f) >> 0;
-	if (r1 <= 5) {
-		if (r2 > 5) {
-			invalid("transfer register");
-			return;
-		}
+	if (r1 <= 5 && r2 <= 5) {
 		wordrefreg(r2) = wordrefreg(r1);
-	} else if (r1 >= 8 && r1 <= 11) {
-		if (r2 < 8 || r2 > 11) {
-			invalid("transfer register");
-			return;
-		}
+	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
 		byterefreg(r2) = byterefreg(r1);
-	} else  {
-		invalid("transfer register");
-		return;
+	} else{
+		throw execution_error("invalid TFR operand");
 	}
 }
 

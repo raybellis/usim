@@ -16,9 +16,14 @@
 
 void USim::run()
 {
-	halted = false;
-	while (!halted) {
-		tick();
+	try {
+		halted = false;
+		while (!halted) {
+			tick();
+		}
+	} catch (execution_error& e) {
+		fprintf(stderr, "\r\nerror: %s : pc = [%04x], ir = [%04x]\r\n",
+			e.what(), pc, ir);
 	}
 }
 
@@ -38,14 +43,6 @@ void USim::halt()
 Byte USim::fetch()
 {
 	return read(pc++);
-}
-
-void USim::invalid(const char *msg)
-{
-	fprintf(stderr, "\r\ninvalid %s : pc = [%04x], ir = [%04x]\r\n",
-		msg ? msg : "",
-		pc, ir);
-	halt();
 }
 
 //----------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "device.h"
+#include <stdexcept>
 
 /*
  * main system wide base class for CPU emulators
@@ -59,12 +60,11 @@ public:
 		void		tron() { m_trace = true; };
 		void		troff() { m_trace = false; };
 
-	virtual void		invalid(const char * = 0);
-
-// Function to load the processor state
+// Exceptions
 public:
-
-		void		load_intelhex(const char *filename);
+	class execution_error : virtual public std::runtime_error {
+		using std::runtime_error::runtime_error;
+	};
 
 };
 

@@ -21,12 +21,12 @@ class mc6809 : virtual public USimMotorola {
 protected:
 
 	enum {
-				immediate = 0,
-				relative = 0,
-				inherent,
-				extended,
+				immediate,
 				direct,
-				indexed
+				indexed,
+				extended,
+				inherent,
+				relative
 	} mode;
 
 // Processor registers
@@ -208,7 +208,6 @@ public:
 
 	virtual void		reset();		// CPU reset
 	virtual void		tick();
-
 };
 
 inline void mc6809::do_br(const char *mnemonic, bool test)

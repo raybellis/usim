@@ -139,13 +139,6 @@ void mc6809::execute()
 			break;
 		case 0x10:
 			switch (ir & 0x0f) {
-				case 0x02: case 0x03: case 0x09:
-				case 0x0d: case 0x0e: case 0x0f:
-					mode = inherent; break;
-				case 0x06: case 0x07:
-					mode = relative; break;
-				case 0x0a: case 0x0c:
-					mode = immediate; break;
 				case 0x00: case 0x01:
 					ir <<= 8;
 					ir |= fetch();
@@ -164,6 +157,12 @@ void mc6809::execute()
 							mode = extended; break;
 					}
 					break;
+				case 0x02: case 0x03: case 0x09: case 0x0d:
+					mode = inherent; break;
+				case 0x06: case 0x07:
+					mode = relative; break;
+				case 0x0a: case 0x0c: case 0x0e: case 0x0f:
+					mode = immediate; break;
 			}
 			break;
 	}
@@ -473,130 +472,121 @@ void mc6809::execute()
 		case 0x1029:
 			lbvs(); break;
 		default:
-			// TODO: make run-time selectable
-			invalid("instruction"); break;
+			throw new execution_error("invalid instruction");
 	}
 }
 
 Word& mc6809::refreg(Byte post)
 {
-	post &= 0x60;
-	post >>= 5;
+	post = (post >> 5) & 0x03;
 
-	if (post == 0) {
-		return x;
-	} else if (post == 1) {
-		return y;
-	} else if (post == 2) {
-		return u;
-	} else {
-		return s;
-	}
-}
-
-Byte& mc6809::byterefreg(int r)
-{
-	if (r == 0x08) {
-		return a;
-	} else if (r == 0x09) {
-		return b;
-	} else if (r == 0x0a) {
-		return cc.all;
-	} else {
-		return dp;
+	switch (post) {
+		case 0: return x;
+		case 1: return y;
+		case 2: return u;
+		case 3: return s;
+		default: throw execution_error("invalid register reference");
 	}
 }
 
 Word& mc6809::wordrefreg(int r)
 {
-	if (r == 0x00) {
-		return d;
-	} else if (r == 0x01) {
-		return x;
-	} else if (r == 0x02) {
-		return y;
-	} else if (r == 0x03) {
-		return u;
-	} else if (r == 0x04) {
-		return s;
-	} else {
-		return pc;
+	switch (r) {
+		case  0: return d;
+		case  1: return x;
+		case  2: return y;
+		case  3: return u;
+		case  4: return s;
+		case  5: return pc;
+		default: throw execution_error("invalid register reference");
+	}
+}
+
+Byte& mc6809::byterefreg(int r)
+{
+	switch (r) {
+		case  8: return a;
+		case  9: return b;
+		case 10: return cc.all;
+		case 11: return dp;
+		default: throw execution_error("invalid byte register selector");
 	}
 }
 
 Byte mc6809::fetch_operand()
 {
-	Byte		ret = 0;
 	Word		addr;
 
-	if (mode == immediate) {
-		ret = fetch();
-	} else if (mode == relative) {
-		ret = fetch();
-	} else if (mode == extended) {
-		addr = fetch_word();
-		ret = read(addr);
-	} else if (mode == direct) {
-		addr = ((Word)dp << 8) | fetch();
-		ret = read(addr);
-	} else if (mode == indexed) {
-		Byte		post = fetch();
-		do_predecrement(post);
-		addr = do_effective_address(post);
-		ret = read(addr);
-		do_postincrement(post);
-	} else {
-		invalid("addressing mode");
+	switch (mode) {
+		case immediate:
+			return fetch();
+		case relative:
+			return fetch();
+		case extended:
+			addr = fetch_word();
+			return read(addr);
+		case direct:
+			addr = ((Word)dp << 8) | fetch();
+			return read(addr);
+		case indexed: {
+			Byte post = fetch();
+			do_predecrement(post);
+			addr = do_effective_address(post);
+			do_postincrement(post);
+			return read(addr);
+		}
+		default:
+			throw execution_error("invalid addressing mode");
 	}
-
-	return ret;
 }
 
 Word mc6809::fetch_word_operand()
 {
-	Word		addr, ret = 0;
+	Word		addr;
 
-	if (mode == immediate) {
-		ret = fetch_word();
-	} else if (mode == relative) {
-		ret = fetch_word();
-	} else if (mode == extended) {
-		addr = fetch_word();
-		ret = read_word(addr);
-	} else if (mode == direct) {
-		addr = (Word)dp << 8 | fetch();
-		ret = read_word(addr);
-	} else if (mode == indexed) {
-		Byte	post = fetch();
-		do_predecrement(post);
-		addr = do_effective_address(post);
-		do_postincrement(post);
-		ret = read_word(addr);
-	} else {
-		invalid("addressing mode");
+	switch (mode) {
+		case immediate:
+			return fetch_word();
+		case relative:
+			return fetch_word();
+		case extended:
+			addr = fetch_word();
+			return read_word(addr);
+		case direct:
+			addr = ((Word)dp << 8) | fetch();
+			return read_word(addr);
+		case indexed: {
+			Byte post = fetch();
+			do_predecrement(post);
+			addr = do_effective_address(post);
+			do_postincrement(post);
+			return read_word(addr);
+		}
+		default:
+			throw execution_error("invalid addressing mode");
 	}
-
-	return ret;
 }
 
 Word mc6809::fetch_effective_address()
 {
-	Word		addr = 0;
+	Word		addr;
 
-	if (mode == extended) {
-		addr = fetch_word();
-	} else if (mode == direct) {
-		addr = (Word)dp << 8 | fetch();
-	} else if (mode == indexed) {
-		Byte		post = fetch();
-		do_predecrement(post);
-		addr = do_effective_address(post);
-		do_postincrement(post);
-	} else {
-		invalid("addressing mode");
+	switch (mode) {
+		case extended:
+			return fetch_word();
+		case direct:
+			addr = (Word)dp << 8 | fetch();
+			return addr;
+		case indexed: {
+			Byte		post = fetch();
+			do_predecrement(post);
+			addr = do_effective_address(post);
+			do_postincrement(post);
+			return addr;
+		}
+		default:
+			throw execution_error("invalid addressing mode");
 	}
-
-	return addr;
 }
 
 Word mc6809::do_effective_address(Byte post)
@@ -643,7 +633,7 @@ Word mc6809::do_effective_address(Byte post)
 				addr = fetch_word();
 				break;
 			default:
-				invalid("indirect addressing postbyte");
+				throw execution_error("indirect addressing postbyte");
 				break;
 		}
 
@@ -663,7 +653,7 @@ void mc6809::do_postincrement(Byte post)
 			refreg(post) += 1;
 			break;
 		case 0x90:
-			invalid("postincrement");
+			throw execution_error("invalid post-increment operation");
 			break;
 		case 0x81: case 0x91:
 			refreg(post) += 2;
@@ -678,7 +668,7 @@ void mc6809::do_predecrement(Byte post)
 			refreg(post) -= 1;
 			break;
 		case 0x92:
-			invalid("predecrement");
+			throw execution_error("invalid pre-decrement operation");
 			break;
 		case 0x83: case 0x93:
 			refreg(post) -= 2;
