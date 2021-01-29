@@ -41,13 +41,18 @@ void mc6809::tick()
 	// every tick we count at least one cycle
 	++cycles;
 
+	// get interrupt pin states
+	bool c_nmi = nmi;
+	bool c_firq = firq;
+	bool c_irq = irq;
+
 	// check for NMI falling edge
-	bool nmi_triggered = !nmi && nmi_previous;
+	bool nmi_triggered = !c_nmi && nmi_previous;
 	nmi_previous = nmi;
 
 	if (waiting_sync) {
 		// if NMI or IRQ or FIRQ asserts (flags don't matter)
-		if (nmi_triggered || !firq || !irq) {
+		if (nmi_triggered || !c_firq || !c_irq) {
 			waiting_sync = false;
 		} else {
 			return;
@@ -57,9 +62,9 @@ void mc6809::tick()
 	// look for external interrupts
 	if (nmi_triggered) {
 		do_nmi();
-	} else if (!firq && !cc.bit.f) {
+	} else if (!c_firq && !cc.bit.f) {
 		do_firq();
-	} else if (!irq && !cc.bit.i) {
+	} else if (!c_irq && !cc.bit.i) {
 		do_irq();
 	} else if (waiting_cwai) {
 		return;
