@@ -189,7 +189,7 @@ void mc6809::execute()
 		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
 			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
 
-		op.empty();
+		op.clear();
 	}
 
 	// Select instruction
@@ -696,14 +696,14 @@ Word mc6809::do_effective_address(Byte post)
 				addr = extend8(b) + refreg(post);
 				cycles += 2;
 				if (m_trace) {
-					op = "," + op + " + B";
+					op = "B," + op;
 				}
 				break;
 			case 0x06: case 0x16:		// ,R + A
 				addr = extend8(a) + refreg(post);
 				cycles += 2;
 				if (m_trace) {
-					op = "," + op + " + A";
+					op = "A," + op;
 				}
 				break;
 			case 0x08: case 0x18:		// ,R + 8 bit
@@ -726,7 +726,7 @@ Word mc6809::do_effective_address(Byte post)
 				addr = d + refreg(post);
 				cycles += 5;
 				if (m_trace) {
-					op = "," + op + "+ D";
+					op = "D," + op;
 				}
 				break;
 			case 0x0c: case 0x1c:		// ,PC + 8
@@ -734,7 +734,7 @@ Word mc6809::do_effective_address(Byte post)
 				addr = pc + offset;
 				cycles += 1;
 				if (m_trace) {
-					op = std::to_string(offset) + "," + op;
+					op = std::to_string(offset) + ",PCR";
 				}
 				break;
 			case 0x0d: case 0x1d:		// ,PC + 16
@@ -742,7 +742,7 @@ Word mc6809::do_effective_address(Byte post)
 				addr = pc + offset;
 				cycles += 3;
 				if (m_trace) {
-					op = std::to_string(offset) + "," + op;
+					op = std::to_string(offset) + ",PCR";
 				}
 				break;
 			case 0x1f:			// [,Address]
