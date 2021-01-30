@@ -356,7 +356,7 @@ void mc6809::andb()
 
 void mc6809::andcc()
 {
-	cc.all &= fetch();
+	cc.all &= fetch_operand();
 }
 
 void mc6809::asra()
@@ -530,14 +530,14 @@ void mc6809::lbrn()
 
 void mc6809::bsr()
 {
-	Byte	x = fetch();
+	Byte	x = fetch_operand();
 	do_psh(s, pc);
 	pc += extend8(x);
 }
 
 void mc6809::lbsr()
 {
-	Word	x = fetch_word();
+	Word	x = fetch_word_operand();
 	do_psh(s, pc);
 	pc += x;
 }
@@ -617,7 +617,7 @@ void mc6809::cmps()
 
 void mc6809::cwai()
 {
-	Byte	n = fetch();
+	Byte	n = fetch_operand();
 	cc.all &= n;
 	cc.bit.e = 1;
 	help_psh(0xff, s, u);
@@ -699,7 +699,7 @@ void mc6809::eorb()
 void mc6809::exg()
 {
 	int	r1, r2;
-	Byte	w = fetch();
+	Byte	w = fetch_operand();
 	r1 = (w & 0xf0) >> 4;
 	r2 = (w & 0x0f) >> 0;
 	if (r1 <= 5 && r2 <= 5) {
@@ -880,23 +880,23 @@ void mc6809::orcc()
 
 void mc6809::pshs()
 {
-	help_psh(fetch(), s, u);
+	help_psh(fetch_operand(), s, u);
 }
 
 void mc6809::pshu()
 {
-	help_psh(fetch(), u, s);
+	help_psh(fetch_operand(), u, s);
 }
 
 void mc6809::puls()
 {
-	Byte	w = fetch();
+	Byte	w = fetch_operand();
 	help_pul(w, s, u);
 }
 
 void mc6809::pulu()
 {
-	Byte	w = fetch();
+	Byte	w = fetch_operand();
 	help_pul(w, u, s);
 }
 
@@ -1055,7 +1055,7 @@ void mc6809::sync()
 void mc6809::tfr()
 {
 	int	r1, r2;
-	Byte	w = fetch();
+	Byte	w = fetch_operand();
 	r1 = (w & 0xf0) >> 4;
 	r2 = (w & 0x0f) >> 0;
 	if (r1 <= 5 && r2 <= 5) {
