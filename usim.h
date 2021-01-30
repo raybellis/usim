@@ -63,7 +63,8 @@ public:
 // Exceptions
 public:
 	class execution_error : virtual public std::runtime_error {
-		using std::runtime_error::runtime_error;
+	public:
+		execution_error(const char *msg) : std::runtime_error(msg) { };
 	};
 
 };
