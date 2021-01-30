@@ -214,12 +214,17 @@ inline void mc6809::do_br(const char *mnemonic, bool test)
 {
 	Word offset = extend8(fetch_operand());
 	if (test) pc += offset;
+	++cycles;
 }
 
 inline void mc6809::do_lbr(const char *mnemonic, bool test)
 {
 	Word offset = fetch_word_operand();
-	if (test) pc += offset;
+	if (test) {
+		pc += offset;
+		++cycles;
+	}
+	++cycles;
 }
 
 inline void mc6809::do_psh(Word& sp, Byte val)
