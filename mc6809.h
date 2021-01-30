@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <string>
 #include "usim.h"
 #include "bits.h"
 
@@ -195,6 +196,10 @@ protected:
 	virtual void		do_nmi();
 	virtual void		do_firq();
 	virtual void		do_irq();
+
+protected:
+	const char*		insn;
+	std::string		op;
 
 protected:
 	virtual void		execute();

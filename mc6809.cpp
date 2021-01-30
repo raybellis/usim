@@ -188,6 +188,8 @@ void mc6809::execute()
 		if (cc.bit.c) flags[7] = 'C';
 		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
 			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
+
+		op.empty();
 	}
 
 	// Select instruction
@@ -479,6 +481,10 @@ void mc6809::execute()
 		default:
 			throw new execution_error("invalid instruction");
 	}
+
+	if (m_trace) {
+		fprintf(stderr, ">> %-8s%s\r\n", insn, op.c_str());
+	}
 }
 
 Word& mc6809::refreg(Byte post)
@@ -486,10 +492,10 @@ Word& mc6809::refreg(Byte post)
 	post = (post >> 5) & 0x03;
 
 	switch (post) {
-		case 0: return x;
-		case 1: return y;
-		case 2: return u;
-		case 3: return s;
+		case 0: op = "X"; return x;
+		case 1: op = "Y"; return y;
+		case 2: op = "U"; return u;
+		case 3: op = "S"; return s;
 		default: throw execution_error("invalid register reference");
 	}
 }
@@ -521,18 +527,34 @@ Byte& mc6809::byterefreg(int r)
 Byte mc6809::fetch_operand()
 {
 	Word		addr;
+	Byte		r = 0;
 
 	switch (mode) {
 		case immediate:
-			return fetch();
+			r = fetch();
+			if (m_trace) {
+				op = "#" + std::to_string(r);
+			}
+			return r;
 		case relative:
-			return fetch();
+			r = fetch();
+			if (m_trace) {
+				op = std::to_string(pc + r);
+			}
+			return r;
 		case extended:
 			addr = fetch_word();
+			if (m_trace) {
+				op = std::to_string(addr);
+			}
 			++cycles;
 			return read(addr);
 		case direct:
-			addr = ((Word)dp << 8) | fetch();
+			r = fetch();
+			addr = ((Word)dp << 8) | r;
+			if (m_trace) {
+				op = "<" + std::to_string(r);
+			}
 			++cycles;
 			return read(addr);
 		case indexed: {
@@ -553,17 +575,33 @@ Word mc6809::fetch_word_operand()
 
 	switch (mode) {
 		case immediate:
-			return fetch_word();
+			addr = fetch_word();
+			if (m_trace) {
+				op = "#" + std::to_string(addr);
+			}
+			return addr;
 		case relative:
-			return fetch_word();
+			addr = fetch_word();
+			if (m_trace) {
+				op = std::to_string(pc + addr);
+			}
+			return addr;
 		case extended:
 			addr = fetch_word();
 			++cycles;
+			if (m_trace) {
+				op = std::to_string(addr);
+			}
 			return read_word(addr);
-		case direct:
-			addr = ((Word)dp << 8) | fetch();
+		case direct: {
+			Byte r = fetch();
+			addr = ((Word)dp << 8) | r;
 			++cycles;
+			if (m_trace) {
+				op = "<" + std::to_string(r);
+			}
 			return read_word(addr);
+		}
 		case indexed: {
 			Byte post = fetch();
 			do_predecrement(post);
@@ -582,84 +620,137 @@ Word mc6809::fetch_effective_address()
 
 	switch (mode) {
 		case extended:
-			return fetch_word();
+			addr = fetch_word();
+			break;
 		case direct:
 			addr = (Word)dp << 8 | fetch();
-			return addr;
+			break;
 		case indexed: {
 			Byte		post = fetch();
 			do_predecrement(post);
 			addr = do_effective_address(post);
 			do_postincrement(post);
-			return addr;
+			break;
 		}
 		default:
 			throw execution_error("invalid addressing mode");
 	}
+
+	if (m_trace) {
+		op = std::to_string(addr);
+	}
+
+	return addr;
 }
 
 Word mc6809::do_effective_address(Byte post)
 {
 	Word		addr = 0;
+	int16_t		offset = 0;
 
 	if ((post & 0x80) == 0x00) {			// ,R + 5 bit offset
-		addr = refreg(post) + extend5(post & 0x1f);
+		offset = extend5(post & 0x1f);
+		addr = refreg(post) + offset;
 		cycles += 2;
+		if (m_trace) {
+			op = std::to_string(offset) + "," + op;
+		}
 	} else {
 		switch (post & 0x1f) {
 			case 0x00:			// ,R+
 				addr = refreg(post);
 				cycles += 3;
+				if (m_trace) {
+					op = "," + op + "+";
+				}
 				break;
 			case 0x01: case 0x11:		// ,R++
 				addr = refreg(post);
 				cycles += 4;
+				if (m_trace) {
+					op = "," + op + "++";
+				}
 				break;
 			case 0x02:			// ,-R
 				addr = refreg(post);
 				cycles += 3;
+				if (m_trace) {
+					op = ",-" + op;
+				}
 				break;
 			case 0x03: case 0x13:		// ,--R
 				addr = refreg(post);
 				cycles += 4;
+				if (m_trace) {
+					op = ",--" + op;
+				}
 				break;
 			case 0x04: case 0x14:		// ,R + 0
 				addr = refreg(post);
 				cycles += 1;
+				if (m_trace) {
+					op = "," + op;
+				}
 				break;
 			case 0x05: case 0x15:		// ,R + B
 				addr = extend8(b) + refreg(post);
 				cycles += 2;
+				if (m_trace) {
+					op = "," + op + " + B";
+				}
 				break;
 			case 0x06: case 0x16:		// ,R + A
 				addr = extend8(a) + refreg(post);
 				cycles += 2;
+				if (m_trace) {
+					op = "," + op + " + A";
+				}
 				break;
 			case 0x08: case 0x18:		// ,R + 8 bit
-				addr = refreg(post) + extend8(fetch());
+				offset = extend8(fetch());
+				addr = refreg(post) + offset;
+				if (m_trace) {
+					op = std::to_string(offset) + "," + op;
+				}
 				cycles += 1;
 				break;
 			case 0x09: case 0x19:		// ,R + 16 bit
+				offset = fetch_word();
 				addr = refreg(post) + fetch_word();
 				cycles += 3;
+				if (m_trace) {
+					op = std::to_string(offset) + "," + op;
+				}
 				break;
 			case 0x0b: case 0x1b:		// ,R + D
 				addr = d + refreg(post);
 				cycles += 5;
+				if (m_trace) {
+					op = "," + op + "+ D";
+				}
 				break;
 			case 0x0c: case 0x1c:		// ,PC + 8
-				addr = extend8(fetch());
-				addr += pc;
+				offset = extend8(fetch());
+				addr = pc + offset;
 				cycles += 1;
+				if (m_trace) {
+					op = std::to_string(offset) + "," + op;
+				}
 				break;
 			case 0x0d: case 0x1d:		// ,PC + 16
-				addr = fetch_word();
-				addr += pc;
+				offset = fetch_word();
+				addr = pc + offset;
 				cycles += 3;
+				if (m_trace) {
+					op = std::to_string(offset) + "," + op;
+				}
 				break;
 			case 0x1f:			// [,Address]
 				addr = fetch_word();
 				cycles += 1;
+				if (m_trace) {
+					op = "," + std::to_string(addr);
+				}
 				break;
 			default:
 				throw execution_error("indirect addressing postbyte");
@@ -670,6 +761,9 @@ Word mc6809::do_effective_address(Byte post)
 		if (post & 0x10) {
 			addr = read_word(addr);
 			cycles += 1;
+			if (m_trace) {
+				op = "[" + op + "]";
+			}
 		}
 	}
 
