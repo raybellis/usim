@@ -120,7 +120,7 @@ void mc6809::execute()
 		case 0x30: case 0x40: case 0x50:
 			if (ir < 0x34) {
 				mode = indexed;
-			} else if (ir < 0x38) {
+			} else if (ir < 0x38 || ir == 0x3c) {
 				mode = immediate;
 			} else {
 				mode = inherent;
