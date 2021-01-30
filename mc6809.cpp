@@ -111,7 +111,10 @@ void mc6809::execute()
 {
 	ir = fetch();
 
-	/* Select addressing mode */
+	// deduct a cycle to account for the one used in "tick"
+	--cycles;
+
+	// Select addressing mode
 	switch (ir & 0xf0) {
 		case 0x00: case 0x90: case 0xd0:
 			mode = direct; break;
@@ -168,8 +171,10 @@ void mc6809::execute()
 	}
 
 	if (m_trace) {
+		uint64_t cycle_start = cycles - 1;
 		Word old_pc = pc - 1;
 		if (ir >= 0x0100) {
+			--cycle_start;
 			--old_pc;
 		}
 		char flags[] = "--------";
@@ -181,8 +186,8 @@ void mc6809::execute()
 		if (cc.bit.z) flags[5] = 'Z';
 		if (cc.bit.v) flags[6] = 'V';
 		if (cc.bit.c) flags[7] = 'C';
-		fprintf(stderr, "PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
-			old_pc, ir, flags, s, u, a, b, x, y);
+		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
+			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
 	}
 
 	/* Select instruction */
