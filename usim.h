@@ -22,9 +22,9 @@ class USim {
 // Generic processor state
 protected:
 
-		bool		m_trace;
-		bool		halted;
-		uint64_t	cycles;
+		bool		m_trace = false;
+		bool		halted = true;
+		uint64_t	cycles = 0;
 
 // Generic internal registers that we assume all CPUs have
 
