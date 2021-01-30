@@ -190,7 +190,7 @@ void mc6809::execute()
 			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
 	}
 
-	/* Select instruction */
+	// Select instruction
 	switch (ir) {
 		case 0x3a:
 			abx(); break;
@@ -529,9 +529,11 @@ Byte mc6809::fetch_operand()
 			return fetch();
 		case extended:
 			addr = fetch_word();
+			++cycles;
 			return read(addr);
 		case direct:
 			addr = ((Word)dp << 8) | fetch();
+			++cycles;
 			return read(addr);
 		case indexed: {
 			Byte post = fetch();
@@ -556,9 +558,11 @@ Word mc6809::fetch_word_operand()
 			return fetch_word();
 		case extended:
 			addr = fetch_word();
+			++cycles;
 			return read_word(addr);
 		case direct:
 			addr = ((Word)dp << 8) | fetch();
+			++cycles;
 			return read_word(addr);
 		case indexed: {
 			Byte post = fetch();
@@ -598,53 +602,74 @@ Word mc6809::do_effective_address(Byte post)
 {
 	Word		addr = 0;
 
-	if ((post & 0x80) == 0x00) {
+	if ((post & 0x80) == 0x00) {			// ,R + 5 bit offset
 		addr = refreg(post) + extend5(post & 0x1f);
+		cycles += 2;
 	} else {
 		switch (post & 0x1f) {
-			case 0x00: case 0x02:
+			case 0x00:			// ,R+
 				addr = refreg(post);
+				cycles += 3;
 				break;
-			case 0x01: case 0x03: case 0x11: case 0x13:
+			case 0x01: case 0x11:		// ,R++
 				addr = refreg(post);
+				cycles += 4;
 				break;
-			case 0x04: case 0x14:
+			case 0x02:			// ,-R
 				addr = refreg(post);
+				cycles += 3;
 				break;
-			case 0x05: case 0x15:
+			case 0x03: case 0x13:		// ,--R
+				addr = refreg(post);
+				cycles += 4;
+				break;
+			case 0x04: case 0x14:		// ,R + 0
+				addr = refreg(post);
+				cycles += 1;
+				break;
+			case 0x05: case 0x15:		// ,R + B
 				addr = extend8(b) + refreg(post);
+				cycles += 2;
 				break;
-			case 0x06: case 0x16:
+			case 0x06: case 0x16:		// ,R + A
 				addr = extend8(a) + refreg(post);
+				cycles += 2;
 				break;
-			case 0x08: case 0x18:
+			case 0x08: case 0x18:		// ,R + 8 bit
 				addr = refreg(post) + extend8(fetch());
+				cycles += 1;
 				break;
-			case 0x09: case 0x19:
+			case 0x09: case 0x19:		// ,R + 16 bit
 				addr = refreg(post) + fetch_word();
+				cycles += 3;
 				break;
-			case 0x0b: case 0x1b:
+			case 0x0b: case 0x1b:		// ,R + D
 				addr = d + refreg(post);
+				cycles += 5;
 				break;
-			case 0x0c: case 0x1c:
-				addr = extend8(fetch()); // NB: fetch first
+			case 0x0c: case 0x1c:		// ,PC + 8
+				addr = extend8(fetch());
 				addr += pc;
+				cycles += 1;
 				break;
-			case 0x0d: case 0x1d:
-				addr = fetch_word();	 // NB: fetch first
-				addr += pc;
-				break;
-			case 0x1f:
+			case 0x0d: case 0x1d:		// ,PC + 16
 				addr = fetch_word();
+				addr += pc;
+				cycles += 3;
+				break;
+			case 0x1f:			// [,Address]
+				addr = fetch_word();
+				cycles += 1;
 				break;
 			default:
 				throw execution_error("indirect addressing postbyte");
 				break;
 		}
 
-		/* Do extra indirection */
+		// Do extra indirection
 		if (post & 0x10) {
 			addr = read_word(addr);
+			cycles += 1;
 		}
 	}
 
