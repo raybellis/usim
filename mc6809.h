@@ -83,17 +83,17 @@ private:
 	bool			nmi_previous;	// previous state of the NMI line
 
 private:
-
-	Word&			refreg(Byte);
 	Byte&			byterefreg(int);
 	Word&			wordrefreg(int);
+
+	Word&			ix_refreg(Byte);
 
 	Byte			fetch_operand();
 	Word			fetch_word_operand();
 	Word			fetch_effective_address();
-	Word			do_effective_address(Byte);
-	void			do_predecrement(Byte);
-	void			do_postincrement(Byte);
+	Word			fetch_indexed_operand();
+	void			do_predecrement();
+	void			do_postincrement();
 
 	void			abx();
 	void			adca(), adcb();
@@ -197,9 +197,13 @@ protected:
 	virtual void		do_firq();
 	virtual void		do_irq();
 
-protected:
+protected: // instruction tracing
 	const char*		insn;
-	std::string		op;
+	Byte			post;
+	Word			operand;
+
+	std::string		disasm_operand();
+	std::string		disasm_indexed();
 
 protected:
 	virtual void		execute();

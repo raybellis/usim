@@ -6,6 +6,7 @@
 //
 
 #include "mc6809.h"
+#include <memory>
 #include <cstdio>
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
@@ -188,8 +189,6 @@ void mc6809::execute()
 		if (cc.bit.c) flags[7] = 'C';
 		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
 			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
-
-		op.clear();
 	}
 
 	// Select instruction
@@ -483,23 +482,11 @@ void mc6809::execute()
 	}
 
 	if (m_trace) {
-		fprintf(stderr, ">> %-8s%s\r\n", insn, op.c_str());
+		fprintf(stderr, ">> %-8s%s\r\n", insn, disasm_operand().c_str());
 	}
 }
 
-Word& mc6809::refreg(Byte post)
-{
-	post = (post >> 5) & 0x03;
-
-	switch (post) {
-		case 0: op = "X"; return x;
-		case 1: op = "Y"; return y;
-		case 2: op = "U"; return u;
-		case 3: op = "S"; return s;
-		default: throw execution_error("invalid register reference");
-	}
-}
-
+// used for EXG and TFR instructions
 Word& mc6809::wordrefreg(int r)
 {
 	switch (r) {
@@ -524,44 +511,42 @@ Byte& mc6809::byterefreg(int r)
 	}
 }
 
+// decodes the postbyte for most indexed modes
+Word& mc6809::ix_refreg(Byte post)
+{
+	post = (post >> 5) & 0x03;
+
+	switch (post) {
+		case 0: return x;
+		case 1: return y;
+		case 2: return u;
+		case 3: return s;
+		default: throw execution_error("invalid register reference");
+	}
+}
+
 Byte mc6809::fetch_operand()
 {
-	Word		addr;
-	Byte		r = 0;
-
 	switch (mode) {
 		case immediate:
-			r = fetch();
-			if (m_trace) {
-				op = "#" + std::to_string(r);
-			}
-			return r;
+			return operand = fetch();
 		case relative:
-			r = fetch();
-			if (m_trace) {
-				op = std::to_string(pc + r);
-			}
-			return r;
+			return operand = fetch();
 		case extended:
-			addr = fetch_word();
-			if (m_trace) {
-				op = std::to_string(addr);
-			}
+			operand = fetch_word();
+			++cycles;
+			return read(operand);
+		case direct: {
+			operand = fetch();
+			Word addr = ((Word)dp << 8) | operand;
 			++cycles;
 			return read(addr);
-		case direct:
-			r = fetch();
-			addr = ((Word)dp << 8) | r;
-			if (m_trace) {
-				op = "<" + std::to_string(r);
-			}
-			++cycles;
-			return read(addr);
+		}
 		case indexed: {
-			Byte post = fetch();
-			do_predecrement(post);
-			addr = do_effective_address(post);
-			do_postincrement(post);
+			post = fetch();
+			do_predecrement();
+			Word addr = fetch_indexed_operand();
+			do_postincrement();
 			return read(addr);
 		}
 		default:
@@ -571,42 +556,25 @@ Byte mc6809::fetch_operand()
 
 Word mc6809::fetch_word_operand()
 {
-	Word		addr;
-
 	switch (mode) {
 		case immediate:
-			addr = fetch_word();
-			if (m_trace) {
-				op = "#" + std::to_string(addr);
-			}
-			return addr;
+			return operand = fetch_word();
 		case relative:
-			addr = fetch_word();
-			if (m_trace) {
-				op = std::to_string(pc + addr);
-			}
-			return addr;
+			return operand = fetch_word();
 		case extended:
-			addr = fetch_word();
 			++cycles;
-			if (m_trace) {
-				op = std::to_string(addr);
-			}
-			return read_word(addr);
+			return read_word(operand = fetch_word());
 		case direct: {
-			Byte r = fetch();
-			addr = ((Word)dp << 8) | r;
+			operand = fetch();
+			Word addr = ((Word)dp << 8) | operand;
 			++cycles;
-			if (m_trace) {
-				op = "<" + std::to_string(r);
-			}
 			return read_word(addr);
 		}
 		case indexed: {
-			Byte post = fetch();
-			do_predecrement(post);
-			addr = do_effective_address(post);
-			do_postincrement(post);
+			post = fetch();
+			do_predecrement();
+			Word addr = fetch_indexed_operand();
+			do_postincrement();
 			return read_word(addr);
 		}
 		default:
@@ -616,186 +584,256 @@ Word mc6809::fetch_word_operand()
 
 Word mc6809::fetch_effective_address()
 {
-	Word		addr;
-
 	switch (mode) {
 		case extended:
-			addr = fetch_word();
-			break;
+			return operand = fetch_word();
 		case direct:
-			addr = (Word)dp << 8 | fetch();
-			break;
+			operand = fetch();
+			// TODO: check cycle count
+			return ((Word)dp << 8) | operand;
 		case indexed: {
-			Byte		post = fetch();
-			do_predecrement(post);
-			addr = do_effective_address(post);
-			do_postincrement(post);
-			break;
+			post = fetch();
+			do_predecrement();
+			Word addr = fetch_indexed_operand();
+			do_postincrement();
+			return addr;
 		}
 		default:
 			throw execution_error("invalid addressing mode");
 	}
-
-	if (m_trace) {
-		op = std::to_string(addr);
-	}
-
-	return addr;
 }
 
-Word mc6809::do_effective_address(Byte post)
+Word mc6809::fetch_indexed_operand()
 {
 	Word		addr = 0;
-	int16_t		offset = 0;
 
 	if ((post & 0x80) == 0x00) {			// ,R + 5 bit offset
-		offset = extend5(post & 0x1f);
-		addr = refreg(post) + offset;
+		Word offset = extend5(post & 0x1f);
 		cycles += 2;
-		if (m_trace) {
-			op = std::to_string(offset) + "," + op;
-		}
-	} else {
-		switch (post & 0x1f) {
-			case 0x00:			// ,R+
-				addr = refreg(post);
-				cycles += 3;
-				if (m_trace) {
-					op = "," + op + "+";
-				}
-				break;
-			case 0x01: case 0x11:		// ,R++
-				addr = refreg(post);
-				cycles += 4;
-				if (m_trace) {
-					op = "," + op + "++";
-				}
-				break;
-			case 0x02:			// ,-R
-				addr = refreg(post);
-				cycles += 3;
-				if (m_trace) {
-					op = ",-" + op;
-				}
-				break;
-			case 0x03: case 0x13:		// ,--R
-				addr = refreg(post);
-				cycles += 4;
-				if (m_trace) {
-					op = ",--" + op;
-				}
-				break;
-			case 0x04: case 0x14:		// ,R + 0
-				addr = refreg(post);
-				cycles += 1;
-				if (m_trace) {
-					op = "," + op;
-				}
-				break;
-			case 0x05: case 0x15:		// ,R + B
-				addr = extend8(b) + refreg(post);
-				cycles += 2;
-				if (m_trace) {
-					op = "B," + op;
-				}
-				break;
-			case 0x06: case 0x16:		// ,R + A
-				addr = extend8(a) + refreg(post);
-				cycles += 2;
-				if (m_trace) {
-					op = "A," + op;
-				}
-				break;
-			case 0x08: case 0x18:		// ,R + 8 bit
-				offset = extend8(fetch());
-				addr = refreg(post) + offset;
-				if (m_trace) {
-					op = std::to_string(offset) + "," + op;
-				}
-				cycles += 1;
-				break;
-			case 0x09: case 0x19:		// ,R + 16 bit
-				offset = fetch_word();
-				addr = refreg(post) + fetch_word();
-				cycles += 3;
-				if (m_trace) {
-					op = std::to_string(offset) + "," + op;
-				}
-				break;
-			case 0x0b: case 0x1b:		// ,R + D
-				addr = d + refreg(post);
-				cycles += 5;
-				if (m_trace) {
-					op = "D," + op;
-				}
-				break;
-			case 0x0c: case 0x1c:		// ,PC + 8
-				offset = extend8(fetch());
-				addr = pc + offset;
-				cycles += 1;
-				if (m_trace) {
-					op = std::to_string(offset) + ",PCR";
-				}
-				break;
-			case 0x0d: case 0x1d:		// ,PC + 16
-				offset = fetch_word();
-				addr = pc + offset;
-				cycles += 3;
-				if (m_trace) {
-					op = std::to_string(offset) + ",PCR";
-				}
-				break;
-			case 0x1f:			// [,Address]
-				addr = fetch_word();
-				cycles += 1;
-				if (m_trace) {
-					op = "," + std::to_string(addr);
-				}
-				break;
-			default:
-				throw execution_error("indirect addressing postbyte");
-				break;
-		}
+		return ix_refreg(post) + offset;
+	}
 
-		// Do extra indirection
-		if (post & 0x10) {
-			addr = read_word(addr);
+	switch (post & 0x1f) {
+		case 0x00:			// ,R+
+			addr = ix_refreg(post);
+			cycles += 3;
+			break;
+		case 0x01: case 0x11:		// ,R++
+			addr = ix_refreg(post);
+			cycles += 4;
+			break;
+		case 0x02:			// ,-R
+			addr = ix_refreg(post);
+			cycles += 3;
+			break;
+		case 0x03: case 0x13:		// ,--R
+			addr = ix_refreg(post);
+			cycles += 4;
+			break;
+		case 0x04: case 0x14:		// ,R + 0
+			addr = ix_refreg(post);
 			cycles += 1;
-			if (m_trace) {
-				op = "[" + op + "]";
-			}
-		}
+			break;
+		case 0x05: case 0x15:		// ,R + B
+			addr = extend8(b) + ix_refreg(post);
+			cycles += 2;
+			break;
+		case 0x06: case 0x16:		// ,R + A
+			addr = extend8(a) + ix_refreg(post);
+			cycles += 2;
+			break;
+		case 0x08: case 0x18:		// ,R + 8 bit
+			operand = extend8(fetch());
+			addr = ix_refreg(post) + operand;
+			cycles += 1;
+			break;
+		case 0x09: case 0x19:		// ,R + 16 bit
+			operand = fetch_word();
+			addr = ix_refreg(post) + operand;
+			cycles += 3;
+			break;
+		case 0x0b: case 0x1b:		// ,R + D
+			addr = d + ix_refreg(post);
+			cycles += 5;
+			break;
+		case 0x0c: case 0x1c:		// ,PC + 8
+			operand = extend8(fetch());
+			addr = pc + operand;
+			cycles += 1;
+			break;
+		case 0x0d: case 0x1d:		// ,PC + 16
+			operand = fetch_word();
+			addr = pc + operand;
+			cycles += 3;
+			break;
+		case 0x1f:			// [,Address]
+			operand = fetch_word();
+			addr = operand;
+			cycles += 1;
+			break;
+		default:
+			throw execution_error("indirect addressing postbyte");
+	}
+
+	// Do extra indirection
+	if (post & 0x10) {
+		addr = read_word(addr);
+		cycles += 1;
 	}
 
 	return addr;
 }
 
-void mc6809::do_postincrement(Byte post)
+void mc6809::do_postincrement()
 {
 	switch (post & 0x9f) {
 		case 0x80:
-			refreg(post) += 1;
+			ix_refreg(post) += 1;
 			break;
 		case 0x90:
 			throw execution_error("invalid post-increment operation");
 			break;
 		case 0x81: case 0x91:
-			refreg(post) += 2;
+			ix_refreg(post) += 2;
 			break;
 	}
 }
 
-void mc6809::do_predecrement(Byte post)
+void mc6809::do_predecrement()
 {
 	switch (post & 0x9f) {
 		case 0x82:
-			refreg(post) -= 1;
+			ix_refreg(post) -= 1;
 			break;
 		case 0x92:
 			throw execution_error("invalid pre-decrement operation");
 			break;
 		case 0x83: case 0x93:
-			refreg(post) -= 2;
+			ix_refreg(post) -= 2;
 			break;
 	}
+}
+
+//---------------------------------------------------------------------
+//
+// disassembly support
+//
+static std::string disasm_reglist(Byte w, const char *other_sr)
+{
+        static const char* regs[]  = {
+                "CC", "A", "B", "DP", "X", "Y", "", "PC"
+        };
+
+        std::string r;
+
+        for (int n = 0; (n < 8) && w; ++n, w >>= 1) {
+                if (w & 1) {
+                        r += (n == 6) ? other_sr : regs[n];
+                        if (w & 0xfe) {
+                                r += ",";
+                        }
+                }
+        }
+
+        return r;
+}
+
+static std::string disasm_regpair(Byte w)
+{
+	static const char* regnames[] = {
+		"D", "X", "Y", "U", "S", "PC", "", "",
+		"A", "B", "CC", "DP", "", "", "", ""
+	};
+
+	int r1 = (w & 0xf0) >> 4;
+	int r2 = (w & 0x0f) >> 0;
+
+	return std::string(regnames[r1]) + "," + std::string(regnames[r2]);
+}
+
+template<typename ... Args>
+static std::string fmt(const std::string& format, Args ... args)
+{
+	int size = ::snprintf(nullptr, 0, format.c_str(), args ...) + 1;
+	if (size <= 0) {
+		throw std::runtime_error("string formatting error");
+	}
+
+	std::unique_ptr<char[]> buf(new char[size]);
+	::snprintf(buf.get(), size, format.c_str(), args ...);
+	return std::string(buf.get(), buf.get() + size - 1 );
+}
+
+std::string mc6809::disasm_indexed()
+{
+	static const char regs[] = "XYUS";
+	const char reg = regs[(post >> 5) & 0x03];
+
+	if (!btst(post, 7)) {			// ,R + 5 bit offset
+		return fmt("%d,%c", (int16_t)extend5(post & 0x1f), reg);
+	}
+
+	switch (post & 0x1f) {
+		case 0x00:			// ,R+
+			return fmt(",%c+", reg);
+		case 0x01: case 0x11:		// ,R++
+			return fmt(",%c++", reg);
+		case 0x02:			// ,-R
+			return fmt(",-%c", reg);
+		case 0x03: case 0x13:		// ,--R
+			return fmt(",--%c", reg);
+		case 0x04: case 0x14:		// ,R + 0
+			return fmt(",%c", reg);
+		case 0x05: case 0x15:		// ,R + B
+			return fmt("B,%c", reg);
+		case 0x06: case 0x16:		// ,R + A
+			return fmt("A,%c", reg);
+		case 0x08: case 0x18:		// ,R + offset
+		case 0x09: case 0x19:
+			return fmt("%d,%c", (int16_t)operand, reg);
+		case 0x0b: case 0x1b:		// ,R + D
+			return fmt("D,%c", reg);
+		case 0x0c: case 0x1c:		// ,PCR + offset
+		case 0x0d: case 0x1d:
+			return fmt("%d,PCR", (int16_t)operand, reg);
+		case 0x1f:			// ,Address
+			return fmt(",$%04x", (int16_t)operand);
+		default:
+			throw execution_error("indirect addressing postbyte");
+	}
+}
+
+std::string mc6809::disasm_operand()
+{
+	// special cases for PSHx / PULx / EXG / TFR
+	switch (ir) {
+		case 0x34: case 0x36:	// PSHS / PULS
+			return disasm_reglist(operand, "U");
+		case 0x35: case 0x37:	// PSHU / PULU
+			return disasm_reglist(operand, "S");
+		case 0x1e: case 0x1f:	// EXG / TFR
+			return disasm_regpair(operand);
+	}
+
+	switch (mode) {
+		case inherent:
+			return "";
+		case immediate:
+			return fmt("#$%02x", operand);
+		case relative:
+			return fmt("$%04x", pc + operand);
+		case direct:
+			return fmt("<$%02x", operand);
+		case extended:
+			return fmt("$%04x", operand);
+		case indexed: {
+			auto r = disasm_indexed();
+			if ((post & 0x90) == 0x90) {
+				r = "[" + r + "]";
+			}
+			return r;
+		}
+	}
+
+	return "[error]";
 }

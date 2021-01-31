@@ -783,27 +783,19 @@ void mc6809::eorb()
 	help_eor(b);
 }
 
-static const char* regnames[] = {
-  "D", "X", "Y", "U", "S", "PC", "", "",
-  "A", "B", "CC", "DP", "", "", "", ""
-};
-
 void mc6809::exg()
 {
 	insn = "EXG";
 	Byte w = fetch_operand();
 	int r1 = (w & 0xf0) >> 4;
 	int r2 = (w & 0x0f) >> 0;
+
 	if (r1 <= 5 && r2 <= 5) {
 		std::swap(wordrefreg(r2), wordrefreg(r1));
 	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
 		std::swap(byterefreg(r2), byterefreg(r1));
 	} else {
 		throw execution_error("invalid EXG operand");
-	}
-
-	if (m_trace) {
-		op = std::string(regnames[r1]) + "," + std::string(regnames[r2]);
 	}
 
 	cycles += 6;
@@ -1014,34 +1006,11 @@ void mc6809::orcc()
 	++cycles;
 }
 
-static std::string stackreg(Byte w, const char *s)
-{
-	static const char* regs[]  = {
-		"CC", "A", "B", "DP", "X", "Y", "", "PC"
-	};
-
-	std::string r;
-
-	for (int n = 0; (n < 8) && w; ++n, w >>= 1) {
-		if (w & 1) {
-			r += (n == 6) ? s : regs[n];
-			if (w & 0xfe) {
-				r += ",";
-			}
-		}
-	}
-
-	return r;
-}
-
 void mc6809::pshs()
 {
 	insn = "PSHS";
 	Byte w = fetch_operand();
 	help_psh(w, s, u);
-	if (m_trace) {
-		op = stackreg(w, "U");
-	}
 	cycles += 3;
 }
 
@@ -1050,9 +1019,6 @@ void mc6809::pshu()
 	insn = "PSHU";
 	Byte w = fetch_operand();
 	help_psh(w, u, s);
-	if (m_trace) {
-		op = stackreg(w, "S");
-	}
 	cycles += 3;
 }
 
@@ -1061,9 +1027,6 @@ void mc6809::puls()
 	insn = "PULS";
 	Byte w = fetch_operand();
 	help_pul(w, s, u);
-	if (m_trace) {
-		op = stackreg(w, "U");
-	}
 	cycles += 3;
 }
 
@@ -1072,9 +1035,6 @@ void mc6809::pulu()
 	insn = "PULU";
 	Byte w = fetch_operand();
 	help_pul(w, u, s);
-	if (m_trace) {
-		op = stackreg(w, "S");
-	}
 	cycles += 3;
 }
 
@@ -1268,16 +1228,13 @@ void mc6809::tfr()
 	Byte	w = fetch_operand();
 	int r1 = (w & 0xf0) >> 4;
 	int r2 = (w & 0x0f) >> 0;
+
 	if (r1 <= 5 && r2 <= 5) {
 		wordrefreg(r2) = wordrefreg(r1);
 	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
 		byterefreg(r2) = byterefreg(r1);
 	} else {
 		throw execution_error("invalid TFR operand");
-	}
-
-	if (m_trace) {
-		op = std::string(regnames[r1]) + "," + std::string(regnames[r2]);
 	}
 
 	cycles += 4;
