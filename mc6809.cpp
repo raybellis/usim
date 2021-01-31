@@ -74,8 +74,20 @@ void mc6809::tick()
 	// if we got here, then CWAI is no longer in effect
 	waiting_cwai = false;
 
-	// process the next instruction
-	execute();
+	// remember current instruction address
+	insn_pc = pc;
+
+	// hook
+	pre_exec();
+
+	// fetch the next instruction
+	fetch_instruction();
+
+	// and process it
+	execute_instruction();
+
+	// hook
+	post_exec();
 }
 
 void mc6809::do_nmi()
@@ -158,29 +170,10 @@ void mc6809::fetch_instruction()
 			}
 			break;
 	}
-
-	if (m_trace) {
-		uint64_t cycle_start = cycles - 1;
-		Word old_pc = pc - 1;
-		if (ir >= 0x0100) {
-			--cycle_start;
-			--old_pc;
-		}
-		char flags[] = "EFHINZVC";
-		for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
-			if ((cc.all & mask) == 0) {
-				flags[i] = '-';
-			}
-		}
-		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
-			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
-	}
 }
 
-void mc6809::execute()
+void mc6809::execute_instruction()
 {
-	fetch_instruction();
-
 	switch (ir) {
 		case 0x3a:
 			abx(); break;
@@ -469,10 +462,28 @@ void mc6809::execute()
 		default:
 			throw new execution_error("invalid instruction");
 	}
+}
 
-	if (m_trace) {
-		fprintf(stderr, ">> %-8s%s\r\n", insn, disasm_operand().c_str());
+void mc6809::pre_exec()
+{
+	if (!m_trace) return;
+
+	uint64_t cycle_start = cycles - 1;
+	char flags[] = "EFHINZVC";
+	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
+		if ((cc.all & mask) == 0) {
+			flags[i] = '-';
+		}
 	}
+	fprintf(stderr, "%8lld PC:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
+		cycle_start, pc, flags, s, u, a, b, x, y);
+}
+
+void mc6809::post_exec()
+{
+	if (!m_trace) return;
+
+	fprintf(stderr, ">> %04x: %-8s%s\r\n", insn_pc, insn, disasm_operand().c_str());
 }
 
 // used for EXG and TFR instructions

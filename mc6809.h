@@ -18,8 +18,7 @@
 
 class mc6809 : virtual public USimMotorola {
 
-// Processor addressing modes
-protected:
+protected: // Processor addressing modes
 
 	enum {
 				immediate,
@@ -30,8 +29,7 @@ protected:
 				relative
 	} mode;
 
-// Processor registers
-protected:
+protected:	// Processor registers
 
 	Word			u, s;		// Stack pointers
 	Word			x, y;		// Index registers
@@ -76,16 +74,14 @@ protected:
 		} bit;
 	} cc;
 
-// internal processor state
-private:
+private:	// internal processor state
 	bool			waiting_sync;
 	bool			waiting_cwai;
-	bool			nmi_previous;	// previous state of the NMI line
+	bool			nmi_previous;
 
-private:
+private:	// instruction and operand fetch and decode
 	Byte&			byterefreg(int);
 	Word&			wordrefreg(int);
-
 	Word&			ix_refreg(Byte);
 
 	void			fetch_instruction();
@@ -93,10 +89,12 @@ private:
 	Word			fetch_word_operand();
 	Word			fetch_effective_address();
 	Word			fetch_indexed_operand();
+	void			execute_instruction();
 
 	void			do_predecrement();
 	void			do_postincrement();
 
+private:	// instruction implementations
 	void			abx();
 	void			adca(), adcb();
 	void			adda(), addb(), addd();
@@ -157,6 +155,7 @@ private:
 	void			tfr();
 	void			tsta(), tstb(), tst();
 
+protected:	// helper functions
 	void			help_adc(Byte&);
 	void			help_add(Byte&);
 	void			help_and(Byte&);
@@ -186,7 +185,7 @@ private:
 	void			help_sub(Word&);
 	void			help_tst(Byte);
 
-protected:
+protected:	// overloadable functions (e.g. for breakpoints)
 	virtual void		do_br(const char *, bool);
 	virtual void		do_lbr(const char *, bool);
 
@@ -199,7 +198,11 @@ protected:
 	virtual void		do_firq();
 	virtual void		do_irq();
 
-protected: // instruction tracing
+	virtual void		pre_exec();
+	virtual void		post_exec();
+
+protected: 	// instruction tracing
+	Word			insn_pc;
 	const char*		insn;
 	Byte			post;
 	Word			operand;
@@ -207,10 +210,7 @@ protected: // instruction tracing
 	std::string		disasm_operand();
 	std::string		disasm_indexed();
 
-protected:
-	virtual void		execute();
-
-public:
+public:		// external signal pins
 	InputPin		irq, firq, nmi;
 
 public:
