@@ -475,8 +475,8 @@ void mc6809::pre_exec()
 			flags[i] = '-';
 		}
 	}
-	fprintf(stderr, "%8lld PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X\r\n",
-		cycle_start, pc, flags, s, u, a, b, x, y);
+	fprintf(stderr, "%8lld PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X DP:%02X\r\n",
+		cycle_start, pc, flags, s, u, a, b, x, y, dp);
 }
 
 void mc6809::post_exec()
