@@ -39,7 +39,6 @@ protected:
 	virtual void		write(Word offset, Byte val);
 	virtual void		write_word(Word offset, Word val) = 0;
 	virtual Byte		fetch();
-	virtual void		execute() = 0;
 
 // Device handling:
 protected:
