@@ -108,14 +108,20 @@ void mc6809::do_irq()
 	pc = read_word(0xfff8);
 }
 
-void mc6809::execute()
+void mc6809::fetch_instruction()
 {
 	ir = fetch();
 
 	// deduct a cycle to account for the one used in "tick"
 	--cycles;
 
-	// Select addressing mode
+	// look for two-byte instructions
+	if (ir == 0x10 || ir == 0x11) {
+		ir <<= 8;
+		ir |= fetch();
+	}
+
+	// Decode addressing mode
 	switch (ir & 0xf0) {
 		case 0x00: case 0x90: case 0xd0:
 			mode = direct; break;
@@ -143,24 +149,6 @@ void mc6809::execute()
 			break;
 		case 0x10:
 			switch (ir & 0x0f) {
-				case 0x00: case 0x01:
-					ir <<= 8;
-					ir |= fetch();
-					switch (ir & 0xf0) {
-						case 0x20:
-							mode = relative; break;
-						case 0x30:
-							mode = inherent; break;
-						case 0x80: case 0xc0:
-							mode = immediate; break;
-						case 0x90: case 0xd0:
-							mode = direct; break;
-						case 0xa0: case 0xe0:
-							mode = indexed; break;
-						case 0xb0: case 0xf0:
-							mode = extended; break;
-					}
-					break;
 				case 0x02: case 0x03: case 0x09: case 0x0d:
 					mode = inherent; break;
 				case 0x06: case 0x07:
@@ -178,20 +166,21 @@ void mc6809::execute()
 			--cycle_start;
 			--old_pc;
 		}
-		char flags[] = "--------";
-		if (cc.bit.e) flags[0] = 'E';
-		if (cc.bit.f) flags[1] = 'F';
-		if (cc.bit.h) flags[2] = 'H';
-		if (cc.bit.i) flags[3] = 'I';
-		if (cc.bit.n) flags[4] = 'N';
-		if (cc.bit.z) flags[5] = 'Z';
-		if (cc.bit.v) flags[6] = 'V';
-		if (cc.bit.c) flags[7] = 'C';
+		char flags[] = "EFHINZVC";
+		for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
+			if ((cc.all & mask) == 0) {
+				flags[i] = '-';
+			}
+		}
 		fprintf(stderr, "%8lld PC:%04x IR:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
 			cycle_start, old_pc, ir, flags, s, u, a, b, x, y);
 	}
+}
 
-	// Select instruction
+void mc6809::execute()
+{
+	fetch_instruction();
+
 	switch (ir) {
 		case 0x3a:
 			abx(); break;

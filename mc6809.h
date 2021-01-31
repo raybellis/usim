@@ -88,10 +88,12 @@ private:
 
 	Word&			ix_refreg(Byte);
 
+	void			fetch_instruction();
 	Byte			fetch_operand();
 	Word			fetch_word_operand();
 	Word			fetch_effective_address();
 	Word			fetch_indexed_operand();
+
 	void			do_predecrement();
 	void			do_postincrement();
 
