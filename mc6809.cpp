@@ -559,12 +559,16 @@ Word mc6809::fetch_effective_address()
 			return ((Word)dp << 8) | operand;
 		case indexed: {
 			post = fetch();
+
 			do_predecrement();
 			Word addr = fetch_indexed_operand();
 			do_postincrement();
-//			if (btst(post, 7) && btst(post, 4)) {
-//				addr = read_word(addr);
-//			}
+
+			// handle indirect indexed mode
+			if (btst(post, 4) && btst(post, 7)) {
+				++cycles;
+				addr = read_word(addr);
+			}
 			return addr;
 		}
 		default:
@@ -574,83 +578,60 @@ Word mc6809::fetch_effective_address()
 
 Word mc6809::fetch_indexed_operand()
 {
-	Word		addr = 0;
-
-	if ((post & 0x80) == 0x00) {			// ,R + 5 bit offset
-		Word offset = extend5(post & 0x1f);
+	if ((post & 0x80) == 0x00) {		// ,R + 5 bit offset
 		cycles += 2;
-		return ix_refreg(post) + offset;
+		return ix_refreg(post) + extend5(post & 0x1f);
 	}
 
 	switch (post & 0x1f) {
 		case 0x00:			// ,R+
-			addr = ix_refreg(post);
 			cycles += 3;
-			break;
+			return ix_refreg(post);
 		case 0x01: case 0x11:		// ,R++
-			addr = ix_refreg(post);
 			cycles += 4;
-			break;
+			return ix_refreg(post);
 		case 0x02:			// ,-R
-			addr = ix_refreg(post);
 			cycles += 3;
-			break;
+			return ix_refreg(post);
 		case 0x03: case 0x13:		// ,--R
-			addr = ix_refreg(post);
 			cycles += 4;
-			break;
+			return ix_refreg(post);
 		case 0x04: case 0x14:		// ,R + 0
-			addr = ix_refreg(post);
 			cycles += 1;
+			return ix_refreg(post);
 			break;
 		case 0x05: case 0x15:		// ,R + B
-			addr = extend8(b) + ix_refreg(post);
 			cycles += 2;
-			break;
+			return extend8(b) + ix_refreg(post);
 		case 0x06: case 0x16:		// ,R + A
-			addr = extend8(a) + ix_refreg(post);
 			cycles += 2;
-			break;
+			return extend8(a) + ix_refreg(post);
 		case 0x08: case 0x18:		// ,R + 8 bit
-			operand = extend8(fetch());
-			addr = ix_refreg(post) + operand;
 			cycles += 1;
-			break;
+			operand = extend8(fetch());
+			return ix_refreg(post) + operand;
 		case 0x09: case 0x19:		// ,R + 16 bit
-			operand = fetch_word();
-			addr = ix_refreg(post) + operand;
 			cycles += 3;
-			break;
+			operand = fetch_word();
+			return ix_refreg(post) + operand;
 		case 0x0b: case 0x1b:		// ,R + D
-			addr = d + ix_refreg(post);
 			cycles += 5;
-			break;
+			return d + ix_refreg(post);
 		case 0x0c: case 0x1c:		// ,PC + 8
+			cycles += 1;
 			operand = extend8(fetch());
-			addr = pc + operand;
-			cycles += 1;
-			break;
+			return pc + operand;
 		case 0x0d: case 0x1d:		// ,PC + 16
-			operand = fetch_word();
-			addr = pc + operand;
 			cycles += 3;
-			break;
-		case 0x1f:			// [,Address]
 			operand = fetch_word();
-			addr = operand;
+			return pc + operand;
+		case 0x1f:			// [,Address]
 			cycles += 1;
-			break;
+			operand = fetch_word();
+			return operand;
 		default:
-			throw execution_error("indirect addressing postbyte");
+			throw execution_error("invalid indexed addressing postbyte");
 	}
-
-	// Do extra indirection
-	if (post & 0x10) {
-		addr = read_word(addr);
-		cycles += 1;
-	}
-
-	return addr;
 }
 
 void mc6809::do_postincrement()
@@ -687,6 +668,8 @@ void mc6809::do_predecrement()
 //
 // disassembly support
 //
+//---------------------------------------------------------------------
+
 static std::string disasm_reglist(Byte w, const char *other_sr)
 {
         static const char* regs[]  = {
@@ -766,7 +749,7 @@ std::string mc6809::disasm_indexed()
 		case 0x0d: case 0x1d:
 			return fmt("%d,PCR", (int16_t)operand, reg);
 		case 0x1f:			// ,Address
-			return fmt(",$%04x", (int16_t)operand);
+			return fmt(",$%04hx", (int16_t)operand);
 		default:
 			throw execution_error("indirect addressing postbyte");
 	}
@@ -797,12 +780,10 @@ std::string mc6809::disasm_operand()
 			return fmt("$%04x", operand);
 		case indexed: {
 			auto r = disasm_indexed();
-			if ((post & 0x90) == 0x90) {
+			if (btst(post, 4) && btst(post, 7)) {
 				r = "[" + r + "]";
 			}
 			return r;
 		}
 	}
-
-	return "[error]";
 }
