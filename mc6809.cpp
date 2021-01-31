@@ -475,7 +475,7 @@ void mc6809::pre_exec()
 			flags[i] = '-';
 		}
 	}
-	fprintf(stderr, "%8lld PC:%04x CC:%s S:%04x U:%04x A:%02x B:%02x X:%04x Y:%04x\r\n",
+	fprintf(stderr, "%8lld PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X\r\n",
 		cycle_start, pc, flags, s, u, a, b, x, y);
 }
 
@@ -483,7 +483,7 @@ void mc6809::post_exec()
 {
 	if (!m_trace) return;
 
-	fprintf(stderr, ">> %04x: %-8s%s\r\n", insn_pc, insn, disasm_operand().c_str());
+	fprintf(stderr, "/ %04X: %-8s%s\r\n", insn_pc, insn, disasm_operand().c_str());
 }
 
 // used for EXG and TFR instructions
@@ -529,8 +529,12 @@ Byte mc6809::fetch_operand()
 {
 	switch (mode) {
 		case immediate:
-		case relative:
-			return operand = fetch();
+			return operand = extend8(fetch());
+		case relative: {
+			Byte r = fetch();
+			operand = pc + extend8(r);
+			return r;
+		}
 		default:
 			return read(fetch_effective_address());
 	}
@@ -540,8 +544,12 @@ Word mc6809::fetch_word_operand()
 {
 	switch (mode) {
 		case immediate:
-		case relative:
 			return operand = fetch_word();
+		case relative: {
+			Word r = fetch_word();
+			operand = pc + r;
+			return r;
+		}
 		default:
 			return read_word(fetch_effective_address());
 	}
@@ -771,13 +779,13 @@ std::string mc6809::disasm_operand()
 		case inherent:
 			return "";
 		case immediate:
-			return fmt("#$%02x", operand);
+			return fmt("#$%02X", operand);
 		case relative:
-			return fmt("$%04x", pc + operand);
+			return fmt("$%04X", operand);
 		case direct:
-			return fmt("<$%02x", operand);
+			return fmt("<$%02X", operand);
 		case extended:
-			return fmt("$%04x", operand);
+			return fmt("$%04X", operand);
 		case indexed: {
 			auto r = disasm_indexed();
 			if (btst(post, 4) && btst(post, 7)) {
