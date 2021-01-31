@@ -18,8 +18,9 @@ inchar		equ	$00
 handle_reset	lds	#system_stack
 		ldu	#user_stack
 		orcc	#$50		; disable interrupts
-		ldx	#system_ready
-		lbsr	putstr
+
+		leax    system_ready, pcr
+		lbsr    putstr
 
 		include "test.s"
 
@@ -93,7 +94,7 @@ puthexbyte	pshs	cc
 		rora
 		rora
 		rora
-		rora
+		rora	; rotate through carry bit
 		bsr	puthexdigit
 		puls	cc
 		rts
@@ -161,8 +162,10 @@ handle_undef	rti
 
 handle_swi	equ	status
 
-handle_swi2
-handle_swi3
+handle_swi2	rti
+
+handle_swi3	rti
+
 handle_nmi	rti
 
 ;

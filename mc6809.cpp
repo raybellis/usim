@@ -529,28 +529,10 @@ Byte mc6809::fetch_operand()
 {
 	switch (mode) {
 		case immediate:
-			return operand = fetch();
 		case relative:
 			return operand = fetch();
-		case extended:
-			operand = fetch_word();
-			++cycles;
-			return read(operand);
-		case direct: {
-			operand = fetch();
-			Word addr = ((Word)dp << 8) | operand;
-			++cycles;
-			return read(addr);
-		}
-		case indexed: {
-			post = fetch();
-			do_predecrement();
-			Word addr = fetch_indexed_operand();
-			do_postincrement();
-			return read(addr);
-		}
 		default:
-			throw execution_error("invalid addressing mode");
+			return read(fetch_effective_address());
 	}
 }
 
@@ -558,27 +540,10 @@ Word mc6809::fetch_word_operand()
 {
 	switch (mode) {
 		case immediate:
-			return operand = fetch_word();
 		case relative:
 			return operand = fetch_word();
-		case extended:
-			++cycles;
-			return read_word(operand = fetch_word());
-		case direct: {
-			operand = fetch();
-			Word addr = ((Word)dp << 8) | operand;
-			++cycles;
-			return read_word(addr);
-		}
-		case indexed: {
-			post = fetch();
-			do_predecrement();
-			Word addr = fetch_indexed_operand();
-			do_postincrement();
-			return read_word(addr);
-		}
 		default:
-			throw execution_error("invalid addressing mode");
+			return read_word(fetch_effective_address());
 	}
 }
 
@@ -586,16 +551,20 @@ Word mc6809::fetch_effective_address()
 {
 	switch (mode) {
 		case extended:
+			++cycles;
 			return operand = fetch_word();
 		case direct:
+			++cycles;
 			operand = fetch();
-			// TODO: check cycle count
 			return ((Word)dp << 8) | operand;
 		case indexed: {
 			post = fetch();
 			do_predecrement();
 			Word addr = fetch_indexed_operand();
 			do_postincrement();
+//			if (btst(post, 7) && btst(post, 4)) {
+//				addr = read_word(addr);
+//			}
 			return addr;
 		}
 		default:
