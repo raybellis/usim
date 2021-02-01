@@ -28,6 +28,7 @@ protected:
 protected:
 	virtual void		tick(uint64_t);
 	virtual void		reset();
+	bool			irq_pin_status() const;
 
 // Read and write functions
 public:
