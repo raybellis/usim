@@ -36,11 +36,8 @@ void mc6809::reset()
 
 void mc6809::tick()
 {
-	// handle attached devices
+	// handle the attached devices
 	USim::tick();
-
-	// every tick we count at least one cycle
-	++cycles;
 
 	// get interrupt pin states
 	bool c_nmi = nmi;
@@ -88,6 +85,9 @@ void mc6809::tick()
 
 	// hook
 	post_exec();
+
+	// deduct a cycle to account for the one added in Usim::tick
+	--cycles;
 }
 
 void mc6809::do_nmi()
@@ -123,9 +123,6 @@ void mc6809::do_irq()
 void mc6809::fetch_instruction()
 {
 	ir = fetch();
-
-	// deduct a cycle to account for the one used in "tick"
-	--cycles;
 
 	// look for two-byte instructions
 	if (ir == 0x10 || ir == 0x11) {
@@ -468,22 +465,21 @@ void mc6809::pre_exec()
 {
 	if (!m_trace) return;
 
-	uint64_t cycle_start = cycles - 1;
 	char flags[] = "EFHINZVC";
 	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
 		if ((cc.all & mask) == 0) {
 			flags[i] = '-';
 		}
 	}
-	fprintf(stderr, "%8lld PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X DP:%02X\r\n",
-		cycle_start, pc, flags, s, u, a, b, x, y, dp);
+	fprintf(stderr, "PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X DP:%02X\r\n",
+		pc, flags, s, u, a, b, x, y, dp);
 }
 
 void mc6809::post_exec()
 {
 	if (!m_trace) return;
 
-	fprintf(stderr, "/ %04X: %-8s%s\r\n", insn_pc, insn, disasm_operand().c_str());
+	fprintf(stderr, "/ %04X: [%2d] %-8s%s\r\n", insn_pc, cycles, insn, disasm_operand().c_str());
 }
 
 // used for EXG and TFR instructions

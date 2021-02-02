@@ -20,13 +20,13 @@ protected:
 
 // Access to real IO device
 
-	uint64_t		next_poll;
 	Terminal		term;
+	uint16_t		cycles;		// cycles since last terminal poll
 
 // Initialisation functions
 
 protected:
-	virtual void		tick(uint64_t);
+	virtual void		tick(uint8_t);
 	virtual void		reset();
 	bool			irq_pin_status() const;
 

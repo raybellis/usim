@@ -24,13 +24,15 @@ void mc6850::reset()
 	sr = 0;		// Clear all status bits
 
 	bset(sr, 1);	// Set TDRE to true
-	next_poll = 0;
+	cycles = 0;
 }
 
-void mc6850::tick(uint64_t cycles)
+void mc6850::tick(uint8_t ticks)
 {
-	if (cycles < next_poll) return;
-	next_poll = cycles + 1000;
+	cycles += ticks;
+	if (cycles < 1000) return;
+
+	cycles = 0;
 
 	// Check for a received character if one isn't available
 	if (!btst(sr, 0)) {

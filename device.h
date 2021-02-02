@@ -8,17 +8,25 @@
 
 #pragma once
 
+#include <functional>
 #include <vector>
 #include "typedefs.h"
 
 /*
- * an abstract memory mapped device
+ * an abstract unmapped device that only handles reset and tick
  */
-class Device {
+class UnmappedDevice {
 
 public:
 	virtual void		reset() = 0;
-	virtual void		tick(uint64_t cycles) = 0;
+	virtual void		tick(uint8_t cycles) = 0;
+
+};
+
+/*
+ * an abstract memory mapped device
+ */
+class Device : virtual public UnmappedDevice {
 
 public:
 	virtual Byte		read(Word offset) = 0;
@@ -27,13 +35,13 @@ public:
 };
 
 /*
- * an abstract device with no-op functions for reset and tick
+ * a device with no-op functions for reset and tick
  */
 class PassiveDevice : public Device {
 
 public:
 	virtual void		reset() final {};
-	virtual void		tick(uint64_t cycles) final {};
+	virtual void		tick(uint8_t cycles) final {};
 
 };
 
@@ -47,6 +55,7 @@ struct DeviceEntry {
 };
 
 typedef std::vector<DeviceEntry> Devices;
+typedef std::vector<UnmappedDevice*> UnmappedDevices;
 
 /*
  * IO pins - currently only used for interrupts
@@ -68,96 +77,21 @@ public:
 				}
 };
 
-template<std::size_t N>
-class OutputPinGroup {
-public:
-	using Function = std::function<bool(size_t)>;
-
-protected:
-	Function	f;
-	OutputPin	outputs[N];
-
-public:
-	OutputPinGroup(const Function&f) : f(f) { }
-
-	const OutputPin&	operator[](size_t n) {
-					return outputs[n];
-				}
-};
-
 class InputPin {
 
 protected:
-	OutputPin*		input = nullptr;
+	std::vector<OutputPin>	inputs;
 
 public:
 	void			attach(OutputPin& input) {
-					this->input = &input;
+					inputs.push_back(input);
 				}
 
 	operator		bool() const {
-					return input == nullptr ? true : *input;
-				}
-};
-
-template<std::size_t M>
-class LogicSimple {
-
-protected:
-	InputPin		inputs[M];
-	virtual bool		logic() = 0;
-
-public:
-	OutputPin		output;
-
-public:
-	LogicSimple(InputPin inputs[M]) : inputs(inputs), output([&]() { return logic();}) { };
-	LogicSimple(InputPin input) : inputs({ inputs }), output([&]() { return logic();}) { };
-
-};
-
-template<std::size_t M, std::size_t N>
-class Logic {
-
-protected:
-	InputPin		inputs[M];
-	virtual bool		logic(size_t n) = 0;
-
-public:
-	OutputPinGroup<N>	outputs;
-
-public:
-	Logic(InputPin inputs[N]) : inputs(inputs), outputs([&](size_t n) { return logic(n);}) { };
-	Logic(InputPin input) : inputs({ inputs }), outputs([&](size_t n) { return logic(n);}) { };
-
-};
-
-class LogicInverter : virtual public LogicSimple<1> {
-protected:
-	virtual bool		logic() {
-					return !inputs[0];
-				}
-};
-
-template<std::size_t N>
-class LogicAND : virtual public LogicSimple<N> {
-
-protected:
-	virtual bool		logic() {
-					for (auto& i : this->inputs) {
-						if (!i) return false;
-					}
-					return true;
-				}
-};
-
-template<std::size_t N>
-class LogicOR : virtual public LogicSimple<N> {
-
-protected:
-	bool			logic() {
-					for (auto& i : this->inputs) {
-						if (i) return true;
+					for (auto& i : inputs) {
+						if (!i) {
+							return false;
+						}
 					}
 					return true;
 				}

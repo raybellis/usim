@@ -24,7 +24,7 @@ protected:
 
 		bool		m_trace = false;
 		bool		halted = true;
-		uint64_t	cycles = 0;
+		uint8_t		cycles = 0;
 
 // Generic internal registers that we assume all CPUs have
 
@@ -42,9 +42,11 @@ protected:
 
 // Device handling:
 protected:
+		UnmappedDevices	unmapped;
 		Devices		devices;
 
 public:
+	virtual void		attach(UnmappedDevice& dev);
 	virtual void		attach(Device& dev, Word base, Word mask);
 
 // Functions to start and stop the virtual processor

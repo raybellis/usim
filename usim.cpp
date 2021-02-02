@@ -29,10 +29,21 @@ void USim::run()
 
 void USim::tick()
 {
+	// assume one cycle happens every time
+	++cycles;
+
+	// update all unmapped devices
+	for (auto& d : unmapped) {
+		d->tick(cycles);
+	}
+
 	// update all attached devices
 	for (auto& d : devices) {
 		d.device->tick(cycles);
 	}
+
+	// reset the cycle counter
+	cycles = 0;
 }
 
 void USim::halt()
@@ -48,6 +59,11 @@ Byte USim::fetch()
 //----------------------------------------------------------------------------
 // Device handling
 //----------------------------------------------------------------------------
+
+void USim::attach(UnmappedDevice& dev)
+{
+	unmapped.push_back(&dev);
+}
 
 void USim::attach(Device& dev, Word base, Word mask)
 {
