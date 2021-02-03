@@ -11,7 +11,6 @@
 
 mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
-	reset();
 }
 
 mc6809::~mc6809()
@@ -20,6 +19,8 @@ mc6809::~mc6809()
 
 void mc6809::reset()
 {
+	USim::reset();
+
 	pc = read_word(0xfffe);
 	cycles = 0;
 	dp = 0x00;		/* Direct page register = 0x00 */
@@ -86,7 +87,7 @@ void mc6809::tick()
 	// hook
 	post_exec();
 
-	// deduct a cycle to account for the one added in Usim::tick
+	// deduct a cycle to account for the one added in USim::tick
 	--cycles;
 }
 

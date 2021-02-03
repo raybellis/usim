@@ -32,18 +32,21 @@ void USim::tick()
 	// assume one cycle happens every time
 	++cycles;
 
-	// update all unmapped devices
-	for (auto& d : unmapped) {
-		d->tick(cycles);
-	}
-
-	// update all attached devices
-	for (auto& d : devices) {
+	// update all active devices
+	for (auto& d : dev_active) {
 		d.device->tick(cycles);
 	}
 
 	// reset the cycle counter
 	cycles = 0;
+}
+
+void USim::reset()
+{
+	// reset all active devices
+	for (auto& d : dev_active) {
+		d.device->reset();
+	}
 }
 
 void USim::halt()
@@ -60,21 +63,31 @@ Byte USim::fetch()
 // Device handling
 //----------------------------------------------------------------------------
 
-void USim::attach(UnmappedDevice& dev)
+void USim::attach(const ActiveDevice::shared_ptr& dev)
 {
-	unmapped.push_back(&dev);
+	dev_active.push_back({ dev });
 }
 
-void USim::attach(Device& dev, Word base, Word mask)
+void USim::attach(const MappedDevice::shared_ptr& dev, Word base, Word mask, rank<0>)
 {
-	devices.push_back(DeviceEntry { &dev, base, mask });
+	dev_mapped.push_back({ dev, base, mask });
 }
+
+void USim::attach(const ActiveMappedDevice::shared_ptr& dev, Word base, Word mask, rank<1>)
+{
+	dev_active.push_back({ dev });
+	dev_mapped.push_back({ dev, base, mask });
+}
+
+//----------------------------------------------------------------------------
+// Mapped Device IO
+//----------------------------------------------------------------------------
 
 // Single byte read
 Byte USim::read(Word offset)
 {
 	++cycles;
-	for (auto& d : devices) {
+	for (auto& d : dev_mapped) {
 		if ((offset & d.mask) == d.base) {
 			return d.device->read(offset - d.base);
 		}
@@ -86,7 +99,7 @@ Byte USim::read(Word offset)
 void USim::write(Word offset, Byte val)
 {
 	++cycles;
-	for (auto& d : devices) {
+	for (auto& d : dev_mapped) {
 		if ((offset & d.mask) == d.base) {
 			d.device->write(offset - d.base, val);
 			break;

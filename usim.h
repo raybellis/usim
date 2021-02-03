@@ -42,12 +42,19 @@ protected:
 
 // Device handling:
 protected:
-		UnmappedDevices	unmapped;
-		Devices		devices;
+		ActiveDevList	dev_active;
+		MappedDevList	dev_mapped;
+
+	virtual void		attach(const MappedDevice::shared_ptr& dev, Word base, Word mask, rank<0>);
+	virtual void		attach(const ActiveMappedDevice::shared_ptr& dev, Word base, Word mask, rank<1>);
 
 public:
-	virtual void		attach(UnmappedDevice& dev);
-	virtual void		attach(Device& dev, Word base, Word mask);
+	virtual void		attach(const ActiveDevice::shared_ptr& dev);
+
+	template<typename T>
+		void		attach(const std::shared_ptr<T>& dev, Word base, Word mask) {
+					attach(dev, base, mask, rank<2>{});
+				};
 
 // Functions to start and stop the virtual processor
 public:
@@ -55,7 +62,7 @@ public:
 	virtual void		run();
 	virtual void		tick();
 	virtual void		halt();
-	virtual void		reset() = 0;
+	virtual void		reset();
 
 // Debugging
 		void		tron() { m_trace = true; };

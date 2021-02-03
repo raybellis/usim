@@ -25,16 +25,17 @@ int main(int argc, char *argv[])
 	const Word rom_size = 0x10000 - rom_base;
 
 	mc6809	cpu;
-	RAM	ram(ram_size);
-	ROM	rom(rom_size);
-	mc6850	acia;
+	auto ram = std::make_shared<RAM>(ram_size);
+	auto rom = std::make_shared<ROM>(rom_size);
+	auto acia = std::make_shared<mc6850>();
 
 	cpu.attach(ram, 0x0000, ~(ram_size - 1));
 	cpu.attach(rom, rom_base, ~(rom_size - 1));
 	cpu.attach(acia, 0xc000, 0xfffe);
-	cpu.firq.attach(acia.irq);
 
-	rom.load_intelhex(argv[1], rom_base);
+	cpu.firq.attach(acia->irq);
+
+	rom->load_intelhex(argv[1], rom_base);
 
 	cpu.reset();
 	cpu.run();

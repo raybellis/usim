@@ -13,7 +13,7 @@
 /*
  * generic memory interface, dynamically assigned space
  */
-class GenericMemory : public PassiveDevice {
+class GenericMemory : public MappedDevice {
 
 protected:
 	std::vector<Byte>	memory;
@@ -64,7 +64,7 @@ public:
  *
  * For use when embedding static firmware data inside a compiled image
  */
-class ROM_Data : public PassiveDevice {
+class ROM_Data : public MappedDevice {
 
 protected:
 	const uint8_t*		memory;

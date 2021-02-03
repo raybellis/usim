@@ -10,7 +10,7 @@
 #include "device.h"
 #include "term.h"
 
-class mc6850 : public Device {
+class mc6850 : virtual public ActiveMappedDevice {
 
 // Internal registers
 
