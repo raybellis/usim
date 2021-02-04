@@ -791,4 +791,6 @@ std::string mc6809::disasm_operand()
 			return r;
 		}
 	}
+
+	return "";
 }
