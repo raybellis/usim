@@ -795,7 +795,7 @@ void mc6809::exg()
 	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
 		std::swap(byterefreg(r2), byterefreg(r1));
 	} else {
-		throw execution_error("invalid EXG operand");
+		invalid("invalid EXG operand");
 	}
 
 	cycles += 6;
@@ -1234,7 +1234,7 @@ void mc6809::tfr()
 	} else if (r1 >= 8 && r1 <= 11 && r2 >= 8 && r2 <= 11) {
 		byterefreg(r2) = byterefreg(r1);
 	} else {
-		throw execution_error("invalid TFR operand");
+		invalid("invalid TFR operand");
 	}
 
 	cycles += 4;

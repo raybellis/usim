@@ -9,7 +9,6 @@
 #pragma once
 
 #include "device.h"
-#include <stdexcept>
 
 /*
  * main system wide base class for CPU emulators
@@ -59,6 +58,8 @@ public:
 // Functions to start and stop the virtual processor
 public:
 
+	std::function<void()>	abort = ::abort;
+	virtual void		invalid(const char*);
 	virtual void		run();
 	virtual void		tick();
 	virtual void		halt();
@@ -67,13 +68,6 @@ public:
 // Debugging
 		void		tron() { m_trace = true; };
 		void		troff() { m_trace = false; };
-
-// Exceptions
-public:
-	class execution_error : virtual public std::runtime_error {
-	public:
-		execution_error(const char *msg) : std::runtime_error(msg) { };
-	};
 
 };
 

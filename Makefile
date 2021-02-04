@@ -1,5 +1,5 @@
 DEBUG		= -O3
-CXX		= g++ --std=c++14 -Wall -Werror -flto
+CXX		= g++ --std=c++14 -Wall -Wextra -Werror -flto
 CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE

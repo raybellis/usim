@@ -458,7 +458,7 @@ void mc6809::execute_instruction()
 		case 0x1029:
 			lbvs(); break;
 		default:
-			throw new execution_error("invalid instruction");
+			invalid("invalid instruction");
 	}
 }
 
@@ -486,6 +486,8 @@ void mc6809::post_exec()
 // used for EXG and TFR instructions
 Word& mc6809::wordrefreg(int r)
 {
+	static Word no_return = 0;
+
 	switch (r) {
 		case  0: return d;
 		case  1: return x;
@@ -493,33 +495,42 @@ Word& mc6809::wordrefreg(int r)
 		case  3: return u;
 		case  4: return s;
 		case  5: return pc;
-		default: throw execution_error("invalid register reference");
 	}
+
+	invalid("invalid word register selector");
+	return no_return;
 }
 
 Byte& mc6809::byterefreg(int r)
 {
+	static Byte no_return = 0;
+
 	switch (r) {
 		case  8: return a;
 		case  9: return b;
 		case 10: return cc.all;
 		case 11: return dp;
-		default: throw execution_error("invalid byte register selector");
 	}
+
+	invalid("invalid byte register selector");
+	return no_return;
 }
 
 // decodes the postbyte for most indexed modes
 Word& mc6809::ix_refreg(Byte post)
 {
-	post = (post >> 5) & 0x03;
+	static Word no_return = 0;
 
+	post = (post >> 5) & 0x03;
 	switch (post) {
 		case 0: return x;
 		case 1: return y;
 		case 2: return u;
 		case 3: return s;
-		default: throw execution_error("invalid register reference");
 	}
+
+	invalid("invalid register reference");
+	return no_return;
 }
 
 Byte mc6809::fetch_operand()
@@ -577,7 +588,8 @@ Word mc6809::fetch_effective_address()
 			return addr;
 		}
 		default:
-			throw execution_error("invalid addressing mode");
+			invalid("invalid addressing mode");
+			return 0;
 	}
 }
 
@@ -635,7 +647,8 @@ Word mc6809::fetch_indexed_operand()
 			operand = fetch_word();
 			return operand;
 		default:
-			throw execution_error("invalid indexed addressing postbyte");
+			invalid("invalid indexed addressing postbyte");
+			return 0;
 	}
 }
 
@@ -646,7 +659,7 @@ void mc6809::do_postincrement()
 			ix_refreg(post) += 1;
 			break;
 		case 0x90:
-			throw execution_error("invalid post-increment operation");
+			invalid("invalid post-increment operation");
 			break;
 		case 0x81: case 0x91:
 			ix_refreg(post) += 2;
@@ -661,7 +674,7 @@ void mc6809::do_predecrement()
 			ix_refreg(post) -= 1;
 			break;
 		case 0x92:
-			throw execution_error("invalid pre-decrement operation");
+			invalid("invalid pre-decrement operation");
 			break;
 		case 0x83: case 0x93:
 			ix_refreg(post) -= 2;
@@ -713,7 +726,7 @@ static std::string fmt(const std::string& format, Args ... args)
 {
 	int size = ::snprintf(nullptr, 0, format.c_str(), args ...) + 1;
 	if (size <= 0) {
-		throw std::runtime_error("string formatting error");
+		return "string formatting error";
 	}
 
 	std::unique_ptr<char[]> buf(new char[size]);
@@ -756,7 +769,8 @@ std::string mc6809::disasm_indexed()
 		case 0x1f:			// ,Address
 			return fmt(",$%04hx", (int16_t)operand);
 		default:
-			throw execution_error("indirect addressing postbyte");
+			invalid("indirect addressing postbyte");
+			return "";
 	}
 }
 

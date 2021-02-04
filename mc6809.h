@@ -223,6 +223,7 @@ public:
 
 inline void mc6809::do_br(const char *mnemonic, bool test)
 {
+	(void)mnemonic;
 	Word offset = extend8(fetch_operand());
 	if (test) pc += offset;
 	++cycles;
@@ -230,6 +231,7 @@ inline void mc6809::do_br(const char *mnemonic, bool test)
 
 inline void mc6809::do_lbr(const char *mnemonic, bool test)
 {
+	(void)mnemonic;
 	Word offset = fetch_word_operand();
 	if (test) {
 		pc += offset;

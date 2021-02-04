@@ -51,8 +51,12 @@ public:
 class ROM : public GenericMemory {
 
 public:
-	virtual void		write(Word offset, Byte val) {};	// no-op
 				ROM(size_t size) : GenericMemory(size) {};
+
+	virtual void		write(Word offset, Byte val) {		// no-op
+					(void)offset;
+					(void)val;
+				}
 
 public:
 		void		load_intelhex(const char *filename, Word base);
@@ -84,5 +88,8 @@ public:
 					}
 				}
 
-	virtual void		write(Word offset, Byte val) {};	// no-op
+	virtual void		write(Word offset, Byte val) {		// no-op
+					(void)offset;
+					(void)val;
+				}
 };
