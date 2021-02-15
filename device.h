@@ -108,12 +108,6 @@ public:
 					inputs.push_back(input);
 				}
 
-#if 0
-	void			operator<<=(const OutputPin& input) {
-					attach(input);
-				}
-#endif
-
 	operator		bool() const {
 					for (auto& i : inputs) {
 						if (!i) {
