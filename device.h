@@ -104,9 +104,15 @@ protected:
 	std::vector<OutputPin>	inputs;
 
 public:
-	void			attach(OutputPin& input) {
+	void			attach(const OutputPin& input) {
 					inputs.push_back(input);
 				}
+
+#if 0
+	void			operator<<=(const OutputPin& input) {
+					attach(input);
+				}
+#endif
 
 	operator		bool() const {
 					for (auto& i : inputs) {
@@ -117,3 +123,8 @@ public:
 					return true;
 				}
 };
+
+inline void operator<<(InputPin& in, const OutputPin& out)
+{
+	in.attach(out);
+}
