@@ -96,6 +96,12 @@ public:
 	operator		bool() const {
 					return f();
 				}
+
+	OutputPin operator	!() const {
+					return OutputPin([&]() {
+						return !f();
+					});
+				}
 };
 
 class InputPin {
