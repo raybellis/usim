@@ -82,49 +82,76 @@ template<>      struct rank<0> {};
 /*
  * IO pins - currently only used for interrupts
  */
+
+static inline bool default_true() {
+	return true;
+}
+
 class OutputPin {
 
 public:
 	using Function = std::function<bool()>;
 
 protected:
-	Function	f;
+	Function	f = default_true;
 
 public:
-	OutputPin(const Function& f) : f(f) { }
+			OutputPin() { }
 
-	operator		bool() const {
-					return f();
-				}
+			OutputPin(const Function& f) : f(f) { }
 
-	OutputPin operator	!() const {
-					return OutputPin([&]() {
-						return !f();
-					});
-				}
+	void		bind(const Function& _f) {
+				f = _f;
+			}
+
+			operator bool() const {
+				return f();
+			}
+
+	OutputPin	operator !() const {
+				return OutputPin([&]() {
+					return !f();
+				});
+			}
 };
 
 class InputPin {
 
 protected:
-	std::vector<OutputPin>	inputs;
+	OutputPin	input;
 
 public:
-	void			attach(const OutputPin& input) {
-					inputs.push_back(input);
-				}
+	void		attach(const OutputPin& _input) {
+				input = _input;
+			}
 
-	operator		bool() const {
-					for (auto& i : inputs) {
-						if (!i) {
-							return false;
-						}
-					}
-					return true;
-				}
+	operator	bool() const {
+				return input;
+			}
 };
 
 inline void operator<<(InputPin& in, const OutputPin& out)
 {
 	in.attach(out);
+}
+
+inline OutputPin operator&(const OutputPin& a, const OutputPin& b)
+{
+	return OutputPin([=]() {
+		return (bool)a & (bool)b;
+	});
+}
+
+inline OutputPin operator|(const OutputPin& a, const OutputPin& b)
+{
+	return OutputPin([=]() {
+		return (bool)a | (bool)b;
+	});
+}
+
+inline OutputPin operator^(const OutputPin& a, const OutputPin& b)
+{
+	return OutputPin([=]() {
+		return (bool)a ^ (bool)b;
+	});
 }
