@@ -11,9 +11,9 @@
 #include "typedefs.h"
 
 //  8 bit operations
-inline int btst(Byte x, int n)
+inline bool btst(Byte x, int n)
 {
-	return (x & (1 << n)) ? 1 : 0;
+	return (x & (1 << n)) ? true : false;
 }
 
 inline void bset(Byte& x, int n)
@@ -27,9 +27,9 @@ inline void bclr(Byte& x, int n)
 }
 
 // 16 bit operations
-inline int btst(Word x, int n)
+inline bool btst(Word x, int n)
 {
-	return (x & (1 << n)) ? 1 : 0;
+	return (x & (1 << n)) ? true : false;
 }
 
 inline void bset(Word& x, int n)
@@ -43,9 +43,9 @@ inline void bclr(Word& x, int n)
 }
 
 // 32 bit operations
-inline int btst(DWord x, int n)
+inline bool btst(DWord x, int n)
 {
-	return (x & (1L << n)) ? 1 : 0;
+	return (x & (1L << n)) ? true : false;
 }
 
 inline void bset(DWord& x, int n)
