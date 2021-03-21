@@ -47,7 +47,7 @@ void mc6809::tick()
 
 	// check for NMI falling edge
 	bool nmi_triggered = !c_nmi && nmi_previous;
-	nmi_previous = nmi;
+	nmi_previous = c_nmi;
 
 	if (waiting_sync) {
 		// if NMI or IRQ or FIRQ asserts (flags don't matter)
