@@ -41,9 +41,9 @@ void mc6809::tick()
 	USim::tick();
 
 	// get interrupt pin states
-	bool c_nmi = nmi;
-	bool c_firq = firq;
-	bool c_irq = irq;
+	bool c_nmi = NMI;
+	bool c_firq = FIRQ;
+	bool c_irq = IRQ;
 
 	// check for NMI falling edge
 	bool nmi_triggered = !c_nmi && nmi_previous;

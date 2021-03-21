@@ -212,7 +212,7 @@ protected: 	// instruction tracing
 	std::string		disasm_indexed();
 
 public:		// external signal pins
-	InputPin		irq, firq, nmi;
+	InputPin		IRQ, FIRQ, NMI;
 
 public:
 				mc6809();		// public constructor

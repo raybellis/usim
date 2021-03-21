@@ -9,7 +9,7 @@
 #include "bits.h"
 
 mc6850::mc6850()
-	: irq(sr, 7, true)	// ~IRQ = SR bit 7
+	: IRQ(sr, 7, true)	// ~IRQ = SR bit 7
 {
 	reset();
 }

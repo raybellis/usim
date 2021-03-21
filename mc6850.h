@@ -38,7 +38,7 @@ public:
 
 // Other exposed interfaces
 public:
-	OutputPinReg		irq;
+	OutputPinReg		IRQ;
 
 // Public constructor and destructor
 
