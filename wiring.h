@@ -95,15 +95,10 @@ protected:
 public:
 				OutputPort(uint8_t& data)
 					: data(data)
-				{
-				}
-
-	bool			btst(uint8_t n) const {
-					return (data & mask) & (1 << n);
-				}
+				{ }
 
 				operator uint8_t() const {
-					return (data & mask);
+					return data & mask;
 				}
 };
 
