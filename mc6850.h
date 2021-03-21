@@ -8,6 +8,7 @@
 #pragma once
 
 #include "device.h"
+#include "wiring.h"
 #include "term.h"
 
 class mc6850 : virtual public ActiveMappedDevice {
@@ -28,7 +29,6 @@ protected:
 protected:
 	virtual void		tick(uint8_t);
 	virtual void		reset();
-	bool			irq_pin_status() const;
 
 // Read and write functions
 public:
@@ -38,7 +38,7 @@ public:
 
 // Other exposed interfaces
 public:
-	OutputPin		irq;
+	OutputPinReg		irq;
 
 // Public constructor and destructor
 

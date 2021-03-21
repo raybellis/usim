@@ -9,7 +9,7 @@
 #include "bits.h"
 
 mc6850::mc6850()
-	: irq(std::bind(&mc6850::irq_pin_status, this))
+	: irq(sr, 7, true)	// ~IRQ = SR bit 7
 {
 	reset();
 }
@@ -84,9 +84,4 @@ void mc6850::write(Word offset, Byte val)
 			reset();
 		}
 	}
-}
-
-bool mc6850::irq_pin_status() const
-{
-	return !btst(sr, 7);
 }

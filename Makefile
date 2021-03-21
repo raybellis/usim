@@ -37,10 +37,10 @@ depend:		machdep.h
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
 usim.o: usim.h device.h typedefs.h machdep.h
-mc6809.o: mc6809.h usim.h device.h typedefs.h machdep.h bits.h
+mc6809.o: mc6809.h usim.h device.h wiring.h typedefs.h machdep.h bits.h
 mc6809in.o: mc6809.h usim.h device.h typedefs.h machdep.h bits.h
 memory.o: memory.h device.h typedefs.h
-mc6850.o: mc6850.h device.h typedefs.h term.h bits.h
+mc6850.o: mc6850.h device.h wiring.h typedefs.h term.h bits.h
 term.o: term.h typedefs.h
 main.o: mc6809.h usim.h device.h typedefs.h machdep.h mc6850.h term.h
 main.o: memory.h

@@ -33,7 +33,9 @@ int main(int argc, char *argv[])
 	cpu.attach(rom, rom_base, ~(rom_size - 1));
 	cpu.attach(acia, 0xc000, 0xfffe);
 
-	cpu.firq.attach(acia->irq);
+	cpu.firq.bind([&]() {
+		return acia->irq;
+	});
 
 	rom->load_intelhex(argv[1], rom_base);
 
