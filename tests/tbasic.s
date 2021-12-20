@@ -1102,7 +1102,6 @@ BRK05	BITA	#RDRF
 ;	RTS
 ;*****************************
 ;*****************************
-	END	BASIC
 
 	ORG	$FFFE
 	FDB	BASIC
