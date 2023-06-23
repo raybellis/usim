@@ -1,15 +1,16 @@
 DEBUG		= -O3
-CXX		= g++ --std=c++14 -Wall -Wextra -Werror -flto
-CC		= gcc --std=c9x -Wall -Werror
+CXX			= g++ --std=c++17 -Wall -Wextra -Werror -flto
+CC			= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
 LDFLAGS		= -flto
 
-SRCS		= usim.cpp mc6809.cpp mc6809in.cpp \
-		  memory.cpp mc6850.cpp term.cpp \
-		  main.cpp
+LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp memory.cpp
+
+SRCS		= ${LIB_SRCS} main.cpp term.cpp
 OBJS		= $(SRCS:.cpp=.o)
-BIN		= usim
+BIN			= usim
+
 LIBS		=
 
 $(BIN):		$(OBJS)
@@ -41,6 +42,6 @@ mc6809.o: mc6809.h usim.h device.h wiring.h typedefs.h machdep.h bits.h
 mc6809in.o: mc6809.h usim.h device.h typedefs.h machdep.h bits.h
 memory.o: memory.h device.h typedefs.h
 mc6850.o: mc6850.h device.h wiring.h typedefs.h term.h bits.h
-term.o: term.h typedefs.h
+term.o: mc6850.h term.h typedefs.h
 main.o: mc6809.h usim.h device.h typedefs.h machdep.h mc6850.h term.h
 main.o: memory.h

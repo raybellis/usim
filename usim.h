@@ -8,7 +8,11 @@
 
 #pragma once
 
+#include <cstdlib>
 #include "device.h"
+#include "memory.h"
+#include "wiring.h"
+#include "bits.h"
 
 /*
  * main system wide base class for CPU emulators
