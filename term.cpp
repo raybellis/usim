@@ -6,6 +6,7 @@
 //
 
 #include <cstdlib>
+#include <cassert>
 #include "term.h"
 
 //------------------------------------------------------------------------
@@ -54,7 +55,7 @@ Terminal::~Terminal()
 	tcsetattr(input_fd, TCSANOW, &oattr);
 }
 
-int Terminal::poll()
+bool Terminal::real_poll_read()
 {
 	fd_set			fds;
 
@@ -70,9 +71,9 @@ int Terminal::poll()
 	return FD_ISSET(input_fd, &fds);
 }
 
-Byte Terminal::read()
+Byte Terminal::real_read()
 {
-	return (Byte)fgetc(input);
+	return fgetc(input);
 }
 
 void Terminal::write(Byte ch)
@@ -93,14 +94,14 @@ Terminal::~Terminal()
 {
 }
 
-int Terminal::poll()
+bool Terminal::real_poll_read()
 {
 	return kbhit();
 }
 
-Byte Terminal::read()
+Byte Terminal::real_read()
 {
-	return (Byte)getch();
+	return getch();
 }
 
 void Terminal::write(Byte ch)
@@ -110,3 +111,83 @@ void Terminal::write(Byte ch)
 
 #endif
 //------------------------------------------------------------------------
+
+//------------------------------------------------------------------------
+// Machine independent part, handles ssh-like tilde-escapes
+//------------------------------------------------------------------------
+
+void Terminal::tilde_escape_help()
+{
+	printf("\r\nSupported escape sequences:\r\n");
+	printf(" ~. - terminate emulator\r\n");
+	// printf(" ~r - reboot emulator\r\n");
+	printf(" ~? - this message\r\n");
+	printf(" ~~ - send the escape character by typing it twice\r\n");
+	printf("(Note that escapes are only recognized immediately after newline.)\r\n");
+}
+
+bool Terminal::poll_read()
+{
+	if (read_data_available) {
+		return true;
+	}
+
+	bool ready = real_poll_read();
+	if (!ready) {
+		read_data_available = false;
+		return read_data_available;
+	}
+
+	Byte ch = read_data = real_read();
+	read_data_available = true;
+
+	switch (tilde_escape_phase) {
+		case 0:
+			if (ch == 0x0a || ch == 0x0d) {
+				tilde_escape_phase = 1;
+			}
+			break;
+
+		case 1:
+			if (ch == '~') {
+				tilde_escape_phase = 2;
+				read_data_available = false;
+			} else {
+				tilde_escape_phase = 0;
+			}
+			break;
+		
+		case 2:
+			tilde_escape_phase = 0;
+			read_data_available = false;
+			switch (ch) {
+				case '~':
+					read_data_available = true;
+					break;
+				case 'r':
+				case 'R':
+					break;
+				case '.':
+					exit(0);
+					break;
+				case '?':
+					tilde_escape_help();
+					break;
+				default:
+					break;
+			}
+			break;
+
+		default:
+			assert(false);
+			break;
+	}
+
+	return read_data_available;
+}
+
+Byte Terminal::read()
+{
+	read_data_available = false;
+	return read_data;
+}

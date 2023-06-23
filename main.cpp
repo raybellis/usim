@@ -9,6 +9,7 @@
 
 #include "mc6809.h"
 #include "mc6850.h"
+#include "term.h"
 #include "memory.h"
 
 int main(int argc, char *argv[])
@@ -24,10 +25,11 @@ int main(int argc, char *argv[])
 	const Word rom_base = 0xe000;
 	const Word rom_size = 0x10000 - rom_base;
 
+	Terminal term;
 	mc6809	cpu;
 	auto ram = std::make_shared<RAM>(ram_size);
 	auto rom = std::make_shared<ROM>(rom_size);
-	auto acia = std::make_shared<mc6850>();
+	auto acia = std::make_shared<mc6850>(term);
 
 	cpu.attach(ram, 0x0000, ~(ram_size - 1));
 	cpu.attach(rom, rom_base, ~(rom_size - 1));

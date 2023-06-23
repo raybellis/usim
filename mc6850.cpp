@@ -8,8 +8,10 @@
 #include "mc6850.h"
 #include "bits.h"
 
-mc6850::mc6850()
-	: IRQ(sr, 7, true)	// ~IRQ = SR bit 7
+mc6850::mc6850(mc6850_impl& impl, uint16_t interval)
+	: impl(impl),
+	  interval(interval),
+	  IRQ(sr, 7, true)	// ~IRQ = SR bit 7
 {
 	reset();
 }
@@ -21,16 +23,14 @@ mc6850::~mc6850()
 void mc6850::reset()
 {
 	cr = 0;		// Clear all control flags
-	sr = 0;		// Clear all status bits
-
-	bset(sr, 1);	// Set TDRE to true
+	sr = TDRE;	// Clear all status bits except TDRE
 	cycles = 0;
 }
 
 void mc6850::tick(uint8_t ticks)
 {
 	cycles += ticks;
-	if (cycles < 1000) return;
+	if (cycles < interval) return;
 
 	cycles = 0;
 
@@ -39,8 +39,8 @@ void mc6850::tick(uint8_t ticks)
 		Byte			ch;
 
 		// If input is ready read a character
-		if (term.poll()) {
-			ch = term.read();
+		if (impl.poll_read()) {
+			ch = impl.read();
 			rd = ch;
 
 			// Check for IRQ
@@ -70,7 +70,7 @@ void mc6850::write(Word offset, Byte val)
 	if (offset & 1) {
 		bclr(sr, 7);		// Clear IRQ
 
-		term.write(val);
+		impl.write(val);
 		bset(sr, 1);		// Set TDRE to true (pretend it's sent)
 
 		if (!btst(cr, 6) && btst(cr, 5)) {
