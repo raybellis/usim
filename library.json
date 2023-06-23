@@ -1,0 +1,36 @@
+{
+	"name": "usim",
+	"version": "0.99.0",
+	"keywords": "emulation, mc6809",
+	"description": "USim 6809 emulator framework",
+	"authors": {
+		"name": "Ray Bellis",
+		"maintainer": true
+	},
+	"license": "MPL-2.0",
+	"frameworks": "*",
+	"platforms": "*",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/raybellis/usim.git"
+	},
+	"headers": [
+		"usim.h",
+		"mc6809.h"
+	],
+	"build": {
+		"flags": [
+			"-DUSIM_MACHDEP_H",
+			"-DMACH_BYTE_ORDER_LSB_FIRST",
+			"-DMACH_BITFIELDS_LSB_FIRST"
+		],
+		"includeDir": ".",
+		"srcDir": ".",
+		"srcFilter": [
+			"+<usim.cpp>",
+			"+<mc6809.cpp>",
+			"+<mc6809in.cpp>",
+			"+<memory.cpp>"
+		]
+	}
+}
