@@ -29,59 +29,59 @@ void mc6850::reset()
 
 void mc6850::tick(uint8_t ticks)
 {
+	if ((sr & IRQB) == 0) {
+		if (((sr & TDRE) && ((cr & 0x60) == 0x20)) ||
+			((sr & RDRF) && ((cr & 0x80) == 0x80)))
+		{
+			sr |= IRQB;
+		}
+	}
+
 	cycles += ticks;
 	if (cycles < interval) return;
-
 	cycles = 0;
 
 	// Check for a received character if one isn't available
-	if (!btst(sr, 0)) {
-		Byte			ch;
-
+	if ((sr & RDRF) == 0) {
 		// If input is ready read a character
 		if (impl.poll_read()) {
-			ch = impl.read();
-			rd = ch;
-
-			// Check for IRQ
-			if (btst(cr, 7)) {	// If CR7
-				bset(sr, 7);	// Set IRQ
-			}
-
-			bset(sr, 0);		// Set RDRF
+			rd = impl.read();
+			sr |= RDRF;
 		}
+	}
+
+	if ((sr & TDRE) == 0) {
+		impl.write(td);
+		sr |= TDRE;
 	}
 }
 
 Byte mc6850::read(Word offset)
 {
-	// Now return the relevant value
-	if (offset & 1) {
-		bclr(sr, 0);		// Clear RDRF
-		bclr(sr, 7);		// Clear IRQ
-		return rd;
-	} else {
-		return sr;
+	switch (offset & 1) {
+		case 0: // status register
+			return sr;
+			break;
+		case 1:	// read data
+		default:
+			sr &= ~(RDRF | IRQB);
+			return rd;
+			break;
 	}
 }
 
 void mc6850::write(Word offset, Byte val)
 {
-	if (offset & 1) {
-		bclr(sr, 7);		// Clear IRQ
-
-		impl.write(val);
-		bset(sr, 1);		// Set TDRE to true (pretend it's sent)
-
-		if (!btst(cr, 6) && btst(cr, 5)) {
-			bset(sr, 7);	// Set IRQ
-		}
-	} else {
-		cr = val;
-
-		// Check for master reset
-		if (btst(cr, 0) && btst(cr, 1)) {
-			reset();
-		}
+	switch (offset & 1) {
+		case 0:	// control register
+			cr = val;
+			if ((cr & 0x03) == 0x03) {
+				reset();
+			}
+			break;
+		case 1:	// data register
+			td = val;
+			sr &= ~(IRQB | TDRE);
+			break;
 	}
 }

@@ -16,7 +16,8 @@
 	},
 	"headers": [
 		"usim.h",
-		"mc6809.h"
+		"mc6809.h",
+		"mc6850.h"
 	],
 	"build": {
 		"flags": [
@@ -30,6 +31,7 @@
 			"+<usim.cpp>",
 			"+<mc6809.cpp>",
 			"+<mc6809in.cpp>",
+			"+<mc6850.cpp>",
 			"+<memory.cpp>"
 		]
 	}
