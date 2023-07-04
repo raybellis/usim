@@ -5,7 +5,7 @@ CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
 LDFLAGS		= -flto
 
-LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp memory.cpp
+LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp wd1770.cpp memory.cpp
 
 SRCS		= ${LIB_SRCS} main.cpp term.cpp
 OBJS		= $(SRCS:.cpp=.o)
