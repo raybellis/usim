@@ -3,7 +3,7 @@ CXX			= g++ --std=c++17 -Wall -Wextra -Werror -flto
 CC			= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE
-LDFLAGS		= -flto
+LDFLAGS		= -flto=auto
 
 LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp wd1770.cpp memory.cpp
 
