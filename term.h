@@ -23,6 +23,8 @@ protected:
 	int					tilde_escape_phase = 0;
 
 	void				tilde_escape_help();
+	virtual void		tilde_escape_help_other();
+	virtual void 		tilde_escape_do_other(char ch);
 	bool				real_poll_read();
 	Byte				real_read();
 
@@ -38,7 +40,6 @@ public:
 	virtual bool		poll_read();
 	virtual void		write(Byte);
 	virtual Byte		read();
-
 
 // Public constructor and destructor
 public:

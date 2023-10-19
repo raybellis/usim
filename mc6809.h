@@ -17,6 +17,9 @@
 #include "machdep.h"
 #endif
 
+#ifndef MC6809_H_
+#define MC6809_H_
+
 class mc6809 : virtual public USimMotorola {
 
 protected: // Processor addressing modes
@@ -81,8 +84,6 @@ private:	// internal processor state
 	bool			nmi_previous;
 
 private:	// instruction and operand fetch and decode
-	Byte&			byterefreg(int);
-	Word&			wordrefreg(int);
 	Word&			ix_refreg(Byte);
 
 	void			fetch_instruction();
@@ -215,11 +216,17 @@ public:		// external signal pins
 	InputPin		IRQ, FIRQ, NMI;
 
 public:
-				mc6809();		// public constructor
+					mc6809();		// public constructor
 	virtual			~mc6809();		// public destructor
 
-	virtual void		reset();		// CPU reset
-	virtual void		tick();
+	virtual void	reset();		// CPU reset
+	virtual void	tick();
+
+	virtual void	regs();
+
+	Byte&			byterefreg(int);
+	Word&			wordrefreg(int);
+
 };
 
 inline void mc6809::do_br(const char *mnemonic, bool test)
@@ -262,3 +269,5 @@ inline void mc6809::do_pul(Word& sp, Word& val)
 	val  = read(sp++) << 8;
 	val |= read(sp++);
 }
+
+#endif /* MC6809_H_ */
