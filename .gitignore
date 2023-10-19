@@ -1,4 +1,7 @@
 machdep
-usim
 machdep.h
 **/*.o
+**/*.a
+*.bak
+*.sublime-workspace
+usim

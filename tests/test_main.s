@@ -8,7 +8,7 @@ acia		equ	$c000
 
 inchar		equ	$00
 
-		setdp	$00
+;		setdp	$00
 
 ;
 ;		Start of System ROM
@@ -19,7 +19,7 @@ handle_reset	lds	#system_stack
 		ldu	#user_stack
 		orcc	#$50		; disable interrupts
 
-		leax    system_ready, pcr
+		leax    system_ready,pcr
 		lbsr    putstr
 
 		include "test.s"
@@ -72,7 +72,7 @@ str_dp		fcn	" DP:"
 str_x		fcn	"  X:"
 str_y		fcn	"  Y:"
 
-str_nl		fcc	13,10,0
+str_nl		fcb	13,10,0
 
 package_io
 
@@ -144,7 +144,8 @@ tolower_done	puls	cc
 		rts
 
 prompt_str	fcn	"> "
-system_ready	fcn	"System loaded and ready",13,10
+system_ready	fcc	"System loaded and ready"
+		fcb 	13,10+$80
 
 handle_irq	rti
 

@@ -462,10 +462,8 @@ void mc6809::execute_instruction()
 	}
 }
 
-void mc6809::pre_exec()
+void mc6809::regs()
 {
-	if (!m_trace) return;
-
 	char flags[] = "EFHINZVC";
 	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
 		if ((cc.all & mask) == 0) {
@@ -474,6 +472,13 @@ void mc6809::pre_exec()
 	}
 	fprintf(stderr, "PC:%04X CC:%s S:%04X U:%04X A:%02X B:%02X X:%04X Y:%04X DP:%02X\r\n",
 		pc, flags, s, u, a, b, x, y, dp);
+}
+
+void mc6809::pre_exec()
+{
+	if (!m_trace) return;
+
+	regs();
 }
 
 void mc6809::post_exec()

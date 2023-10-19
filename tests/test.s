@@ -9,7 +9,7 @@
 loop		cwai	#$bf
 		lda	inchar
 		jsr	puthexbyte
-		exg	a, b
+		exg	a,b
 		swi
 		bra	loop
 

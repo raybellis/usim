@@ -35,7 +35,7 @@ protected:
 		Word		pc;
 
 // Generic read/write/execute functions
-protected:
+public:
 
 	virtual Byte		read(Word offset);
 	virtual Word		read_word(Word offset) = 0;
@@ -78,7 +78,7 @@ public:
 class USimMotorola : virtual public USim {
 
 // Memory access functions taking target byte order into account
-protected:
+public:
 	virtual Word		fetch_word();
 
 	virtual Word		read_word(Word offset);
@@ -89,7 +89,7 @@ protected:
 class USimIntel : virtual public USim {
 
 // Memory access functions taking target byte order into account
-protected:
+public:
 	virtual Word		fetch_word();
 
 	virtual Word		read_word(Word offset);

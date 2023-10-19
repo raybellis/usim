@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include "memory.h"
 
-static Byte fread_hex_byte(FILE *fp)
+Byte fread_hex_byte(FILE *fp)
 {
 	char			str[3];
 	long			l;
@@ -23,7 +23,7 @@ static Byte fread_hex_byte(FILE *fp)
 	return (Byte)(l & 0xff);
 }
 
-static Word fread_hex_word(FILE *fp)
+Word fread_hex_word(FILE *fp)
 {
 	Word		ret;
 

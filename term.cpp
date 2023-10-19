@@ -118,12 +118,12 @@ void Terminal::write(Byte ch)
 
 void Terminal::tilde_escape_help()
 {
-	printf("\r\nSupported escape sequences:\r\n");
-	printf(" ~. - terminate emulator\r\n");
-	// printf(" ~r - reboot emulator\r\n");
-	printf(" ~? - this message\r\n");
-	printf(" ~~ - send the escape character by typing it twice\r\n");
-	printf("(Note that escapes are only recognized immediately after newline.)\r\n");
+	fprintf(stderr, "\r\nSupported escape sequences:\r\n");
+	fprintf(stderr, " ~. - terminate emulator\r\n");
+	fprintf(stderr, " ~? - this message\r\n");
+	fprintf(stderr, " ~~ - send the escape character by typing it twice\r\n");
+	tilde_escape_help_other();
+	fprintf(stderr, "(Note that escapes are only recognized immediately after newline.)\r\n");
 }
 
 bool Terminal::poll_read()
@@ -160,12 +160,10 @@ bool Terminal::poll_read()
 		case 2:
 			tilde_escape_phase = 0;
 			read_data_available = false;
+
 			switch (ch) {
 				case '~':
 					read_data_available = true;
-					break;
-				case 'r':
-				case 'R':
 					break;
 				case '.':
 					exit(0);
@@ -174,6 +172,7 @@ bool Terminal::poll_read()
 					tilde_escape_help();
 					break;
 				default:
+					tilde_escape_do_other(ch);
 					break;
 			}
 			break;
@@ -184,6 +183,15 @@ bool Terminal::poll_read()
 	}
 
 	return read_data_available;
+}
+
+void Terminal::tilde_escape_do_other(char ch)
+{
+	(void)ch;
+}
+
+void Terminal::tilde_escape_help_other()
+{
 }
 
 Byte Terminal::read()

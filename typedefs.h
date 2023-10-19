@@ -8,8 +8,16 @@
 
 #pragma once
 
+#ifdef __cplusplus
+
 #include <cstddef>
 #include <cstdint>
+
+#else
+
+#include <stdint.h>
+
+#endif
 
 typedef uint8_t		Byte;
 typedef uint16_t	Word;
