@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <string.h>
 
-Terminal::Terminal()
+Terminal::Terminal(USim& sys) : sys(sys)
 {
 	input = stdin;
 	output = stdout;
@@ -34,10 +34,20 @@ Terminal::Terminal()
 	setbuf(input, (char *)0);
 	setbuf(output, (char *)0);
 
-	// Get copies of current terminal attributes
+	// Get copies of startup terminal attributes
 	tcgetattr(input_fd, &oattr);
 	tcgetattr(input_fd, &nattr);
 
+	setup();
+}
+
+Terminal::~Terminal()
+{
+	reset();
+}
+
+void Terminal::setup()
+{
 	nattr.c_lflag &= ~ICANON;
 	nattr.c_lflag &= ~ISIG;
 
@@ -50,7 +60,7 @@ Terminal::Terminal()
 	tcsetattr(input_fd, TCSANOW, &nattr);
 }
 
-Terminal::~Terminal()
+void Terminal::reset()
 {
 	tcsetattr(input_fd, TCSANOW, &oattr);
 }
@@ -107,6 +117,14 @@ Byte Terminal::real_read()
 void Terminal::write(Byte ch)
 {
 	putch(ch);
+}
+
+void Terminal::setup()
+{
+}
+
+void Terminal::reset()
+{
 }
 
 #endif
@@ -166,7 +184,7 @@ bool Terminal::poll_read()
 					read_data_available = true;
 					break;
 				case '.':
-					exit(0);
+					sys.halt();
 					break;
 				case '?':
 					tilde_escape_help();

@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	const Word rom_size = 0x10000 - rom_base;
 
 	mc6809			cpu;
-	Terminal 		term;
+	Terminal 		term(cpu);
 
 	auto ram = std::make_shared<RAM>(ram_size);
 	auto rom = std::make_shared<ROM>(rom_size);

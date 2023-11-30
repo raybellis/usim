@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <functional>
 #include <cstdio>
+#include "usim.h"
 #include "mc6850.h"
 
 #ifdef _POSIX_SOURCE
@@ -18,6 +18,7 @@
 class Terminal :  virtual public mc6850_impl {
 
 protected:
+	USim&				sys;
 	Byte				read_data;
 	bool				read_data_available = false;
 	int					tilde_escape_phase = 0;
@@ -41,9 +42,13 @@ public:
 	virtual void		write(Byte);
 	virtual Byte		read();
 
+public:
+	virtual void		setup();
+	virtual void		reset();
+
 // Public constructor and destructor
 public:
-						 Terminal();
+						 Terminal(USim& sys);
 	virtual				~Terminal();
 
 };
