@@ -17,9 +17,6 @@
 #include "machdep.h"
 #endif
 
-#ifndef MC6809_H_
-#define MC6809_H_
-
 class mc6809 : virtual public USimMotorola {
 
 protected: // Processor addressing modes
@@ -222,7 +219,7 @@ public:
 	virtual void	reset();		// CPU reset
 	virtual void	tick();
 
-	virtual void	regs();
+	virtual void	print_regs();
 
 	Byte&			byterefreg(int);
 	Word&			wordrefreg(int);
@@ -269,5 +266,3 @@ inline void mc6809::do_pul(Word& sp, Word& val)
 	val  = read(sp++) << 8;
 	val |= read(sp++);
 }
-
-#endif /* MC6809_H_ */

@@ -462,7 +462,7 @@ void mc6809::execute_instruction()
 	}
 }
 
-void mc6809::regs()
+void mc6809::print_regs()
 {
 	char flags[] = "EFHINZVC";
 	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
@@ -478,7 +478,7 @@ void mc6809::pre_exec()
 {
 	if (!m_trace) return;
 
-	regs();
+	print_regs();
 }
 
 void mc6809::post_exec()
