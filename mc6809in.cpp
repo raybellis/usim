@@ -643,7 +643,7 @@ void mc6809::clr()
 {
 	insn = "CLR";
 	Word	addr = fetch_effective_address();
-	Byte	m = read(addr);
+	Byte	m;
 	help_clr(m);
 	write(addr, m);
 }
