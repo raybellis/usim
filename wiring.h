@@ -1,9 +1,8 @@
 //
-//
 //	wiring.h
+//	(C) R.P.Bellis 2021 - 2025
 //
-//	(C) R.P.Bellis 2021
-//
+//	vim: ts=8
 //
 
 #pragma once

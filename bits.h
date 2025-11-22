@@ -1,9 +1,8 @@
 //
-//
 //	bits.h
+//	(C) R.P.Bellis 1993 - 2025
 //
-//	(C) R.P.Bellis 1993 - 2021
-//
+//	vim: ts=8
 //
 
 #pragma once

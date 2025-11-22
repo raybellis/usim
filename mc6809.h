@@ -1,9 +1,8 @@
 //
 //	mc6809.h
-//
+//	(C) R.P.Bellis 1993 - 2025
 //	Class definition for Motorola MC6809 microprocessor
-//
-//	(C) R.P.Bellis 1993
+//	vim: ts=8
 //
 
 #pragma once
