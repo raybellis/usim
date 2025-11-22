@@ -1,5 +1,6 @@
 machdep
 machdep.h
+*.img
 **/*.o
 **/*.a
 *.bak

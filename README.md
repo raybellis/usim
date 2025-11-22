@@ -1,8 +1,8 @@
-# usim
+# USIM
 
 A Motorola MC6809 emulator written in C++
 
-NB: version 0.91 is historic (written 1993 - 1994) and has some serious
+NB: version 0.91 is historic (written 1993 - 1994) and had some serious
 known bugs in the handling of some instructions and addressing modes.
 Many thanks are due to B. Armstrong and Soren Roug for finding and
 resolving those.
