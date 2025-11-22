@@ -142,8 +142,8 @@ public:
 // a developer-supplied function that typically will
 // poll the state of one or more Output* objects
 //
-// The value may be read by casting to (uint8_t), and will
-// be masked to be within the expected legal range.
+// The value may also be read by casting to (uint8_t), and
+// will be masked to be within the expected legal range.
 //
 template<size_t N>
 class InputPort {

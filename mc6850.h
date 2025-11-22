@@ -21,8 +21,8 @@ public:
 	virtual void		write(Byte) = 0;
 
 public:
-						mc6850_impl() = default;
-	virtual				~mc6850_impl() = default;
+				mc6850_impl() = default;
+	virtual			~mc6850_impl() = default;
 };
 
 class mc6850 : virtual public ActiveMappedDevice {
@@ -33,21 +33,21 @@ protected:
 		TDRE	= 0x02,
 		DCDB	= 0x04,
 		CTSB	= 0x08,
-		FE		= 0x10,
+		FE	= 0x10,
 		OVRN	= 0x20,
-		PE		= 0x40,
+		PE	= 0x40,
 		IRQB	= 0x80
 	};
 
 // Internal registers
 protected:
 
-	Byte				td, rd, cr, sr;
+	Byte			td, rd, cr, sr;
 
 // Access to real IO device
 	mc6850_impl&		impl;
-	uint16_t			interval;	// how often to poll
-	uint16_t			cycles;		// cycles since last poll
+	uint16_t		interval;	// how often to poll
+	uint16_t		cycles;		// cycles since last poll
 
 // Initialisation functions
 
@@ -67,7 +67,7 @@ public:
 
 // Public constructor and destructor
 
-						mc6850(mc6850_impl& impl, uint16_t interval = 1000);
-	virtual				~mc6850();
+				mc6850(mc6850_impl& impl, uint16_t interval = 1000);
+	virtual			~mc6850();
 
 };

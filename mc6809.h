@@ -213,13 +213,13 @@ public:		// external signal pins
 	InputPin		IRQ, FIRQ, NMI;
 
 public:
-					mc6809();		// public constructor
+				mc6809();		// public constructor
 	virtual			~mc6809();		// public destructor
 
-	virtual void	reset();		// CPU reset
-	virtual void	tick();
+	virtual void		reset();		// CPU reset
+	virtual void		tick();
 
-	virtual void	print_regs();
+	virtual void		print_regs();
 
 	Byte&			byterefreg(int);
 	Word&			wordrefreg(int);
