@@ -44,8 +44,8 @@ public:
 
 // Device handling:
 protected:
-		ActiveDevList	dev_active;
-		MappedDevList	dev_mapped;
+	ActiveDevList	        dev_active;
+	MappedDevList   	dev_mapped;
 
 	virtual void		attach(const MappedDevice::shared_ptr& dev, Word base, Word mask, rank<0>);
 	virtual void		attach(const ActiveMappedDevice::shared_ptr& dev, Word base, Word mask, rank<1>);

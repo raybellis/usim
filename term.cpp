@@ -1,8 +1,8 @@
 //
-//
 //	term.cpp
+//	(C) R.P.Bellis 1994 - 2025
 //
-//	(C) R.P.Bellis 1994
+//      vim: ts=8 sw=8 noet:
 //
 
 #include <cstdlib>
@@ -174,7 +174,7 @@ bool Terminal::poll_read()
 				tilde_escape_phase = 0;
 			}
 			break;
-		
+
 		case 2:
 			tilde_escape_phase = 0;
 			read_data_available = false;

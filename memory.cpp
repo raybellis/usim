@@ -1,9 +1,8 @@
 //
-//
 //	memory.c
+//	(C) R.P.Bellis 2021 - 2025
 //
-//	(C) R.P.Bellis 2021
-//
+//      vim: ts=8 sw=8 noet:
 //
 
 #include <cstdio>

@@ -1,20 +1,24 @@
+#
+# usim (C) R.P.Bellis 1993 -
+# vim: set ts=8 sw=8 noet:
+#
 DEBUG		= -O3
-CXX			= g++ --std=c++17 -Wall -Wextra -Werror -flto
-CC			= gcc --std=c9x -Wall -Werror
+CXX		= g++ --std=c++17 -Wall -Wextra -Werror -flto
+CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
-CPPFLAGS	= -D_POSIX_SOURCE -I. -o $(@)
+CPPFLAGS	= -D_POSIX_SOURCE -I.
 LDFLAGS		= -flto
 
 LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp memory.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN			= usim
+BIN		= usim
 
-LIB			= libusim.a
+LIB		= libusim.a
 
 all: $(BIN)
 
-$(LIB): $(OBJS) # $(LIB)($(OBJS))
+$(LIB): $(OBJS)
 	ar crs $(@) $^
 	ranlib $(@)
 

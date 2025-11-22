@@ -1,9 +1,8 @@
 //
-//
 //	usim.cpp
+//	(C) R.P.Bellis 1994 - 2025
 //
-//	(C) R.P.Bellis 1994
-//
+//      vim: ts=8 sw=8 noet:
 //
 
 #include <cstdlib>

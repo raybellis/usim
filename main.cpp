@@ -1,5 +1,11 @@
 //
 //	main.cpp
+//	(C) R.P.Bellis 1993 - 2025
+//
+//	vim: ts=8 sw=8 noet:
+//
+//	Example of a simple MC6809 system with an MC6850 ACIA at
+//	address 0xc000, 32kB of RAM at 0x0000 and 8kB of ROM at 0xe000
 //
 
 #include <cstdlib>

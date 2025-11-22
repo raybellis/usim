@@ -1,10 +1,9 @@
 /*
-//	machdep.c
-//
-//	Machine dependencies checker
-//
-//	(C) R.P.Bellis 1993
-*/
+ *	machdep.c
+ *	(C) R.P.Bellis 1993 - 2025
+ *	Machine dependencies checker
+ *      vim: ts=8 sw=8 noet:
+ */
 
 #include <stdlib.h>
 #include <stddef.h>

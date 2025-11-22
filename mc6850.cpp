@@ -1,8 +1,8 @@
 //
-//
 //	mc6850.cpp
+//	(C) R.P.Bellis 1994 - 2025
 //
-//	(C) R.P.Bellis 1994
+//      vim: ts=8 sw=8 noet:
 //
 
 #include "mc6850.h"

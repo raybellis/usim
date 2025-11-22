@@ -1,7 +1,8 @@
 //
 //	mc6809ins.cpp
+//	(C) R.P.Bellis 1993 - 2025
 //
-//	(C) R.P.Bellis
+//      vim: ts=8 sw=8 noet:
 //
 //	Updated from BDA and Soren Roug 12/2003 primarily
 //	with fixes for SBC / CMP / NEG instructions with

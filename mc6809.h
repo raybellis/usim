@@ -130,7 +130,7 @@ private:	// instruction implementations
 	void			jsr();
 	void			lda(), ldb();
 	void			ldd(), ldx(), ldy(), lds(), ldu();
-	void			leax(), leay(), leas(), leau(); 
+	void			leax(), leay(), leas(), leau();
 	void			lsla(), lslb(), lsl();
 	void			lsra(), lsrb(), lsr();
 	void			mul();

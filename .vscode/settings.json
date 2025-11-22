@@ -1,0 +1,7 @@
+{
+    "C_Cpp.default.includePath": [
+        "."
+    ],
+"editor.tabSize": 8,
+"editor.stickyTabStops": false
+}
