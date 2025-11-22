@@ -74,7 +74,7 @@ public:
 
 };
 
-class USimMotorola : virtual public USim {
+class USimBE : virtual public USim {
 
 // Memory access functions taking target byte order into account
 public:
@@ -85,7 +85,7 @@ public:
 
 };
 
-class USimIntel : virtual public USim {
+class USimLE : virtual public USim {
 
 // Memory access functions taking target byte order into account
 public:

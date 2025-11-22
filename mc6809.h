@@ -16,7 +16,7 @@
 #include "machdep.h"
 #endif
 
-class mc6809 : virtual public USimMotorola {
+class mc6809 : virtual public USimBE {
 
 protected: // Processor addressing modes
 

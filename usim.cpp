@@ -111,7 +111,7 @@ void USim::write(Word offset, Byte val)
 // Word memory access routines for big-endian (Motorola type)
 //----------------------------------------------------------------------------
 
-Word USimMotorola::fetch_word()
+Word USimBE::fetch_word()
 {
 	Word		tmp;
 
@@ -121,7 +121,7 @@ Word USimMotorola::fetch_word()
 	return tmp;
 }
 
-Word USimMotorola::read_word(Word offset)
+Word USimBE::read_word(Word offset)
 {
 	Word		tmp;
 
@@ -131,7 +131,7 @@ Word USimMotorola::read_word(Word offset)
 	return tmp;
 }
 
-void USimMotorola::write_word(Word offset, Word val)
+void USimBE::write_word(Word offset, Word val)
 {
 	write(offset++, (Byte)(val >> 8));
 	write(offset, (Byte)val);
@@ -141,7 +141,7 @@ void USimMotorola::write_word(Word offset, Word val)
 // Word memory access routines for little-endian (Intel type)
 //----------------------------------------------------------------------------
 
-Word USimIntel::fetch_word()
+Word USimLE::fetch_word()
 {
 	Word		tmp;
 
@@ -151,7 +151,7 @@ Word USimIntel::fetch_word()
 	return tmp;
 }
 
-Word USimIntel::read_word(Word offset)
+Word USimLE::read_word(Word offset)
 {
 	Word		tmp;
 
@@ -161,7 +161,7 @@ Word USimIntel::read_word(Word offset)
 	return tmp;
 }
 
-void USimIntel::write_word(Word offset, Word val)
+void USimLE::write_word(Word offset, Word val)
 {
 	write(offset++, (Byte)val);
 	write(offset, (Byte)(val >> 8));
