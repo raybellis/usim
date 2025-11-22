@@ -159,24 +159,24 @@ bool Terminal::poll_read()
 	Byte ch = read_data = real_read();
 	read_data_available = true;
 
-	switch (tilde_escape_phase) {
-		case 0:
+	switch (tilde_state) {
+		case normal:
 			if (ch == 0x0a || ch == 0x0d) {
-				tilde_escape_phase = 1;
+				tilde_state = looking;
 			}
 			break;
 
-		case 1:
+		case looking:
 			if (ch == '~') {
-				tilde_escape_phase = 2;
+				tilde_state = handling;
 				read_data_available = false;
 			} else {
-				tilde_escape_phase = 0;
+				tilde_state = normal;
 			}
 			break;
 
-		case 2:
-			tilde_escape_phase = 0;
+		case handling:
+			tilde_state = normal;
 			read_data_available = false;
 
 			switch (ch) {

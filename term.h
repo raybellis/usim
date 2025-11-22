@@ -21,8 +21,14 @@ protected:
 	USim&			sys;
 	Byte			read_data;
 	bool			read_data_available = false;
-	int			tilde_escape_phase = 0;
 
+        enum tilde_escape_state {
+                normal,
+                looking,
+                handling
+        };
+
+        tilde_escape_state      tilde_state = looking;
 	void			tilde_escape_help();
 	virtual void		tilde_escape_help_other();
 	virtual void 		tilde_escape_do_other(char ch);
