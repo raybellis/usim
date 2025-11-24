@@ -1,5 +1,3 @@
-machdep
-machdep.h
 *.img
 **/*.o
 **/*.a

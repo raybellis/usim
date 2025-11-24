@@ -9,7 +9,7 @@
 #include <memory>
 #include <cstdio>
 
-mc6809::mc6809() : a(acc.byte.a), b(acc.byte.b), d(acc.d)
+mc6809::mc6809() // : a(acc.byte.a), b(acc.byte.b), d(acc.d)
 {
 }
 
@@ -27,9 +27,9 @@ void mc6809::reset()
 	d = 0x0000;
 	x = 0x0000;
 	y = 0x0000;
-	cc.all = 0x00;		/* Clear all flags */
-	cc.bit.i = 1;		/* IRQ disabled */
-	cc.bit.f = 1;		/* FIRQ disabled */
+	cc = 0x00;		/* Clear all flags */
+	cc.i = 1;		/* IRQ disabled */
+	cc.f = 1;		/* FIRQ disabled */
 	waiting_sync = false;	/* not in SYNC */
 	waiting_cwai = false;	/* not in CWAI */
 	nmi_previous = true;	/* no NMI present */
@@ -61,9 +61,9 @@ void mc6809::tick()
 	// look for external interrupts
 	if (nmi_triggered) {
 		do_nmi();
-	} else if (!c_firq && !cc.bit.f) {
+	} else if (!c_firq && !cc.f) {
 		do_firq();
-	} else if (!c_irq && !cc.bit.i) {
+	} else if (!c_irq && !cc.i) {
 		do_irq();
 	} else if (waiting_cwai) {
 		return;
@@ -94,30 +94,30 @@ void mc6809::tick()
 void mc6809::do_nmi()
 {
 	if (!waiting_cwai) {
-		cc.bit.e = 1;
+		cc.e = 1;
 		help_psh(0xff, s, u);
 	}
-	cc.bit.f = cc.bit.i = 1;
+	cc.f = cc.i = 1;
 	pc = read_word(0xfffc);
 }
 
 void mc6809::do_firq()
 {
 	if (!waiting_cwai) {
-		cc.bit.e = 0;
+		cc.e = 0;
 		help_psh(0x81, s, u);
 	}
-	cc.bit.f = cc.bit.i = 1;
+	cc.f = cc.i = 1;
 	pc = read_word(0xfff6);
 }
 
 void mc6809::do_irq()
 {
 	if (!waiting_cwai) {
-		cc.bit.e = 1;
+		cc.e = 1;
 		help_psh(0xff, s, u);
 	}
-	cc.bit.f = cc.bit.i = 1;
+	cc.f = cc.i = 1;
 	pc = read_word(0xfff8);
 }
 
@@ -466,7 +466,7 @@ void mc6809::print_regs()
 {
 	char flags[] = "EFHINZVC";
 	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
-		if ((cc.all & mask) == 0) {
+		if ((cc & mask) == 0) {
 			flags[i] = '-';
 		}
 	}
@@ -513,7 +513,7 @@ Byte& mc6809::byterefreg(int r)
 	switch (r) {
 		case  8: return a;
 		case  9: return b;
-		case 10: return cc.all;
+		case 10: return cc.value;
 		case 11: return dp;
 	}
 

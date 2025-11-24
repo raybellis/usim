@@ -8,13 +8,25 @@
 #pragma once
 
 #include <string>
+#include <bit>
 #include "wiring.h"
 #include "usim.h"
 #include "bits.h"
 
-#ifndef USIM_MACHDEP_H
-#include "machdep.h"
-#endif
+union mc6809_cc {
+	uint8_t         value;
+	template <int offset> using bit = ByteBits<mc6809_cc, offset>;
+	bit<0>          c;      // Carry
+	bit<1>          v;      // Overflow
+	bit<2>          z;      // Zero
+	bit<3>          n;      // Negative
+	bit<4>          i;      // IRQ disable
+	bit<5>          h;      // Half carry
+	bit<6>          f;      // FIRQ disable
+	bit<7>          e;      // Entire
+	operator uint8_t() const { return value; }
+	uint8_t operator =(uint8_t n) { return value = n; }
+};
 
 class mc6809 : virtual public USimBE {
 
@@ -34,45 +46,23 @@ protected:	// Processor registers
 	Word			u, s;		// Stack pointers
 	Word			x, y;		// Index registers
 	Byte			dp;		// Direct Page register
-	union {
+        mc6809_cc               cc;
+
+        // NB: intentional UB type-aliasing
+        union {
 		Word			d;	// Combined accumulator
 		struct {
-#ifdef MACH_BYTE_ORDER_MSB_FIRST
+#if __BYTE_ORDER == __LITTLE_ENDIAN
 			Byte		a;	// Accumulator a
 			Byte		b;	// Accumulator b
-#else
+#elif __BYTE_ORDER == __BIG_ENDIAN
 			Byte		b;	// Accumulator b
 			Byte		a;	// Accumulator a
-#endif
-		} byte;
-	} acc;
-	Byte&			a;
-	Byte&			b;
-	Word&			d;
-	union {
-		Byte			all;	// Condition code register
-		struct {
-#ifdef MACH_BITFIELDS_LSB_FIRST
-			Byte		c : 1;	// Carry
-			Byte		v : 1;	// Overflow
-			Byte		z : 1;	// Zero
-			Byte		n : 1;	// Negative
-			Byte		i : 1;	// IRQ disable
-			Byte		h : 1;	// Half carry
-			Byte		f : 1;	// FIRQ disable
-			Byte		e : 1;	// Entire
 #else
-			Byte		e : 1;	// Entire
-			Byte		f : 1;	// FIRQ disable
-			Byte		h : 1;	// Half carry
-			Byte		i : 1;	// IRQ disable
-			Byte		n : 1;	// Negative
-			Byte		z : 1;	// Zero
-			Byte		v : 1;	// Overflow
-			Byte		c : 1;	// Carry
+#error "target byte order cannot be determined"
 #endif
-		} bit;
-	} cc;
+		};
+	};
 
 private:	// internal processor state
 	bool			waiting_sync;

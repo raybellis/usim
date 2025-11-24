@@ -75,3 +75,56 @@ inline Word extend8(Byte x)
 		return (Word)x;
 	}
 }
+
+//
+// a template to allow direct access to the individual bits
+// of a byte, without needing explicit getters and setters
+//
+// partially derived from https://andreashohmann.com/cpp-bitfields/
+//
+
+template<typename T, int offset, unsigned size = 1>
+	requires(0 <= offset && offset + size <= 8)
+class ByteBits {
+private:
+	constexpr uint8_t mask() const {
+		return (1U << (size - 1));
+	}
+
+	uint8_t& value() {
+		return *reinterpret_cast<uint8_t *>(this);
+	}
+
+	const uint8_t& value() const {
+		return *reinterpret_cast<const uint8_t *>(this);
+	}
+
+public:
+	operator uint8_t() const {
+		const auto m = mask();
+		const auto v = value();
+		return (v >> offset) & m;
+	}
+
+	ByteBits& operator =(uint8_t n) {
+		const auto m = mask();
+		auto& v = value();
+		v &= ~(m << offset);
+		v |= ((n & m) << offset);
+		return *this;
+	}
+
+	ByteBits& operator ^=(uint8_t n) {
+		const auto m = mask();
+		auto& v = value();
+		v ^= ((n & m) << offset);
+		return *this;
+	}
+
+	ByteBits& operator |=(uint8_t n) {
+		const auto m = mask();
+		auto& v = value();
+		v |= ((n & m) << offset);
+		return *this;
+	}
+};

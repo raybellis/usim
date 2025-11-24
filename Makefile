@@ -3,7 +3,7 @@
 # vim: set ts=8 sw=8 noet:
 #
 DEBUG		= -O3
-CXX		= g++ --std=c++17 -Wall -Wextra -Werror -flto
+CXX		= g++ --std=c++20 -Wall -Wextra -Werror -flto
 CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE -I.
@@ -30,18 +30,12 @@ $(BIN):	$(LIB) main.o term.o
 .cpp.o:
 	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c $<
 
-$(OBJS): machdep.h
-
-machdep: machdep.o
-	$(CC) -o $(@) $(CCFLAGS) $(LDFLAGS) machdep.o
-
-machdep.h: machdep
-	./machdep $(@)
-
+.PHONY: clean
 clean:
-	$(RM) machdep.h machdep.o machdep $(BIN) $(OBJS) main.o term.o $(LIB)
+	$(RM) $(BIN) $(OBJS) main.o term.o $(LIB)
 
-depend:	machdep.h
+.PHONY: depend
+depend:
 	makedepend 	$(LIB_SRCS) main.cpp term.cpp
 
 # Manually defined dependencies
@@ -49,13 +43,13 @@ depend:	machdep.h
 usim.o: usim.h device.h typedefs.h memory.h wiring.h
 usim.o: bits.h
 mc6809.o: mc6809.h wiring.h usim.h device.h typedefs.h
-mc6809.o: memory.h bits.h machdep.h
+mc6809.o: memory.h bits.h
 mc6809in.o: mc6809.h wiring.h usim.h device.h typedefs.h
-mc6809in.o: memory.h bits.h machdep.h
+mc6809in.o: memory.h bits.h
 mc6850.o: mc6850.h device.h typedefs.h wiring.h bits.h
 memory.o: memory.h device.h typedefs.h
 main.o: mc6809.h wiring.h usim.h device.h
-main.o: typedefs.h memory.h bits.h machdep.h mc6850.h
+main.o: typedefs.h memory.h bits.h mc6850.h
 main.o: term.h
 term.o: term.h mc6850.h device.h typedefs.h wiring.h
 
