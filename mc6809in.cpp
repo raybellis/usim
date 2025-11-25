@@ -1194,7 +1194,7 @@ void mc6809::swi()
 	cc.e = 1;
 	help_psh(0xff, s, u);
 	cc.f = cc.i = 1;
-	pc = read_word(0xfffa);
+	pc = read_word(vector_swi);
 	cycles += 4;
 }
 
@@ -1203,7 +1203,7 @@ void mc6809::swi2()
 	insn = "SWI2";
 	cc.e = 1;
 	help_psh(0xff, s, u);
-	pc = read_word(0xfff4);
+	pc = read_word(vector_swi2);
 	cycles += 4;
 }
 
@@ -1212,7 +1212,7 @@ void mc6809::swi3()
 	insn = "SWI3";
 	cc.e = 1;
 	help_psh(0xff, s, u);
-	pc = read_word(0xfff2);
+	pc = read_word(vector_swi3);
 	cycles += 4;
 }
 

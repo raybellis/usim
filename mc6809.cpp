@@ -21,7 +21,7 @@ void mc6809::reset()
 {
 	USim::reset();
 
-	pc = read_word(0xfffe);
+	pc = read_word(vector_reset);
 	cycles = 0;
 	dp = 0x00;		/* Direct page register = 0x00 */
 	d = 0x0000;
@@ -98,7 +98,7 @@ void mc6809::do_nmi()
 		help_psh(0xff, s, u);
 	}
 	cc.f = cc.i = 1;
-	pc = read_word(0xfffc);
+	pc = read_word(vector_nmi);
 }
 
 void mc6809::do_firq()
@@ -108,7 +108,7 @@ void mc6809::do_firq()
 		help_psh(0x81, s, u);
 	}
 	cc.f = cc.i = 1;
-	pc = read_word(0xfff6);
+	pc = read_word(vector_firq);
 }
 
 void mc6809::do_irq()
@@ -118,7 +118,7 @@ void mc6809::do_irq()
 		help_psh(0xff, s, u);
 	}
 	cc.f = cc.i = 1;
-	pc = read_word(0xfff8);
+	pc = read_word(vector_irq);
 }
 
 void mc6809::fetch_instruction()

@@ -2,7 +2,7 @@
 //	mc6809.h
 //	(C) R.P.Bellis 1993 - 2025
 //	Class definition for Motorola MC6809 microprocessor
-//	vim: ts=8
+//	vim: ts=8 sw=8 noet:
 //
 
 #pragma once
@@ -30,7 +30,7 @@ union mc6809_cc {
 
 class mc6809 : virtual public USimBE {
 
-protected: // Processor addressing modes
+protected:      // Processor addressing modes
 
 	enum {
 				immediate,
@@ -41,15 +41,28 @@ protected: // Processor addressing modes
 				relative
 	} mode;
 
+public:         // useful addresses
+
+	enum : uint16_t {
+		vector_reserved	= 0xfff0,
+		vector_swi3	= 0xfff2,
+		vector_swi2	= 0xfff4,
+		vector_firq	= 0xfff6,
+		vector_irq	= 0xfff8,
+		vector_swi	= 0xfffa,
+		vector_nmi	= 0xfffc,
+		vector_reset	= 0xfffe,
+	};
+
 protected:	// Processor registers
 
 	Word			u, s;		// Stack pointers
 	Word			x, y;		// Index registers
 	Byte			dp;		// Direct Page register
-        mc6809_cc               cc;
+	mc6809_cc               cc;
 
-        // NB: intentional UB type-aliasing
-        union {
+	// NB: intentional UB type-aliasing
+	union {
 		Word			d;	// Combined accumulator
 		struct {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
