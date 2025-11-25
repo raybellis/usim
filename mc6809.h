@@ -53,11 +53,11 @@ protected:	// Processor registers
 		Word			d;	// Combined accumulator
 		struct {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-			Byte		a;	// Accumulator a
 			Byte		b;	// Accumulator b
+			Byte		a;	// Accumulator a
 #elif __BYTE_ORDER == __BIG_ENDIAN
-			Byte		b;	// Accumulator b
 			Byte		a;	// Accumulator a
+			Byte		b;	// Accumulator b
 #else
 #error "target byte order cannot be determined"
 #endif
