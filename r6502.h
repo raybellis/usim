@@ -13,12 +13,9 @@
 #include "bits.h"
 
 union r6502_status {
-
-private:
 	uint8_t         value;
 	template <int offset> using bit = ByteBits<r6502_status, offset>;
 
-public:
 	bit<0>          c;
 	bit<1>          z;
 	bit<2>          i;
@@ -36,12 +33,18 @@ class r6502 : virtual public USimLE {
 protected: // Processor addressing modes
 
 	enum {
+				accumulator,
 				immediate,
-				direct,
-				indexed,
-				extended,
-				inherent,
-				relative
+				absolute,
+				zeropage,
+				zpindexed,
+				xindexed,
+				yindexed,
+				implied,
+				relative,
+				xindirect,
+				yindirect,
+				absindirect
 	} mode;
 
 	enum : uint16_t {
@@ -57,109 +60,53 @@ protected:	// Processor registers
 	Byte			x, y;		// Index registers
 	Byte			s;		// Stack pointer
 	r6502_status		p;		// Processor status
+	Byte			ir;		// Instruction register
 
 private:	// internal processor state
-	// bool			waiting_sync;
-	bool			nmi_previous;
+	// placeholder for future use
 
 private:	// instruction and operand fetch and decode
-	void			fetch_instruction();
-	Byte			fetch_operand();
-	Word			fetch_word_operand();
-	Word			fetch_effective_address();
-	Word			fetch_indexed_operand();
 	void			execute_instruction();
+        void			fetch_instruction();
+        void			decode_mode();
+        Byte			fetch_operand();
+	Word			fetch_effective_address();
 
 private:	// instruction implementations
-	// void			abx();
-	// void			adca(), adcb();
-	// void			adda(), addb(), addd();
-	// void			anda(), andb(), andcc();
-	// void			asra(), asrb(), asr();
-	// void			bcc(), lbcc();
-	// void			bcs(), lbcs();
-	// void			beq(), lbeq();
-	// void			bge(), lbge();
-	// void			bgt(), lbgt();
-	// void			bhi(), lbhi();
-	// void			bita(), bitb();
-	// void			ble(), lble();
-	// void			bls(), lbls();
-	// void			blt(), lblt();
-	// void			bmi(), lbmi();
-	// void			bne(), lbne();
-	// void			bpl(), lbpl();
-	// void			bra(), lbra();
-	// void			brn(), lbrn();
-	// void			bsr(), lbsr();
-	// void			bvc(), lbvc();
-	// void			bvs(), lbvs();
-	// void			clra(), clrb(), clr();
-	// void			cmpa(), cmpb();
-	// void			cmpd(), cmpx(), cmpy(), cmpu(), cmps();
-	// void			coma(), comb(), com();
-	// void			cwai();
-	// void			daa();
-	// void			deca(), decb(), dec();
-	// void			eora(), eorb();
-	// void			exg();
-	// void			inca(), incb(), inc();
-	// void			jmp();
-	// void			jsr();
-	// void			lda(), ldb();
-	// void			ldd(), ldx(), ldy(), lds(), ldu();
-	// void			leax(), leay(), leas(), leau();
-	// void			lsla(), lslb(), lsl();
-	// void			lsra(), lsrb(), lsr();
-	// void			mul();
-	// void			nega(), negb(), neg();
-	// void			nop();
-	// void			ora(), orb(), orcc();
-	// void			pshs(), pshu();
-	// void			puls(), pulu();
-	// void			rola(), rolb(), rol();
-	// void			rora(), rorb(), ror();
-	// void			rti(), rts();
-	// void			sbca(), sbcb();
-	// void			sex();
-	// void			sta(), stb();
-	// void			std(), stx(), sty(), sts(), stu();
-	// void			suba(), subb();
-	// void			subd();
-	// void			swi(), swi2(), swi3();
-	// void			sync();
-	// void			tfr();
-	// void			tsta(), tstb(), tst();
+	void			adc();
+	void			and_();
+	void			asl();
+	void			bcc(), bcs();
+	void			beq();
+	void			bit();
+	void			bmi(), bne();
+	void			bpl();
+	void			brk();
+	void			bvc(), bvs();
+	void			clc(), cld(), cli(), clv();
+	void			cmp(), cpx(), cpy();
+	void			dec(), dex(), dey();
+	void			eor();
+	void			inc(), inx(), iny();
+	void			jmp(), jsr();
+        void			lda(), ldx(), ldy();
+        void			lsr();
+	void			nop();
+	void			ora();
+	void			pha(), php();
+	void			pla(), plp();
+	void			rol(), ror();
+	void			rti(), rts();
+	void			sbc();
+	void			sec(), sed(), sei();
+	void			sta(), stx(), sty();
+	void			tax(), tay();
+	void			txa(), tya();
+	void			tsx(), txs();
 
 protected:	// helper functions
-	// void			help_adc(Byte&);
-	// void			help_add(Byte&);
-	// void			help_and(Byte&);
-	// void			help_asr(Byte&);
-	// void			help_bit(Byte);
-	// void			help_clr(Byte&);
-	// void			help_cmp(Byte);
-	// void			help_cmp(Word);
-	// void			help_com(Byte&);
-	// void			help_dec(Byte&);
-	// void			help_eor(Byte&);
-	// void			help_inc(Byte&);
-	// void			help_ld(Byte&);
-	// void			help_ld(Word&);
-	// void			help_lsr(Byte&);
-	// void			help_lsl(Byte&);
-	// void			help_neg(Byte&);
-	// void			help_or(Byte&);
-	// void			help_psh(Byte, Word&, Word&);
-	// void			help_pul(Byte, Word&, Word&);
-	// void			help_ror(Byte&);
-	// void			help_rol(Byte&);
-	// void			help_sbc(Byte&);
-	// void			help_st(Byte);
-	// void			help_st(Word);
-	// void			help_sub(Byte&);
-	// void			help_sub(Word&);
-	// void			help_tst(Byte);
+	void			help_cmp(Byte reg, Byte value);
+	void			help_ld(Byte& reg);
 
 protected:	// overloadable functions (e.g. for breakpoints)
 	virtual void		do_br(const char *, bool);
@@ -171,6 +118,7 @@ protected:	// overloadable functions (e.g. for breakpoints)
 
 	virtual void		do_nmi();
 	virtual void		do_irq();
+	virtual void		do_brk();
 
 	virtual void		pre_exec();
 	virtual void		post_exec();
@@ -206,8 +154,8 @@ inline void r6502::do_br(const char *mnemonic, bool test)
 
 inline void r6502::do_psh(Byte val)
 {
-	--s;
 	write(stack_base + s, val);
+	--s;
 }
 
 inline void r6502::do_psh(Word val)
@@ -218,8 +166,8 @@ inline void r6502::do_psh(Word val)
 
 inline void r6502::do_pul(Byte& val)
 {
+	++s;
 	val = read(0x100 + s);
-	s++;
 }
 
 inline void r6502::do_pul(Word& val)

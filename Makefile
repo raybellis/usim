@@ -9,7 +9,10 @@ CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE -I.
 LDFLAGS		= -flto
 
-LIB_SRCS	= usim.cpp mc6809.cpp mc6809in.cpp mc6850.cpp memory.cpp
+LIB_SRCS	= usim.cpp memory.cpp \
+		  mc6809.cpp mc6809in.cpp \
+		  r6502.cpp r6502in.cpp \
+		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
 BIN		= usim
