@@ -299,8 +299,7 @@ void r6502::php()
 void r6502::pla()
 {
 	do_pul(a);
-	p.z = (a == 0);
-	p.n = (a & 0x80) != 0;
+	set_nz(a);
 }
 
 void r6502::plp()
