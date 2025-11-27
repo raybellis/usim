@@ -95,8 +95,8 @@ private:	// instruction implementations
 	void			ora();
 	void			pha(), php();
 	void			pla(), plp();
-	void			rol(), ror();
-	void			rti(), rts();
+        void			rol(), ror();
+        void			rti(), rts();
 	void			sbc();
 	void			sec(), sed(), sei();
 	void			sta(), stx(), sty();
@@ -105,8 +105,13 @@ private:	// instruction implementations
 	void			tsx(), txs();
 
 protected:	// helper functions
-	void			help_cmp(Byte reg, Byte value);
+        void			set_nz(Byte val);
+        void			help_asl(Byte &val);
+        void			help_cmp(Byte reg, Byte value);
 	void			help_ld(Byte& reg);
+	void			help_lsr(Byte& val);
+	void			help_rol(Byte &val);
+	void			help_ror(Byte &val);
 
 protected:	// overloadable functions (e.g. for breakpoints)
 	virtual void		do_br(const char *, bool);
@@ -125,9 +130,9 @@ protected:	// overloadable functions (e.g. for breakpoints)
 
 protected: 	// instruction tracing
 	Word			insn_pc;
-	const char*		insn;
 	Word			operand;
 
+	const char *		disasm_opcode(Word addr);
 	// std::string		disasm_operand();
 	// std::string		disasm_indexed();
 
@@ -147,9 +152,11 @@ public:
 inline void r6502::do_br(const char *mnemonic, bool test)
 {
 	(void)mnemonic;
-	Word offset = extend8(fetch_operand());
-	if (test) pc += offset;
-	++cycles;
+	Word next = fetch_effective_address();
+	if (test) {
+		pc = next;
+		++cycles;
+	}
 }
 
 inline void r6502::do_psh(Byte val)
