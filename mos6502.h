@@ -1,5 +1,5 @@
 //
-//	r6502.h
+//	mos6502.h
 //	(C) R.P.Bellis 2025 -
 //	Class definition for Rockwell 6502 microprocessor
 //	vim: ts=8 sw=8 noet:
@@ -12,9 +12,9 @@
 #include "usim.h"
 #include "bits.h"
 
-union r6502_status {
+union mos6502_status {
 	uint8_t         value;
-	template <int offset> using bit = ByteBits<r6502_status, offset>;
+	template <int offset> using bit = ByteBits<mos6502_status, offset>;
 
 	bit<0>          c;
 	bit<1>          z;
@@ -28,7 +28,7 @@ union r6502_status {
 	uint8_t operator =(uint8_t n) { return value = n; }
 };
 
-class r6502 : virtual public USimLE {
+class mos6502 : virtual public USimLE {
 
 protected: // Processor addressing modes
 
@@ -59,7 +59,7 @@ protected:	// Processor registers
 	Byte			a;		// Accumulator
 	Byte			x, y;		// Index registers
 	Byte			s;		// Stack pointer
-	r6502_status		p;		// Processor status
+	mos6502_status		p;		// Processor status
 	Byte			ir;		// Instruction register
 
 private:	// internal processor state
@@ -130,7 +130,7 @@ protected:	// overloadable functions (e.g. for breakpoints)
 
 protected: 	// instruction tracing
 	Word			insn_pc;
-	Word			operand;
+	// Word			operand;
 
 	const char *		disasm_opcode(Word addr);
 	// std::string		disasm_operand();
@@ -140,8 +140,8 @@ public:		// external signal pins
 	InputPin		IRQ, NMI;
 
 public:
-				r6502();		// public constructor
-	virtual			~r6502();		// public destructor
+				mos6502();		// public constructor
+	virtual			~mos6502();		// public destructor
 
 	virtual void		reset();		// CPU reset
 	virtual void		tick();
@@ -149,7 +149,7 @@ public:
 	virtual void		print_regs();
 };
 
-inline void r6502::do_br(const char *mnemonic, bool test)
+inline void mos6502::do_br(const char *mnemonic, bool test)
 {
 	(void)mnemonic;
 	Word next = fetch_effective_address();
@@ -159,25 +159,25 @@ inline void r6502::do_br(const char *mnemonic, bool test)
 	}
 }
 
-inline void r6502::do_psh(Byte val)
+inline void mos6502::do_psh(Byte val)
 {
 	write(stack_base + s, val);
 	--s;
 }
 
-inline void r6502::do_psh(Word val)
+inline void mos6502::do_psh(Word val)
 {
 	do_psh((Byte)val);
 	do_psh((Byte)(val >> 8));
 }
 
-inline void r6502::do_pul(Byte& val)
+inline void mos6502::do_pul(Byte& val)
 {
 	++s;
 	val = read(0x100 + s);
 }
 
-inline void r6502::do_pul(Word& val)
+inline void mos6502::do_pul(Word& val)
 {
 	uint8_t lsb, msb;
 	do_pul(msb);

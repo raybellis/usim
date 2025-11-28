@@ -11,7 +11,7 @@ LDFLAGS		= -flto
 
 LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6809.cpp mc6809in.cpp \
-		  r6502.cpp r6502in.cpp \
+		  mos6502.cpp mos6502in.cpp \
 		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)

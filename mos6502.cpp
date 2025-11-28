@@ -1,26 +1,26 @@
 //
-// r6502.cpp
+// mos6502.cpp
 // 6502 CPU core emulation
 // (C) R.P.Bellis 2025 -
 // vim: ts=8 sw=8 noet:
 //
 
-#include "r6502.h"
+#include "mos6502.h"
 
-void r6502::pre_exec()
+void mos6502::pre_exec()
 {
         insn_pc = pc;
 }
 
-void r6502::post_exec()
+void mos6502::post_exec()
 {
         // Placeholder for future use
 }
 
-void r6502::do_nmi()
+void mos6502::do_nmi()
 {
         do_psh(pc);
-	r6502_status saved = p;
+	mos6502_status saved = p;
 	saved.i = true;
 	saved.b = false;
 	do_psh((Byte)saved);
@@ -28,11 +28,11 @@ void r6502::do_nmi()
         cycles += 7;
 }
 
-void r6502::do_irq()
+void mos6502::do_irq()
 {
         if (!p.i) {
                 do_psh(pc);
-		r6502_status saved = p;
+		mos6502_status saved = p;
 		saved.i = true;
 		saved.b = false;
 		do_psh((Byte)saved);
@@ -41,10 +41,10 @@ void r6502::do_irq()
         }
 }
 
-void r6502::do_brk()
+void mos6502::do_brk()
 {
 	do_psh((Word)(pc + 1));
-	r6502_status saved = p;
+	mos6502_status saved = p;
 	saved.i = true;
 	saved.b = true;
 	do_psh((Byte)saved);
@@ -52,7 +52,7 @@ void r6502::do_brk()
 	cycles += 7;
 }
 
-void r6502::reset()
+void mos6502::reset()
 {
 	a = 0;
 	x = 0;
@@ -65,31 +65,31 @@ void r6502::reset()
 	cycles = 7;
 }
 
-void r6502::tick()
+void mos6502::tick()
 {
 	fetch_instruction();
 	execute_instruction();
 }
 
-void r6502::print_regs()
+void mos6502::print_regs()
 {
 	printf("A:%02X X:%02X Y:%02X S:%02X P:%02X PC:%04X\n",
 		a, x, y, s, (uint8_t)p, pc);
 }
 
-void r6502::fetch_instruction()
+void mos6502::fetch_instruction()
 {
 	ir = fetch();
 	decode_mode();
 }
 
-Byte r6502::fetch_operand()
+Byte mos6502::fetch_operand()
 {
 	Word m = fetch_effective_address();
 	return read(m);
 }
 
-Word r6502::fetch_effective_address()
+Word mos6502::fetch_effective_address()
 {
 	Word m;
 	switch (mode) {
@@ -146,7 +146,7 @@ Word r6502::fetch_effective_address()
 	return m;
 }
 
-void r6502::decode_mode()
+void mos6502::decode_mode()
 {
 	// Decode based on opcode bits
 	switch (ir & 0x1f) {
@@ -195,7 +195,7 @@ void r6502::decode_mode()
 	}
 }
 
-void r6502::execute_instruction()
+void mos6502::execute_instruction()
 {
 	switch (ir) {
 		// Miscellaneous Instructions
@@ -358,7 +358,7 @@ void r6502::execute_instruction()
 	}
 }
 
-const char *r6502::disasm_opcode(Word addr)
+const char *mos6502::disasm_opcode(Word addr)
 {
 	Byte ir = read(addr);
 	switch (ir) {
