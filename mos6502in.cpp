@@ -4,7 +4,6 @@
 // refactored helper functions
 //
 
-
 void mos6502::set_nz(Byte val)
 {
 	p.n = (val & 0x80) != 0;
@@ -139,7 +138,7 @@ void mos6502::bpl()
 
 void mos6502::brk()
 {
-	// Placeholder for BRK instruction implementation
+        do_brk();
 }
 
 void mos6502::bvc()

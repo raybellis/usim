@@ -63,7 +63,7 @@ protected:	// Processor registers
 	Byte			ir;		// Instruction register
 
 private:	// internal processor state
-	// placeholder for future use
+	bool			nmi_previous;
 
 private:	// instruction and operand fetch and decode
 	void			execute_instruction();

@@ -30,15 +30,13 @@ void mos6502::do_nmi()
 
 void mos6502::do_irq()
 {
-        if (!p.i) {
-                do_psh(pc);
-		mos6502_status saved = p;
-		saved.i = true;
-		saved.b = false;
-		do_psh((Byte)saved);
-                pc = read_word(vector_irq);
-                cycles += 7;
-        }
+	do_psh(pc);
+	mos6502_status saved = p;
+	saved.i = true;
+	saved.b = false;
+	do_psh((Byte)saved);
+	pc = read_word(vector_irq);
+	cycles += 7;
 }
 
 void mos6502::do_brk()
@@ -67,8 +65,41 @@ void mos6502::reset()
 
 void mos6502::tick()
 {
+	// handle the attached devices
+	USim::tick();
+
+	// get interrupt pin states
+	bool c_nmi = NMI;
+	bool c_irq = IRQ;
+
+	// check for NMI falling edge
+	bool nmi_triggered = !c_nmi && nmi_previous;
+	nmi_previous = c_nmi;
+
+	// look for external interrupts
+	if (nmi_triggered) {
+		do_nmi();
+	} else if (!c_irq && !p.i) {
+                do_irq();
+        }
+
+	// remember current instruction address
+	insn_pc = pc;
+
+	// hook
+	pre_exec();
+
+	// fetch the next instruction
 	fetch_instruction();
+
+	// and process it
 	execute_instruction();
+
+	// hook
+	post_exec();
+
+	// deduct a cycle to account for the one added in USim::tick
+	--cycles;
 }
 
 void mos6502::print_regs()
