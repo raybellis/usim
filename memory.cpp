@@ -44,26 +44,28 @@ void ROM::load_intelhex(const char *filename, Word base)
 		exit(EXIT_FAILURE);
 	}
 
-	while (!done) {
+	while (!done && !feof(fp)) {
 		Byte		n, t;
 		Word		addr;
 		Byte		b;
 
-		(void)fgetc(fp);
-		n = fread_hex_byte(fp);
-		addr = fread_hex_word(fp);
-		t = fread_hex_byte(fp);
-		if (t == 0x00) {
-			while (n--) {
-				b = fread_hex_byte(fp);
+		(void)fgetc(fp);		// colon
+		n = fread_hex_byte(fp);		// byte count
+		addr = fread_hex_word(fp);	// start memory address
+		t = fread_hex_byte(fp);		// record type
+
+		while (n--) {
+			b = fread_hex_byte(fp);	// data byte
+			if (t == 0x00) {
 				if ((addr >= base) && (addr < ((DWord)base + size))) {
 					memory[addr - base] = b;
 				}
 				++addr;
+			} else if (t == 0x01) {
+				done = 1;
 			}
-		} else if (t == 0x01) {
-			done = 1;
 		}
+
 		// Read and discard checksum byte
 		(void)fread_hex_byte(fp);
 		if (fgetc(fp) == '\r') (void)fgetc(fp);
