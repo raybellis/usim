@@ -5,11 +5,22 @@
 // vim: ts=8 sw=8 noet:
 //
 
+#include <iostream>
+
 #include "mos6502.h"
+
+mos6502::mos6502()
+{
+}
+
+mos6502::~mos6502()
+{
+}
 
 void mos6502::pre_exec()
 {
         insn_pc = pc;
+	// print_regs();
 }
 
 void mos6502::post_exec()
@@ -32,8 +43,8 @@ void mos6502::do_irq()
 {
 	do_psh(pc);
 	mos6502_status saved = p;
-	saved.i = true;
-	saved.b = false;
+	p.i = true;
+	p.b = false;
 	do_psh((Byte)saved);
 	pc = read_word(vector_irq);
 	cycles += 7;
@@ -43,8 +54,8 @@ void mos6502::do_brk()
 {
 	do_psh((Word)(pc + 1));
 	mos6502_status saved = p;
-	saved.i = true;
-	saved.b = true;
+	p.i = true;
+	p.b = true;
 	do_psh((Byte)saved);
 	pc = read_word(vector_irq);
 	cycles += 7;
@@ -104,7 +115,7 @@ void mos6502::tick()
 
 void mos6502::print_regs()
 {
-	printf("A:%02X X:%02X Y:%02X S:%02X P:%02X PC:%04X\n",
+	printf("A:%02X X:%02X Y:%02X S:%02X P:%02X PC:%04X\r\n",
 		a, x, y, s, (uint8_t)p, pc);
 }
 
@@ -166,7 +177,10 @@ Word mos6502::fetch_effective_address()
 		m = pc++;
 		break;
 	case relative:
-		m = pc + extend8(fetch());
+		{
+			Word offset = extend8(fetch());
+			m = pc + offset;
+		}
 		break;
 	default:
 		// implied or accumulator mode
