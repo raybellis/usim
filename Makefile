@@ -2,12 +2,12 @@
 # usim (C) R.P.Bellis 1993 -
 # vim: set ts=8 sw=8 noet:
 #
-DEBUG		= -O3
-CXX		= g++ --std=c++20 -Wall -Wextra -Werror -flto
+DEBUG		= -g
+CXX		= g++ --std=c++20 -Wall -Wextra -Werror
 CC		= gcc --std=c9x -Wall -Werror
 CCFLAGS		= $(DEBUG)
 CPPFLAGS	= -D_POSIX_SOURCE -I.
-LDFLAGS		= -flto
+LDFLAGS		=
 
 LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6809.cpp mc6809in.cpp \
@@ -15,7 +15,7 @@ LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim
+BIN		= usim usim02
 
 LIB		= libusim.a
 
@@ -25,8 +25,11 @@ $(LIB): $(OBJS)
 	ar crs $(@) $^
 	ranlib $(@)
 
-$(BIN):	$(LIB) main.o term.o
+usim:	$(LIB) main.o term.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) main.o term.o -L. -lusim -o $(@)
+
+usim02:	$(LIB) main02.o term.o
+	$(CXX) $(CCFLAGS) $(LDFLAGS) main02.o term.o -L. -lusim -o $(@)
 
 .SUFFIXES: .cpp
 

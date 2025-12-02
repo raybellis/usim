@@ -32,7 +32,7 @@ class mos6502 : virtual public USimLE {
 
 protected: // Processor addressing modes
 
-	enum {
+	enum mode_t : uint8_t {
 				accumulator,
 				immediate,
 				absolute,
@@ -45,7 +45,7 @@ protected: // Processor addressing modes
 				xindirect,
 				yindirect,
 				absindirect
-	} mode;
+	};
 
 	enum : uint16_t {
 		stack_base	= 0x0100,
@@ -62,13 +62,15 @@ protected:	// Processor registers
 	mos6502_status		p;		// Processor status
 	Byte			ir;		// Instruction register
 
-private:	// internal processor state
+private:	// Execution state
+	mode_t			mode;
+	Word			operand;
 	bool			nmi_previous;
 
 private:	// instruction and operand fetch and decode
 	void			execute_instruction();
         void			fetch_instruction();
-        void			decode_mode();
+        mode_t			decode_mode(Byte ir);
         Byte			fetch_operand();
 	Word			fetch_effective_address();
 
@@ -130,11 +132,8 @@ protected:	// overloadable functions (e.g. for breakpoints)
 
 protected: 	// instruction tracing
 	Word			insn_pc;
-	// Word			operand;
-
-	const char *		disasm_opcode(Word addr);
-	// std::string		disasm_operand();
-	// std::string		disasm_indexed();
+	const char *		disasm_opcode(Byte ir);
+	std::string		disasm_operand(Word addr, mode_t mode);
 
 public:		// external signal pins
 	InputPin		IRQ, NMI;

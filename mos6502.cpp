@@ -19,46 +19,59 @@ mos6502::~mos6502()
 
 void mos6502::pre_exec()
 {
-        insn_pc = pc;
-	// print_regs();
+	if (!m_trace) return;
+
+	print_regs();
 }
 
 void mos6502::post_exec()
 {
-        // Placeholder for future use
+	if (!m_trace) return;
+
+	auto insn = disasm_opcode(ir);
+	auto operand = disasm_operand(insn_pc, mode);
+	fprintf(stderr, "/ %04X: [%2d] %-8s%s\r\n", insn_pc, cycles, insn, operand.c_str());
 }
 
 void mos6502::do_nmi()
 {
         do_psh(pc);
-	mos6502_status saved = p;
-	saved.i = true;
-	saved.b = false;
-	do_psh((Byte)saved);
+	mos6502_status pushed = p;
+	pushed.i = true;
+	pushed.b = false;
+	do_psh((Byte)pushed);
         pc = read_word(vector_nmi);
-        cycles += 7;
 }
 
 void mos6502::do_irq()
 {
 	do_psh(pc);
-	mos6502_status saved = p;
+
+	mos6502_status pushed = p;
+	pushed.b = false;
+	do_psh((Byte)pushed);
+
 	p.i = true;
 	p.b = false;
-	do_psh((Byte)saved);
+
 	pc = read_word(vector_irq);
-	cycles += 7;
 }
 
 void mos6502::do_brk()
 {
-	do_psh((Word)(pc + 1));
-	mos6502_status saved = p;
+	// dummy fetch
+	fetch();
+
+	do_psh(pc);
+
+	mos6502_status pushed = p;
+	pushed.b = true;
+	do_psh((Byte)pushed);
+
 	p.i = true;
-	p.b = true;
-	do_psh((Byte)saved);
+	p.b = false;
+
 	pc = read_word(vector_irq);
-	cycles += 7;
 }
 
 void mos6502::reset()
@@ -115,20 +128,32 @@ void mos6502::tick()
 
 void mos6502::print_regs()
 {
-	printf("A:%02X X:%02X Y:%02X S:%02X P:%02X PC:%04X\r\n",
-		a, x, y, s, (uint8_t)p, pc);
+	char flags[] = "NVRBDIZC";
+	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
+		if ((p.value & mask) == 0) {
+			flags[i] = '-';
+		}
+	}
+
+	fprintf(stderr, "PC:%04X P:%s S:01%02X A:%02X X:%02X Y:%02X\r\n",
+		pc, flags, s, a, x, y);
 }
 
 void mos6502::fetch_instruction()
 {
 	ir = fetch();
-	decode_mode();
+	mode = decode_mode(ir);
 }
 
 Byte mos6502::fetch_operand()
 {
-	Word m = fetch_effective_address();
-	return read(m);
+	if (mode == immediate) {
+		operand = fetch();
+		return (Byte)operand;
+	} else {
+		Word m = fetch_effective_address();
+		return read(m);
+	}
 }
 
 Word mos6502::fetch_effective_address()
@@ -136,49 +161,55 @@ Word mos6502::fetch_effective_address()
 	Word m;
 	switch (mode) {
 	case absolute:
-		m = fetch_word();
+		operand = fetch_word();
+		m = operand;
 		break;
 	case zeropage:
-		m = fetch() & 0x00ff;
+		operand = fetch();
+		m = operand & 0x00ff;
 		break;
 	case zpindexed:
-		m = (fetch() + x) & 0x00ff;
+		operand = fetch();
+		m = (operand + x) & 0x00ff;
 		break;
 	case xindexed:
-		m = fetch_word() + x;
+		operand = fetch_word();
+		m = operand + x;
 		break;
 	case yindexed:
-		m = fetch_word() + y;
+		operand = fetch_word();
+		m = operand + y;
 		break;
 	case absindirect:
 		{
-			Word addr = fetch_word();
+			operand = fetch_word();
+
 			// 6502 indirect JMP bug emulation
-			if ((addr & 0x00ff) == 0x00ff) {
-				m = read(addr) | (read(addr & 0xff00) << 8);
+			if ((operand & 0x00ff) == 0x00ff) {
+				m = read(operand) | (read(operand & 0xff00) << 8);
 			} else {
-				m = read_word(addr);
+				m = read_word(operand);
 			}
 		}
 		break;
 	case xindirect:
 		{
-			Byte zp_addr = (fetch() + x) & 0x00ff;
+			operand = fetch();
+			Byte zp_addr = (operand + x) & 0x00ff;
 			m = read(zp_addr) | (read((zp_addr + 1) & 0x00ff) << 8);
 		}
 		break;
 	case yindirect:
 		{
-			Byte zp_addr = fetch() & 0x00ff;
+			operand = fetch();
+			Byte zp_addr = operand & 0x00ff;
 			m = (read(zp_addr) | (read((zp_addr + 1) & 0x00ff) << 8)) + y;
 		}
 		break;
-	case immediate:
-		m = pc++;
-		break;
 	case relative:
 		{
-			Word offset = extend8(fetch());
+			operand = fetch();
+			Word offset = extend8(operand);
 			m = pc + offset;
 		}
 		break;
@@ -191,52 +222,38 @@ Word mos6502::fetch_effective_address()
 	return m;
 }
 
-void mos6502::decode_mode()
+mos6502::mode_t mos6502::decode_mode(Byte ir)
 {
 	// Decode based on opcode bits
 	switch (ir & 0x1f) {
 	case 0x00:
-		mode = (ir & 0x80) ? immediate : (ir == 0x20 ? absolute : implied); // JSR special case
-		break;
+		return (ir & 0x80) ? immediate : (ir == 0x20 ? absolute : implied); // JSR special case
 	case 0x10:
-		mode = relative;
-		break;
+		return relative;
 	case 0x01:
-		mode = xindirect;
-		break;
+		return xindirect;
 	case 0x11:
-		mode = yindirect;
-		break;
+		return yindirect;
 	case 0x02:
-		mode = immediate;
-		break;
+		return immediate;
 	case 0x04: case 0x05: case 0x06:
-		mode = zeropage;
-		break;
+		return zeropage;
 	case 0x14: case 0x15: case 0x16:
-		mode = zpindexed;
-		break;
+		return zpindexed;
 	case 0x08: case 0x18:
-		mode = implied;
-		break;
+		return implied;
 	case 0x09:
-		mode = immediate;
-		break;
+		return immediate;
 	case 0x19:
-		mode = yindexed;
-		break;
+		return yindexed;
 	case 0x0a: case 0x1a:
-		mode = (ir & 0x80) ? implied : accumulator;
-		break;
+		return (ir & 0x80) ? implied : accumulator;
 	case 0x0c: case 0x0d: case 0x0e:
-		mode = (ir == 0x6c) ? absindirect : absolute;	// JMP indirect special case
-		break;
+		return (ir == 0x6c) ? absindirect : absolute;	// JMP indirect special case
 	case 0x1c: case 0x1d: case 0x1e:
-		mode = (ir == 0xbe) ? yindexed : xindexed;	// LDX ABS,Y special case
-		break;
+		return (ir == 0xbe) ? yindexed : xindexed;	// LDX ABS,Y special case
 	default:
-		mode = implied;
-		break;
+		return implied;
 	}
 }
 
@@ -403,9 +420,21 @@ void mos6502::execute_instruction()
 	}
 }
 
-const char *mos6502::disasm_opcode(Word addr)
+template<typename ... Args>
+static std::string fmt(const std::string& format, Args ... args)
 {
-	Byte ir = read(addr);
+	int size = ::snprintf(nullptr, 0, format.c_str(), args ...) + 1;
+	if (size <= 0) {
+		return "string formatting error";
+	}
+
+	std::unique_ptr<char[]> buf(new char[size]);
+	::snprintf(buf.get(), size, format.c_str(), args ...);
+	return std::string(buf.get(), buf.get() + size - 1 );
+}
+
+const char *mos6502::disasm_opcode(Byte ir)
+{
 	switch (ir) {
 		// Miscellaneous Instructions
 		case 0x00:	return "BRK";
@@ -528,5 +557,33 @@ const char *mos6502::disasm_opcode(Word addr)
 		case 0x68:	return "PLA";
 
 		default:	return "???";
+	}
+}
+
+std::string mos6502::disasm_operand(Word addr, mode_t mode)
+{
+	switch (mode) {
+	case absolute:
+		return fmt("$%04X", operand);
+	case zeropage:
+		return fmt("$%02X", operand);
+	case zpindexed:
+		return fmt("$%02X,X", operand);
+	case xindexed:
+		return fmt("$%04X,X", operand);
+	case yindexed:
+		return fmt("$%04X,Y", operand);
+	case absindirect:
+		return fmt("($%04X)", operand);
+	case xindirect:
+		return fmt("($%02X,X)", operand);
+	case yindirect:
+		return fmt("($%02X),Y", operand);
+	case immediate:
+		return fmt("#$%02X", operand);
+	case relative:
+		return fmt("$%04X", (Word)(addr + extend8(operand) + 2));
+	default:
+		return "";
 	}
 }
