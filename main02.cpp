@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <cstdio>
+#include <csignal>
 
 #include "mos6502.h"
 #include "mc6850.h"
@@ -47,7 +48,7 @@ int main(int argc, char *argv[])
 	rom->load_intelhex(argv[1], rom_base);
 
 	cpu.reset();
-	cpu.tron();
+	// cpu.tron();
 	cpu.run();
 
 	return EXIT_SUCCESS;
