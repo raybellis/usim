@@ -15,7 +15,7 @@ LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim usim02
+BIN		= usim09 usim02
 
 LIB		= libusim.a
 
@@ -25,8 +25,8 @@ $(LIB): $(OBJS)
 	ar crs $(@) $^
 	ranlib $(@)
 
-usim:	$(LIB) main.o term.o
-	$(CXX) $(CCFLAGS) $(LDFLAGS) main.o term.o -L. -lusim -o $(@)
+usim09:	$(LIB) main09.o term.o
+	$(CXX) $(CCFLAGS) $(LDFLAGS) main09.o term.o -L. -lusim -o $(@)
 
 usim02:	$(LIB) main02.o term.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) main02.o term.o -L. -lusim -o $(@)
@@ -38,7 +38,7 @@ usim02:	$(LIB) main02.o term.o
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(OBJS) main.o term.o $(LIB)
+	$(RM) $(BIN) $(LIB) *.o
 
 .PHONY: depend
 depend:
@@ -52,6 +52,10 @@ mc6809.o: mc6809.h wiring.h usim.h device.h typedefs.h
 mc6809.o: memory.h bits.h
 mc6809in.o: mc6809.h wiring.h usim.h device.h typedefs.h
 mc6809in.o: memory.h bits.h
+mos6502.o: mos6502.h wiring.h usim.h device.h typedefs.h
+mos6502.o: memory.h bits.h
+mos6502in.o: mos6502.h wiring.h usim.h device.h typedefs.h
+mos6502in.o: memory.h bits.h
 mc6850.o: mc6850.h device.h typedefs.h wiring.h bits.h
 memory.o: memory.h device.h typedefs.h
 main.o: mc6809.h wiring.h usim.h device.h

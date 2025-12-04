@@ -1,18 +1,34 @@
 # USIM
 
-A Motorola MC6809 emulator written in C++
+A framework for emulating 8-bit processors, written in C++.
 
-NB: version 0.91 is historic (written 1993 - 1994) and had some serious
-known bugs in the handling of some instructions and addressing modes.
-Many thanks are due to B. Armstrong and Soren Roug for finding and
-resolving those.
+The currently supported processors are:
+- Motorola MC6809
+- MOS 6502 (NMOS version)
 
-The master branch on the primary Github repository
-(https://github.com/raybellis/usim/) now contains fixes for those
-issues.
+The primary repository for the code is
+https://github.com/raybellis/usim/.
 
-As of January 2021 (!) support for interrupts has been implemented, and
-the code has been refactored so that complete machines are generated
+The code requires a C++20 compatible compiler.
+
+## History
+
+This code was first started in 1993 and was specifically for the Motorola
+6809 processor.  The initial released versions had some serious known bugs
+in the handling of some 6809 instructions and addressing modes.  Many
+thanks are due to B. Armstrong and Soren Roug for finding and resolving
+those.
+
+As of January 2021 support for interrupts was implemented, and
+the code was reorganised so that complete machines are generated
 by creating instances of a CPU, memory devices and peripherals and then
-"attaching" those to each other.   See main.cpp for an example of how
+"attaching" those to each other.  See main.cpp for an example of how
 this is done.
+
+(In earler versions it was necessary to create a subclass of the CPU
+object and overload the `read` and `write` functions to direct memory
+and I/O accesses accordingly).
+
+While this framework was always intended to be extensible for other CPU
+types, this didn't happen until December 2025 when MOS 6502 support was
+added.

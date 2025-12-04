@@ -1,5 +1,5 @@
 //
-//	main.cpp
+//	main09.cpp
 //	(C) R.P.Bellis 1993 - 2025
 //
 //	vim: ts=8 sw=8 noet:
@@ -21,7 +21,7 @@
 int main(int argc, char *argv[])
 {
 	if (argc != 2) {
-		fprintf(stderr, "usage: usim <hexfile>\n");
+		fprintf(stderr, "usage: usim09 <hexfile>\n");
 		return EXIT_FAILURE;
 	}
 
