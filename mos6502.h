@@ -43,8 +43,8 @@ protected: // Processor addressing modes
 				zpyindexed,
 				xindexed,
 				yindexed,
-				xindirect,
-				yindirect,
+				zpxindirect,
+				zpyindirect,
 				absindirect
 	};
 

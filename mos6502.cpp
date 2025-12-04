@@ -196,14 +196,14 @@ Word mos6502::fetch_effective_address()
 			}
 		}
 		break;
-	case xindirect:
+	case zpxindirect:
 		{
 			operand = fetch();
 			Byte zp_addr = (operand + x) & 0x00ff;
 			m = read(zp_addr) | (read((zp_addr + 1) & 0x00ff) << 8);
 		}
 		break;
-	case yindirect:
+	case zpyindirect:
 		{
 			operand = fetch();
 			Byte zp_addr = operand & 0x00ff;
@@ -235,9 +235,9 @@ mos6502::mode_t mos6502::decode_mode(Byte ir)
 	case 0x10:
 		return relative;
 	case 0x01:
-		return xindirect;
+		return zpxindirect;
 	case 0x11:
-		return yindirect;
+		return zpyindirect;
 	case 0x02:
 		return immediate;
 	case 0x04: case 0x05: case 0x06:
@@ -571,6 +571,8 @@ std::string mos6502::disasm_operand(Word addr, mode_t mode)
 		return fmt("#$%02X", operand);
 	case absolute:
 		return fmt("$%04X", operand);
+	case absindirect:
+		return fmt("($%04X)", operand);
 	case zeropage:
 		return fmt("$%02X", operand);
 	case zpxindexed:
@@ -581,11 +583,9 @@ std::string mos6502::disasm_operand(Word addr, mode_t mode)
 		return fmt("$%04X,X", operand);
 	case yindexed:
 		return fmt("$%04X,Y", operand);
-	case absindirect:
-		return fmt("($%04X)", operand);
-	case xindirect:
+	case zpxindirect:
 		return fmt("($%02X,X)", operand);
-	case yindirect:
+	case zpyindirect:
 		return fmt("($%02X),Y", operand);
 	case relative:
 		return fmt("$%04X", (Word)(addr + extend8(operand) + 2));
