@@ -1,8 +1,8 @@
 {
 	"name": "usim",
-	"version": "0.99.0",
-	"keywords": "emulation, mc6809",
-	"description": "USim 6809 emulator framework",
+	"version": "1.0.1",
+	"keywords": "emulation, mc6809, mos6502",
+	"description": "USim 6502 / 6809 emulator framework",
 	"authors": {
 		"name": "Ray Bellis",
 		"maintainer": true
@@ -17,13 +17,11 @@
 	"headers": [
 		"usim.h",
 		"mc6809.h",
+                "mos6850.h",
 		"mc6850.h"
 	],
 	"build": {
 		"flags": [
-			"-DUSIM_MACHDEP_H",
-			"-DMACH_BYTE_ORDER_LSB_FIRST",
-			"-DMACH_BITFIELDS_LSB_FIRST"
 		],
 		"includeDir": ".",
 		"srcDir": ".",
@@ -31,6 +29,8 @@
 			"+<usim.cpp>",
 			"+<mc6809.cpp>",
 			"+<mc6809in.cpp>",
+                        "+<mos6502.cpp>",
+                        "+<mos6502in.cpp>",
 			"+<mc6850.cpp>",
 			"+<memory.cpp>"
 		]

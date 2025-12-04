@@ -30,7 +30,7 @@ https://github.com/hoglet67/BBCBasicSBC02
 
 The code was patched as below:
 
-```
+```diff
 diff --git a/src/SBC_MOS.asm b/src/SBC_MOS.asm
 index b3d6c54..c3c3766 100644
 --- a/src/SBC_MOS.asm
@@ -65,10 +65,10 @@ index c7d43cb..f0a7dcd 100644
  include_RANDOMACCESS=FALSE       \ 443 bytes
  ```
 
-After compilation with `beebasm`, the resulting binary was converted
-to Intel Hex format using the `srecord` utilities:
+After compilation with `beebasm` using the included `build.sh` script,
+the resulting binary was converted to Intel Hex format using the `srecord` utilities:
 
-```
+```txt
 srec_cat SBC02 -binary --offset 0xc000 -output bbcbasic02.hex -Intel
 ```
 

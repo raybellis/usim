@@ -4,5 +4,9 @@
     ],
 "editor.tabSize": 8,
 "editor.stickyTabStops": false,
-"C_Cpp.default.cppStandard": "c++20"
+"C_Cpp.default.cppStandard": "c++20",
+"files.exclude": {
+        "**/*.a": true,
+        "**/*.o": true
+}
 }
