@@ -232,28 +232,28 @@ mos6502::mode_t mos6502::decode_mode(Byte ir)
 	switch (ir & 0x1f) {
 	case 0x00:
 		return (ir & 0x80) ? immediate : (ir == 0x20 ? absolute : implied); // JSR special case
-	case 0x10:
-		return relative;
 	case 0x01:
 		return zpxindirect;
-	case 0x11:
-		return zpyindirect;
 	case 0x02:
 		return immediate;
 	case 0x04: case 0x05: case 0x06:
 		return zeropage;
-	case 0x14: case 0x15: case 0x16:
-		return (ir == 0x96 || ir == 0xb6 ) ? zpyindexed : zpxindexed;  // LDX ZP,Y special case
 	case 0x08: case 0x18:
 		return implied;
 	case 0x09:
 		return immediate;
-	case 0x19:
-		return yindexed;
 	case 0x0a: case 0x1a:
 		return (ir & 0x80) ? implied : accumulator;
 	case 0x0c: case 0x0d: case 0x0e:
 		return (ir == 0x6c) ? absindirect : absolute;	// JMP indirect special case
+	case 0x10:
+		return relative;
+	case 0x11:
+		return zpyindirect;
+	case 0x14: case 0x15: case 0x16:
+		return (ir == 0x96 || ir == 0xb6 ) ? zpyindexed : zpxindexed;  // LDX ZP,Y special case
+	case 0x19:
+		return yindexed;
 	case 0x1c: case 0x1d: case 0x1e:
 		return (ir == 0xbe) ? yindexed : xindexed;	// LDX ABS,Y special case
 	default:
