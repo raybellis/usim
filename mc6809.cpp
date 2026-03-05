@@ -542,7 +542,7 @@ Byte mc6809::fetch_operand()
 {
 	switch (mode) {
 		case immediate:
-			return operand = extend8(fetch());
+			return operand = fetch();
 		case relative: {
 			Byte r = fetch();
 			operand = pc + extend8(r);
