@@ -21,12 +21,7 @@ void mos6502::help_cmp(Byte reg, Byte val)
 {
     uint16_t diff = (uint16_t)reg - (uint16_t)val;
     p.c = (reg >= val);
-    Byte result = (Byte)(diff & 0xff);
-    set_nz(result);
-
-    // Overflow occurs if the sign bits of reg and val are different,
-    // and the sign bit of the result is different from the sign bit of reg
-    p.v = (((uint16_t)reg ^ (uint16_t)val) & ((uint16_t)reg ^ (uint16_t)result) & 0x80) != 0;
+    set_nz((Byte)(diff & 0xff));
 }
 
 void mos6502::help_ld(Byte& reg)
@@ -292,7 +287,7 @@ void mos6502::pha()
 
 void mos6502::php()
 {
-	do_psh(p.value);
+	do_psh((Byte)(p.value | 0x30));
 }
 
 void mos6502::pla()

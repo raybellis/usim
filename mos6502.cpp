@@ -37,9 +37,10 @@ void mos6502::do_nmi()
 {
         do_psh(pc);
 	mos6502_status pushed = p;
-	pushed.i = true;
 	pushed.b = false;
-	do_psh((Byte)pushed);
+	do_psh((Byte)(pushed.value | 0x20));
+	p.i = true;
+	p.b = false;
         pc = read_word(vector_nmi);
 }
 
@@ -49,7 +50,7 @@ void mos6502::do_irq()
 
 	mos6502_status pushed = p;
 	pushed.b = false;
-	do_psh((Byte)pushed);
+	do_psh((Byte)(pushed.value | 0x20));
 
 	p.i = true;
 	p.b = false;
@@ -66,7 +67,7 @@ void mos6502::do_brk()
 
 	mos6502_status pushed = p;
 	pushed.b = true;
-	do_psh((Byte)pushed);
+	do_psh((Byte)(pushed.value | 0x20));
 
 	p.i = true;
 	p.b = false;
@@ -378,10 +379,10 @@ void mos6502::execute_instruction()
 		case 0x96:
 			stx(); break;
 		case 0xa0: case 0xa4: case 0xac:
-		case 0xb4:
+		case 0xb4: case 0xbc:
 			ldy(); break;
 		case 0xa2: case 0xa6: case 0xae:
-		case 0xb6:
+		case 0xb6: case 0xbe:
 			ldx(); break;
 
 		// Increment and Decrement Register Instructions
@@ -529,10 +530,10 @@ const char *mos6502::disasm_opcode(Byte ir)
 		// Register Load and Store Instructions
 		case 0x84: case 0x8c:
 		case 0x94:
-				return "STX";
+				return "STY";
 		case 0x86: case 0x8e:
 		case 0x96:
-				return "STY";
+				return "STX";
 		case 0xa0: case 0xa4: case 0xac:
 		case 0xb4:
 				return "LDY";

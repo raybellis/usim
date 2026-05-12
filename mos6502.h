@@ -154,8 +154,8 @@ inline void mos6502::do_br(const char *mnemonic, bool test)
 	(void)mnemonic;
 	Word next = fetch_effective_address();
 	if (test) {
+		cycles += ((pc & 0xff00) != (next & 0xff00)) ? 2 : 1;
 		pc = next;
-		++cycles;
 	}
 }
 
@@ -167,8 +167,8 @@ inline void mos6502::do_psh(Byte val)
 
 inline void mos6502::do_psh(Word val)
 {
-	do_psh((Byte)val);
 	do_psh((Byte)(val >> 8));
+	do_psh((Byte)val);
 }
 
 inline void mos6502::do_pul(Byte& val)
@@ -180,7 +180,7 @@ inline void mos6502::do_pul(Byte& val)
 inline void mos6502::do_pul(Word& val)
 {
 	uint8_t lsb, msb;
-	do_pul(msb);
 	do_pul(lsb);
+	do_pul(msb);
 	val = (msb << 8) | lsb;
 }
