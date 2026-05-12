@@ -183,7 +183,6 @@ protected:	// helper functions
 	void			help_st(Byte);
 	void			help_st(Word);
 	void			help_sub(Byte&);
-	void			help_sub(Word&);
 	void			help_tst(Byte);
 
 protected:	// overloadable functions (e.g. for breakpoints)

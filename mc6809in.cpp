@@ -450,7 +450,7 @@ void mc6809::bge()
 
 void mc6809::lbge()
 {
-	insn = "LGBE";
+	insn = "LBGE";
 	do_lbr("ge", !(cc.n ^ cc.v));
 }
 

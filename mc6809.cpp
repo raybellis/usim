@@ -783,9 +783,9 @@ std::string mc6809::disasm_operand()
 {
 	// special cases for PSHx / PULx / EXG / TFR
 	switch (ir) {
-		case 0x34: case 0x36:	// PSHS / PULS
+		case 0x34: case 0x35:	// PSHS / PULS
 			return disasm_reglist(operand, "U");
-		case 0x35: case 0x37:	// PSHU / PULU
+		case 0x36: case 0x37:	// PSHU / PULU
 			return disasm_reglist(operand, "S");
 		case 0x1e: case 0x1f:	// EXG / TFR
 			return disasm_regpair(operand);
