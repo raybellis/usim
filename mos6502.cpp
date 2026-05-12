@@ -128,7 +128,7 @@ void mos6502::tick()
 
 void mos6502::print_regs()
 {
-	char flags[] = "NVRBDIZC";
+	char flags[] = "NV-BDIZC";
 	for (uint8_t i = 0, mask = 0x80; mask; ++i, mask >>= 1) {
 		if ((p.value & mask) == 0) {
 			flags[i] = '-';

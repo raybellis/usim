@@ -10,18 +10,18 @@
 #include <string>
 #include "wiring.h"
 #include "usim.h"
-#include "bits.h"
+#include "registers.h"
 
 union mos6502_status {
 	uint8_t         value;
-	template <int offset> using bit = ByteBits<mos6502_status, offset>;
+	template <int offset> using bit = register_bits<uint8_t, offset, bool, 1>;
 
 	bit<0>          c;
 	bit<1>          z;
 	bit<2>          i;
 	bit<3>          d;
 	bit<4>          b;
-	bit<5>          r;
+	// bit<5>	r;	// reserved
 	bit<6>          v;
 	bit<7>          n;
 	operator uint8_t() const { return value; }

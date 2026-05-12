@@ -457,25 +457,25 @@ void mc6809::lbge()
 void mc6809::bgt()
 {
 	insn = "BGT";
-	do_br("gt", !(cc.z | (cc.n ^ cc.v)));
+	do_br("gt", !(cc.z || (cc.n ^ cc.v)));
 }
 
 void mc6809::lbgt()
 {
 	insn = "LBGT";
-	do_lbr("gt", !(cc.z | (cc.n ^ cc.v)));
+	do_lbr("gt", !(cc.z || (cc.n ^ cc.v)));
 }
 
 void mc6809::bhi()
 {
 	insn = "BHI";
-	do_br("hi", !(cc.c | cc.z));
+	do_br("hi", !(cc.c || cc.z));
 }
 
 void mc6809::lbhi()
 {
 	insn = "LBHI";
-	do_lbr("hi", !(cc.c | cc.z));
+	do_lbr("hi", !(cc.c || cc.z));
 }
 
 void mc6809::bita()
@@ -493,25 +493,25 @@ void mc6809::bitb()
 void mc6809::ble()
 {
 	insn = "BLE";
-	do_br("le", cc.z | (cc.n ^ cc.v));
+	do_br("le", cc.z || (cc.n ^ cc.v));
 }
 
 void mc6809::lble()
 {
 	insn = "LBLE";
-	do_lbr("le", cc.z | (cc.n ^ cc.v));
+	do_lbr("le", cc.z || (cc.n ^ cc.v));
 }
 
 void mc6809::bls()
 {
 	insn = "BLS";
-	do_br("ls", cc.c | cc.z);
+	do_br("ls", cc.c || cc.z);
 }
 
 void mc6809::lbls()
 {
 	insn = "LBLS";
-	do_lbr("ls", cc.c | cc.z);
+	do_lbr("ls", cc.c || cc.z);
 }
 
 void mc6809::blt()

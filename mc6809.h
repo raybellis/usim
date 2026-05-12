@@ -11,11 +11,11 @@
 #include <bit>
 #include "wiring.h"
 #include "usim.h"
-#include "bits.h"
+#include "registers.h"
 
 union mc6809_cc {
 	uint8_t         value;
-	template <int offset> using bit = ByteBits<mc6809_cc, offset>;
+	template <int offset> using bit = register_bits<uint8_t, offset, bool, 1>;
 	bit<0>          c;      // Carry
 	bit<1>          v;      // Overflow
 	bit<2>          z;      // Zero
