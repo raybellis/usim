@@ -33,7 +33,7 @@ protected:
 
 int main(int argc, char *argv[])
 {
-	const char *binfile = (argc == 2) ? argv[1] : "test/6502_functional_test.bin";
+	const char *binfile = (argc == 2) ? argv[1] : "tests/6502_functional_test.bin";
 
 	Test6502 cpu;
 

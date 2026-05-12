@@ -15,7 +15,7 @@ LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim09 usim02 test/test6502
+BIN		= usim09 usim02 tests/test6502
 
 LIB		= libusim.a
 
@@ -31,15 +31,15 @@ usim09:	$(LIB) main09.o term.o
 usim02:	$(LIB) main02.o term.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) main02.o term.o -L. -lusim -o $(@)
 
-test/test6502: $(LIB) test/test6502.o
-	$(CXX) $(CCFLAGS) $(LDFLAGS) test/test6502.o -L. -lusim -o $(@)
+tests/test6502: $(LIB) tests/test6502.o
+	$(CXX) $(CCFLAGS) $(LDFLAGS) tests/test6502.o -L. -lusim -o $(@)
 
-test/test6502.o: test/test6502.cpp
-	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c test/test6502.cpp -o $(@)
+tests/test6502.o: tests/test6502.cpp
+	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c tests/test6502.cpp -o $(@)
 
 .PHONY: test
-test: test/test6502
-	test/test6502
+test: tests/test6502
+	tests/test6502
 
 .SUFFIXES: .cpp
 
@@ -48,7 +48,7 @@ test: test/test6502
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(LIB) *.o test/*.o
+	$(RM) $(BIN) $(LIB) *.o tests/*.o
 
 .PHONY: depend
 depend:

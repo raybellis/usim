@@ -16,9 +16,9 @@ Compiles with C++20, `-Wall -Wextra -Werror`. There is no separate lint target; 
 There is no automated test suite. Tests are ROM images run through the simulators:
 
 ```bash
-./usim09 tests/test_main.hex    # MC6809 test ROM
-./usim09 tests/tbasic09.hex     # TinyBASIC for MC6809
-./usim02 tests/bbcbasic02.hex   # BBC BASIC v2 for MOS 6502
+./usim09 samples/test_main.hex    # MC6809 test ROM
+./usim09 samples/tbasic09.hex     # TinyBASIC for MC6809
+./usim02 samples/bbcbasic02.hex   # BBC BASIC v2 for MOS 6502
 ```
 
 ## Architecture
