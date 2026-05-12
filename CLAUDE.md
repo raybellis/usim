@@ -13,7 +13,17 @@ Compiles with C++20, `-Wall -Wextra -Werror`. There is no separate lint target; 
 
 ## Testing
 
-There is no automated test suite. Tests are ROM images run through the simulators:
+```bash
+make test       # run both CPU functional tests; exits 0 on PASS
+```
+
+Two automated tests:
+
+- **MOS 6502** (`tests/test6502.cpp`): runs Klaus Dormann's 6502 functional test. Loads a flat 64KB binary, runs until PC traps on itself, checks for success address `0x3469`. Exercises every legal opcode including BCD arithmetic.
+
+- **MC6809** (`tests/test6809.cpp` + `tests/test6809.asm`): a custom MC6809 functional test suite. Assembled with `asm6809 -B`, loaded at `$0400`. Tests ALU, flags, shifts, EXG/TFR, PSHS/PULS, branches, BSR/JSR/RTS, RTI (E=0 and E=1 via SWI), SWI/SWI2/SWI3, MUL, DAA, SEX, ABX, LEA, and indexed addressing. Success address is `0x0986`.
+
+Interactive ROM images (no automated pass/fail):
 
 ```bash
 ./usim09 samples/test_main.hex    # MC6809 test ROM
