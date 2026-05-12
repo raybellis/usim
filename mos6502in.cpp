@@ -61,15 +61,31 @@ void mos6502::help_ror(Byte &val)
 void mos6502::adc()
 {
 	auto val = fetch_operand();
-	uint16_t sum = (uint16_t)a + (uint16_t)val + (uint16_t)(p.c ? 1 : 0);
-	p.c = (sum > 0xff);
-	Byte result = (Byte)(sum & 0xff);
-	set_nz(result);
+	uint16_t c = p.c ? 1 : 0;
 
-	// Overflow occurs if the sign bits of a and val are the same,
-	// and the sign bit of the result is different
-	p.v = (~((uint16_t)a ^ (uint16_t)val) & ((uint16_t)a ^ (uint16_t)result) & 0x80) != 0;
-	a = result;
+	if (p.d) {
+		// NMOS 6502: Z from binary result, N/V from partially-corrected result
+		uint16_t bin = (uint16_t)a + (uint16_t)val + c;
+		p.z = (bin & 0xff) == 0;
+
+		uint16_t al = (a & 0x0f) + (val & 0x0f) + c;
+		if (al > 9) al += 6;
+		uint16_t ah = (a >> 4) + (val >> 4) + (al > 15 ? 1 : 0);
+
+		p.n = (ah << 4) & 0x80;
+		p.v = (~((uint16_t)a ^ (uint16_t)val) & ((uint16_t)a ^ (uint16_t)(ah << 4)) & 0x80) != 0;
+
+		if (ah > 9) ah += 6;
+		p.c = ah > 15;
+		a = (Byte)(((ah & 0x0f) << 4) | (al & 0x0f));
+	} else {
+		uint16_t sum = (uint16_t)a + (uint16_t)val + c;
+		p.c = (sum > 0xff);
+		Byte result = (Byte)(sum & 0xff);
+		set_nz(result);
+		p.v = (~((uint16_t)a ^ (uint16_t)val) & ((uint16_t)a ^ (uint16_t)result) & 0x80) != 0;
+		a = result;
+	}
 }
 
 void mos6502::and_()
@@ -340,14 +356,24 @@ void mos6502::rts()
 void mos6502::sbc()
 {
 	auto val = fetch_operand();
-	uint16_t diff = (uint16_t)a - (uint16_t)val - (uint16_t)(p.c ? 0 : 1);
-	p.c = (diff < 0x100);
+	uint16_t borrow = p.c ? 0 : 1;
+	uint16_t diff = (uint16_t)a - (uint16_t)val - borrow;
 	Byte result = (Byte)(diff & 0xff);
+
+	// NMOS 6502: all flags from binary result in both binary and decimal modes
+	p.c = (diff < 0x100);
 	set_nz(result);
-	// Overflow occurs if the sign bits of a and val are different,
-	// and the sign bit of the result is different from the sign bit of a
 	p.v = (((uint16_t)a ^ (uint16_t)val) & ((uint16_t)a ^ (uint16_t)result) & 0x80) != 0;
-	a = result;
+
+	if (p.d) {
+		int16_t al = (int16_t)(a & 0x0f) - (int16_t)(val & 0x0f) - (int16_t)borrow;
+		if (al < 0) al = ((al - 6) & 0x0f) - 0x10;
+		int16_t ah = (int16_t)(a >> 4) - (int16_t)(val >> 4) + (al >> 4);
+		if (ah < 0) ah -= 6;
+		a = (Byte)(((ah & 0x0f) << 4) | (al & 0x0f));
+	} else {
+		a = result;
+	}
 }
 
 void mos6502::sec()
