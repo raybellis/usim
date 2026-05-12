@@ -84,6 +84,7 @@ void mos6502::reset()
 	p.value = 0;
 	p.i = true;	// Disable interrupts
 	p.d = false;	// Decimal mode off
+	nmi_previous = true;	// NMI is active-low; idle state is high
 	pc = read_word(vector_reset);
 	cycles = 7;
 }

@@ -314,7 +314,10 @@ void mos6502::pla()
 
 void mos6502::plp()
 {
-	do_pul(p.value);
+	Byte pulled;
+	do_pul(pulled);
+	// B (bit 4) and unused (bit 5) are not real flags; preserve them
+	p.value = (pulled & 0xcf) | (p.value & 0x30);
 }
 
 void mos6502::rol()
@@ -343,7 +346,10 @@ void mos6502::ror()
 
 void mos6502::rti()
 {
-	do_pul(p.value);
+	Byte pulled;
+	do_pul(pulled);
+	// B (bit 4) and unused (bit 5) are not real flags; preserve them
+	p.value = (pulled & 0xcf) | (p.value & 0x30);
 	do_pul(pc);
 }
 
