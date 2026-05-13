@@ -210,3 +210,73 @@ void base65c02::tsb()
 	p.z = ((a & val) == 0);
 	write(m, val | a);
 }
+
+void base65c02::adc()
+{
+	// Binary mode is identical to NMOS.
+	if (!p.d) {
+		mos6502::adc();
+		return;
+	}
+
+	// CMOS decimal: N, V, Z come from the BCD-corrected result, and the
+	// instruction takes one extra cycle.
+	Byte val = fetch_operand();
+	Byte oa = a;
+	uint16_t c = p.c ? 1 : 0;
+
+	uint16_t al = (a & 0x0f) + (val & 0x0f) + c;
+	if (al > 9) al += 6;
+	uint16_t ah = (a >> 4) + (val >> 4) + (al > 15 ? 1 : 0);
+	if (ah > 9) ah += 6;
+	p.c = (ah > 15);
+	a = (Byte)(((ah & 0x0f) << 4) | (al & 0x0f));
+
+	set_nz(a);
+	p.v = (~((uint16_t)oa ^ (uint16_t)val) & ((uint16_t)oa ^ (uint16_t)a) & 0x80) != 0;
+	++cycles;
+}
+
+void base65c02::sbc()
+{
+	if (!p.d) {
+		mos6502::sbc();
+		return;
+	}
+
+	// CMOS decimal: N, V, Z come from the BCD-corrected result; C from
+	// the binary subtraction; one extra cycle.
+	Byte val = fetch_operand();
+	Byte oa = a;
+	uint16_t borrow = p.c ? 0 : 1;
+	uint16_t diff = (uint16_t)a - (uint16_t)val - borrow;
+	p.c = (diff < 0x100);
+
+	int16_t al = (int16_t)(a & 0x0f) - (int16_t)(val & 0x0f) - (int16_t)borrow;
+	if (al < 0) al = ((al - 6) & 0x0f) - 0x10;
+	int16_t ah = (int16_t)(a >> 4) - (int16_t)(val >> 4) + (al >> 4);
+	if (ah < 0) ah -= 6;
+	a = (Byte)(((ah & 0x0f) << 4) | (al & 0x0f));
+
+	set_nz(a);
+	p.v = (((uint16_t)oa ^ (uint16_t)val) & ((uint16_t)oa ^ (uint16_t)diff) & 0x80) != 0;
+	++cycles;
+}
+
+void base65c02::do_nmi()
+{
+	mos6502::do_nmi();
+	p.d = false;
+}
+
+void base65c02::do_irq()
+{
+	mos6502::do_irq();
+	p.d = false;
+}
+
+void base65c02::do_brk()
+{
+	mos6502::do_brk();
+	p.d = false;
+}

@@ -20,6 +20,13 @@ protected:	// dispatch overrides
 
 protected:	// CMOS-extended NMOS instruction overrides
 	virtual void		bit() override;
+	virtual void		adc() override;
+	virtual void		sbc() override;
+
+protected:	// interrupt entry overrides (clear D on entry)
+	virtual void		do_nmi() override;
+	virtual void		do_irq() override;
+	virtual void		do_brk() override;
 
 protected:	// CMOS-specific instruction implementations
 	void			bra();
