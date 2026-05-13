@@ -20,6 +20,7 @@ protected:	// dispatch overrides
 
 protected:	// CMOS-specific instruction implementations
 	void			bra();
+	void			stz();
 
 public:
 				base65c02();

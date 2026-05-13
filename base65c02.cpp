@@ -22,6 +22,8 @@ mos6502::mode_t base65c02::decode_mode(Byte ir)
 		return relative;
 	case 0x7c:		// JMP (abs,X)
 		return absxindirect;
+	case 0x9c:		// STZ abs (NMOS decoder would say xindexed)
+		return absolute;
 	default:
 		return mos6502::decode_mode(ir);
 	}
@@ -34,6 +36,8 @@ void base65c02::execute_instruction()
 		bra(); break;
 	case 0x7c:
 		jmp(); break;
+	case 0x64: case 0x74: case 0x9c: case 0x9e:
+		stz(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -67,6 +71,8 @@ const char* base65c02::disasm_opcode(Byte ir)
 		return "BRA";
 	case 0x7c:
 		return "JMP";
+	case 0x64: case 0x74: case 0x9c: case 0x9e:
+		return "STZ";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
@@ -75,4 +81,10 @@ const char* base65c02::disasm_opcode(Byte ir)
 void base65c02::bra()
 {
 	do_br("BRA", true);
+}
+
+void base65c02::stz()
+{
+	auto m = fetch_effective_address();
+	write(m, 0);
 }
