@@ -12,10 +12,11 @@ LDFLAGS		=
 LIB_SRCS	= usim.cpp memory.cpp \
 		  mc6809.cpp mc6809in.cpp \
 		  mos6502.cpp mos6502in.cpp \
+		  base65c02.cpp \
 		  mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim09 usim02 tests/test6502 tests/test6809
+BIN		= usim09 usim02 usim65c02 tests/test6502 tests/test6809
 
 LIB		= libusim.a
 
@@ -30,6 +31,9 @@ usim09:	$(LIB) main09.o term.o
 
 usim02:	$(LIB) main02.o term.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) main02.o term.o -L. -lusim -o $(@)
+
+usim65c02: $(LIB) main65c02.o term.o
+	$(CXX) $(CCFLAGS) $(LDFLAGS) main65c02.o term.o -L. -lusim -o $(@)
 
 tests/test6502: $(LIB) tests/test6502.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) tests/test6502.o -L. -lusim -o $(@)
@@ -78,6 +82,8 @@ mos6502.o: mos6502.h wiring.h usim.h device.h typedefs.h
 mos6502.o: memory.h bits.h
 mos6502in.o: mos6502.h wiring.h usim.h device.h typedefs.h
 mos6502in.o: memory.h bits.h
+base65c02.o: base65c02.h mos6502.h wiring.h usim.h device.h typedefs.h
+base65c02.o: memory.h bits.h
 mc6850.o: mc6850.h device.h typedefs.h wiring.h bits.h
 memory.o: memory.h device.h typedefs.h
 main.o: mc6809.h wiring.h usim.h device.h
