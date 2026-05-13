@@ -46,6 +46,10 @@ void base65c02::execute_instruction()
 		plx(); break;
 	case 0x7a:
 		ply(); break;
+	case 0x1a:
+		ina(); break;
+	case 0x3a:
+		dea(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -89,6 +93,10 @@ const char* base65c02::disasm_opcode(Byte ir)
 		return "PLX";
 	case 0x7a:
 		return "PLY";
+	case 0x1a:
+		return "INC";
+	case 0x3a:
+		return "DEC";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
@@ -125,4 +133,16 @@ void base65c02::ply()
 {
 	do_pul(y);
 	set_nz(y);
+}
+
+void base65c02::ina()
+{
+	++a;
+	set_nz(a);
+}
+
+void base65c02::dea()
+{
+	--a;
+	set_nz(a);
 }
