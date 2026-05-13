@@ -4,7 +4,7 @@
 //
 //	vim: ts=8 sw=8 noet:
 //
-//	Example of a simple WDC 65C02 system with an MC6850 ACIA at
+//	Example of a simple 65C02 system with an MC6850 ACIA at
 //	address 0xa000, 32kB of RAM at 0x0000 and 16kB of ROM at 0xc000
 //
 

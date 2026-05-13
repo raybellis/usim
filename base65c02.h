@@ -1,8 +1,9 @@
 //
 //	base65c02.h
 //	(C) R.P.Bellis 2026 -
-//	Class definition for the common WDC 65C02 CMOS core
-//	(no RMB/SMB/BBR/BBS/WAI/STP).
+//	Common 65C02 CMOS core (shared by all CMOS variants).
+//	Concrete vendor subclasses add their own extensions
+//	(RMB/SMB/BBR/BBS, WAI/STP, etc.) on top of this.
 //	vim: ts=8 sw=8 noet:
 //
 
