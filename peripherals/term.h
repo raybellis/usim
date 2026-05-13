@@ -15,20 +15,20 @@
 #include <termios.h>
 #endif
 
-class Terminal :  virtual public mc6850_impl {
+class Terminal : virtual public mc6850_impl {
 
 protected:
 	USim&			sys;
 	Byte			read_data;
 	bool			read_data_available = false;
 
-        enum tilde_escape_state {
-                normal,
-                looking,
-                handling
-        };
+	enum tilde_escape_state {
+		normal,
+		looking,
+		handling
+	};
 
-        tilde_escape_state      tilde_state = looking;
+	tilde_escape_state	tilde_state = looking;
 	void			tilde_escape_help();
 	virtual void		tilde_escape_help_other();
 	virtual void 		tilde_escape_do_other(char ch);

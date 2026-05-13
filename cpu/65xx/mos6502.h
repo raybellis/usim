@@ -13,17 +13,17 @@
 #include "registers.h"
 
 union mos6502_status {
-	uint8_t         value;
+	uint8_t		value;
 	template <int offset> using bit = register_bits<uint8_t, offset, bool, 1>;
 
-	bit<0>          c;
-	bit<1>          z;
-	bit<2>          i;
-	bit<3>          d;
-	bit<4>          b;
+	bit<0>		c;
+	bit<1>		z;
+	bit<2>		i;
+	bit<3>		d;
+	bit<4>		b;
 	// bit<5>	r;	// reserved
-	bit<6>          v;
-	bit<7>          n;
+	bit<6>		v;
+	bit<7>		n;
 	operator uint8_t() const { return value; }
 	uint8_t operator =(uint8_t n) { return value = n; }
 };
@@ -112,9 +112,9 @@ protected:	// instruction implementations
 	void			tsx(), txs();
 
 protected:	// helper functions
-        void			set_nz(Byte val);
-        void			help_asl(Byte &val);
-        void			help_cmp(Byte reg, Byte value);
+	void			set_nz(Byte val);
+	void			help_asl(Byte &val);
+	void			help_cmp(Byte reg, Byte value);
 	void			help_ld(Byte& reg);
 	void			help_lsr(Byte& val);
 	void			help_rol(Byte &val);

@@ -14,23 +14,23 @@
 #include "registers.h"
 
 union mc6809_cc {
-	uint8_t         value;
+	uint8_t		value;
 	template <int offset> using bit = register_bits<uint8_t, offset, bool, 1>;
-	bit<0>          c;      // Carry
-	bit<1>          v;      // Overflow
-	bit<2>          z;      // Zero
-	bit<3>          n;      // Negative
-	bit<4>          i;      // IRQ disable
-	bit<5>          h;      // Half carry
-	bit<6>          f;      // FIRQ disable
-	bit<7>          e;      // Entire
+	bit<0>		c;	// Carry
+	bit<1>		v;	// Overflow
+	bit<2>		z;	// Zero
+	bit<3>		n;	// Negative
+	bit<4>		i;	// IRQ disable
+	bit<5>		h;	// Half carry
+	bit<6>		f;	// FIRQ disable
+	bit<7>		e;	// Entire
 	operator uint8_t() const { return value; }
 	uint8_t operator =(uint8_t n) { return value = n; }
 };
 
 class mc6809 : virtual public USimBE {
 
-protected:      // Processor addressing modes
+protected:	// Processor addressing modes
 
 	enum {
 				immediate,
@@ -41,7 +41,7 @@ protected:      // Processor addressing modes
 				relative
 	} mode;
 
-public:         // useful addresses
+public:		// useful addresses
 
 	enum : uint16_t {
 		vector_reserved	= 0xfff0,
@@ -59,7 +59,7 @@ protected:	// Processor registers
 	Word			u, s;		// Stack pointers
 	Word			x, y;		// Index registers
 	Byte			dp;		// Direct Page register
-	mc6809_cc               cc;
+	mc6809_cc		cc;
 
 	// NB: intentional UB type-aliasing
 	union {

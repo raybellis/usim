@@ -9,7 +9,7 @@
 
 #include "typedefs.h"
 
-//  8 bit operations
+// 8 bit operations
 inline bool btst(Byte x, int n)
 {
 	return (x & (1 << n)) ? true : false;

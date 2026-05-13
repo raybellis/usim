@@ -21,7 +21,7 @@ template<typename T, unsigned offset = 0, typename R = bool, unsigned size = 8 *
 		 std::is_unsigned_v<R> &&
 		 (size <= 8 * sizeof(R)) &&
 		 (offset + size <= 8 * sizeof(T))
-class register_bits  {
+class register_bits {
 
 private:
 	constexpr T mask() const {
