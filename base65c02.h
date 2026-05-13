@@ -18,6 +18,9 @@ protected:	// dispatch overrides
 	virtual Word		fetch_effective_address() override;
 	virtual const char*	disasm_opcode(Byte ir) override;
 
+protected:	// CMOS-extended NMOS instruction overrides
+	virtual void		bit() override;
+
 protected:	// CMOS-specific instruction implementations
 	void			bra();
 	void			stz();

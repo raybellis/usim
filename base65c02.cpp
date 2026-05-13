@@ -50,6 +50,8 @@ void base65c02::execute_instruction()
 		ina(); break;
 	case 0x3a:
 		dea(); break;
+	case 0x34: case 0x3c: case 0x89:
+		bit(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -97,6 +99,8 @@ const char* base65c02::disasm_opcode(Byte ir)
 		return "INC";
 	case 0x3a:
 		return "DEC";
+	case 0x34: case 0x3c: case 0x89:
+		return "BIT";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
@@ -145,4 +149,17 @@ void base65c02::dea()
 {
 	--a;
 	set_nz(a);
+}
+
+void base65c02::bit()
+{
+	// CMOS BIT #imm sets only Z, leaving N and V untouched.
+	// Every other addressing form (existing zp/abs and the new zp,X
+	// and abs,X) is handled by the inherited memory-mode logic.
+	if (mode == immediate) {
+		Byte val = fetch_operand();
+		p.z = ((a & val) == 0);
+	} else {
+		mos6502::bit();
+	}
 }
