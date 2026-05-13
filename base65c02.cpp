@@ -38,6 +38,14 @@ void base65c02::execute_instruction()
 		jmp(); break;
 	case 0x64: case 0x74: case 0x9c: case 0x9e:
 		stz(); break;
+	case 0xda:
+		phx(); break;
+	case 0x5a:
+		phy(); break;
+	case 0xfa:
+		plx(); break;
+	case 0x7a:
+		ply(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -73,6 +81,14 @@ const char* base65c02::disasm_opcode(Byte ir)
 		return "JMP";
 	case 0x64: case 0x74: case 0x9c: case 0x9e:
 		return "STZ";
+	case 0xda:
+		return "PHX";
+	case 0x5a:
+		return "PHY";
+	case 0xfa:
+		return "PLX";
+	case 0x7a:
+		return "PLY";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
@@ -87,4 +103,26 @@ void base65c02::stz()
 {
 	auto m = fetch_effective_address();
 	write(m, 0);
+}
+
+void base65c02::phx()
+{
+	do_psh(x);
+}
+
+void base65c02::phy()
+{
+	do_psh(y);
+}
+
+void base65c02::plx()
+{
+	do_pul(x);
+	set_nz(x);
+}
+
+void base65c02::ply()
+{
+	do_pul(y);
+	set_nz(y);
 }

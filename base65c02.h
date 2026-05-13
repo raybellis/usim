@@ -21,6 +21,8 @@ protected:	// dispatch overrides
 protected:	// CMOS-specific instruction implementations
 	void			bra();
 	void			stz();
+	void			phx(), phy();
+	void			plx(), ply();
 
 public:
 				base65c02();
