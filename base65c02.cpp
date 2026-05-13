@@ -27,6 +27,10 @@ mos6502::mode_t base65c02::decode_mode(Byte ir)
 	case 0x12: case 0x32: case 0x52: case 0x72:	// ORA/AND/EOR/ADC (zp)
 	case 0x92: case 0xb2: case 0xd2: case 0xf2:	// STA/LDA/CMP/SBC (zp)
 		return zpindirect;
+	case 0x14:		// TRB zp (NMOS decoder would say zpxindexed)
+		return zeropage;
+	case 0x1c:		// TRB abs (NMOS decoder would say xindexed)
+		return absolute;
 	default:
 		return mos6502::decode_mode(ir);
 	}
@@ -63,6 +67,10 @@ void base65c02::execute_instruction()
 	case 0xb2: lda(); break;
 	case 0xd2: cmp(); break;
 	case 0xf2: sbc(); break;
+	case 0x14: case 0x1c:
+		trb(); break;
+	case 0x04: case 0x0c:
+		tsb(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -120,6 +128,10 @@ const char* base65c02::disasm_opcode(Byte ir)
 	case 0xb2: return "LDA";
 	case 0xd2: return "CMP";
 	case 0xf2: return "SBC";
+	case 0x14: case 0x1c:
+		return "TRB";
+	case 0x04: case 0x0c:
+		return "TSB";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
@@ -181,4 +193,20 @@ void base65c02::bit()
 	} else {
 		mos6502::bit();
 	}
+}
+
+void base65c02::trb()
+{
+	auto m = fetch_effective_address();
+	Byte val = read(m);
+	p.z = ((a & val) == 0);
+	write(m, val & ~a);
+}
+
+void base65c02::tsb()
+{
+	auto m = fetch_effective_address();
+	Byte val = read(m);
+	p.z = ((a & val) == 0);
+	write(m, val | a);
 }

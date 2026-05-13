@@ -27,6 +27,7 @@ protected:	// CMOS-specific instruction implementations
 	void			phx(), phy();
 	void			plx(), ply();
 	void			ina(), dea();
+	void			trb(), tsb();
 
 public:
 				base65c02();
