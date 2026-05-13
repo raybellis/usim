@@ -1186,6 +1186,7 @@ void mc6809::subd()
 	cc.n = btst((DWord)t, 15);
 	d = t & 0xffff;
 	cc.z = !d;
+	++cycles;
 }
 
 void mc6809::swi()

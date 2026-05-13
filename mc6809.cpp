@@ -644,7 +644,7 @@ Word mc6809::fetch_indexed_operand()
 			operand = extend8(fetch());
 			return pc + operand;
 		case 0x0d: case 0x1d:		// ,PC + 16
-			cycles += 3;
+			cycles += 4;
 			operand = fetch_word();
 			return pc + operand;
 		case 0x1f:			// [,Address]
