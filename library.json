@@ -15,24 +15,31 @@
 		"url": "https://github.com/raybellis/usim.git"
 	},
 	"headers": [
-		"usim.h",
-		"mc6809.h",
-                "mos6850.h",
-		"mc6850.h"
+		"core/usim.h",
+		"cpu/6809/mc6809.h",
+		"cpu/65xx/mos6502.h",
+		"cpu/65xx/base65c02.h",
+		"peripherals/mc6850.h"
 	],
 	"build": {
 		"flags": [
+			"-I.",
+			"-Icore",
+			"-Icpu/6809",
+			"-Icpu/65xx",
+			"-Iperipherals"
 		],
 		"includeDir": ".",
 		"srcDir": ".",
 		"srcFilter": [
-			"+<usim.cpp>",
-			"+<mc6809.cpp>",
-			"+<mc6809in.cpp>",
-                        "+<mos6502.cpp>",
-                        "+<mos6502in.cpp>",
-			"+<mc6850.cpp>",
-			"+<memory.cpp>"
+			"+<core/usim.cpp>",
+			"+<core/memory.cpp>",
+			"+<cpu/6809/mc6809.cpp>",
+			"+<cpu/6809/mc6809in.cpp>",
+			"+<cpu/65xx/mos6502.cpp>",
+			"+<cpu/65xx/mos6502in.cpp>",
+			"+<cpu/65xx/base65c02.cpp>",
+			"+<peripherals/mc6850.cpp>"
 		]
 	}
 }
