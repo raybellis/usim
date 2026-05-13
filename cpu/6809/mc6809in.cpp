@@ -2,7 +2,7 @@
 //	mc6809ins.cpp
 //	(C) R.P.Bellis 1993 - 2025
 //
-//      vim: ts=8 sw=8 noet:
+//	vim: ts=8 sw=8 noet:
 //
 //	Updated from BDA and Soren Roug 12/2003 primarily
 //	with fixes for SBC / CMP / NEG instructions with
@@ -101,8 +101,8 @@ void mc6809::help_clr(Byte& x)
 
 void mc6809::help_cmp(Byte x)
 {
-	Byte	m = fetch_operand();
-	int	t = x - m;
+	Byte m = fetch_operand();
+	int t = x - m;
 
 	cc.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
 	cc.c = btst((Word)t, 8);
@@ -112,8 +112,8 @@ void mc6809::help_cmp(Byte x)
 
 void mc6809::help_cmp(Word x)
 {
-	Word	m = fetch_word_operand();
-	long	t = x - m;
+	Word m = fetch_word_operand();
+	long t = x - m;
 
 	cc.v = btst((DWord)(x ^ m ^ t ^ (t >> 1)), 15);
 	cc.c = btst((DWord)t, 16);
@@ -239,7 +239,7 @@ void mc6809::help_pul(Byte w, Word& s, Word& u)
 
 void mc6809::help_rol(Byte& x)
 {
-	int	oc = cc.c;
+	int oc = cc.c;
 	cc.v = btst(x, 7) ^ btst(x, 6);
 	cc.c = btst(x, 7);
 	x = x << 1;
@@ -251,7 +251,7 @@ void mc6809::help_rol(Byte& x)
 
 void mc6809::help_ror(Byte& x)
 {
-	int	oc = cc.c;
+	int oc = cc.c;
 	cc.c = btst(x, 0);
 	x = x >> 1;
 	if (oc) bset(x, 7);
@@ -262,7 +262,7 @@ void mc6809::help_ror(Byte& x)
 
 void mc6809::help_sbc(Byte& x)
 {
-	Byte    m = fetch_operand();
+	Byte m = fetch_operand();
 	int t = x - m - cc.c;
 
 	cc.v = btst((Byte)(x ^ m ^ t ^ (t >> 1)), 7);
@@ -274,7 +274,7 @@ void mc6809::help_sbc(Byte& x)
 
 void mc6809::help_st(Byte x)
 {
-	Word	addr = fetch_effective_address();
+	Word addr = fetch_effective_address();
 	write(addr, x);
 	cc.v = 0;
 	cc.n = btst(x, 7);
@@ -292,7 +292,7 @@ void mc6809::help_st(Word x)
 
 void mc6809::help_sub(Byte& x)
 {
-	Byte    m = fetch_operand();
+	Byte m = fetch_operand();
 	int t = x - m;
 
 	cc.v = btst((Byte)(x^m^t^(t>>1)),7);
@@ -346,15 +346,15 @@ void mc6809::addb()
 void mc6809::addd()
 {
 	insn = "ADDD";
-	Word	m = fetch_word_operand();
+	Word m = fetch_word_operand();
 
 	{
-		Word	t = (d & 0x7fff) + (m & 0x7fff);
+		Word t = (d & 0x7fff) + (m & 0x7fff);
 		cc.v = btst(t, 15);
 	}
 
 	{
-		DWord	t = (DWord)d + m;
+		DWord t = (DWord)d + m;
 		cc.c = btst(t, 16);
 		d = (Word)(t & 0xffff);
 	}
@@ -399,8 +399,8 @@ void mc6809::asrb()
 void mc6809::asr()
 {
 	insn = "ASR";
-	Word	addr = fetch_effective_address();
-	Byte	m = read(addr);
+	Word addr = fetch_effective_address();
+	Byte m = read(addr);
 
 	help_asr(m);
 	write(addr, m);
@@ -1178,7 +1178,7 @@ void mc6809::subb()
 void mc6809::subd()
 {
 	insn = "SUBD";
-	Word    m = fetch_word_operand();
+	Word m = fetch_word_operand();
 	int t = d - m;
 
 	cc.v = btst((DWord)(d ^ m ^ t ^(t >> 1)), 15);

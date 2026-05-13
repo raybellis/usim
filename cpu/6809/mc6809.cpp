@@ -2,7 +2,7 @@
 //	mc6809.cpp
 //	(C) R.P.Bellis 1993 - 2025
 //
-//      vim: ts=8 sw=8 noet:
+//	vim: ts=8 sw=8 noet:
 //
 
 #include "mc6809.h"
@@ -494,12 +494,12 @@ Word& mc6809::wordrefreg(int r)
 	static Word no_return = 0;
 
 	switch (r) {
-		case  0: return d;
-		case  1: return x;
-		case  2: return y;
-		case  3: return u;
-		case  4: return s;
-		case  5: return pc;
+		case 0: return d;
+		case 1: return x;
+		case 2: return y;
+		case 3: return u;
+		case 4: return s;
+		case 5: return pc;
 	}
 
 	invalid("invalid word register selector");
@@ -695,22 +695,22 @@ void mc6809::do_predecrement()
 
 static std::string disasm_reglist(Byte w, const char *other_sr)
 {
-        static const char* regs[]  = {
-                "CC", "A", "B", "DP", "X", "Y", "", "PC"
-        };
+	static const char* regs[] = {
+		"CC", "A", "B", "DP", "X", "Y", "", "PC"
+	};
 
-        std::string r;
+	std::string r;
 
-        for (int n = 0; (n < 8) && w; ++n, w >>= 1) {
-                if (w & 1) {
-                        r += (n == 6) ? other_sr : regs[n];
-                        if (w & 0xfe) {
-                                r += ",";
-                        }
-                }
-        }
+	for (int n = 0; (n < 8) && w; ++n, w >>= 1) {
+		if (w & 1) {
+			r += (n == 6) ? other_sr : regs[n];
+			if (w & 0xfe) {
+				r += ",";
+			}
+		}
+	}
 
-        return r;
+	return r;
 }
 
 static std::string disasm_regpair(Byte w)

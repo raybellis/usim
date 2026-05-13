@@ -35,13 +35,13 @@ void mos6502::post_exec()
 
 void mos6502::do_nmi()
 {
-        do_psh(pc);
+	do_psh(pc);
 	mos6502_status pushed = p;
 	pushed.b = false;
 	do_psh((Byte)(pushed.value | 0x20));
 	p.i = true;
 	p.b = false;
-        pc = read_word(vector_nmi);
+	pc = read_word(vector_nmi);
 }
 
 void mos6502::do_irq()
@@ -106,8 +106,8 @@ void mos6502::tick()
 	if (nmi_triggered) {
 		do_nmi();
 	} else if (!c_irq && !p.i) {
-                do_irq();
-        }
+		do_irq();
+	}
 
 	// remember current instruction address
 	insn_pc = pc;
@@ -266,7 +266,7 @@ mos6502::mode_t mos6502::decode_mode(Byte ir)
 	case 0x11:
 		return zpyindirect;
 	case 0x14: case 0x15: case 0x16:
-		return (ir == 0x96 || ir == 0xb6 ) ? zpyindexed : zpxindexed;  // LDX ZP,Y special case
+		return (ir == 0x96 || ir == 0xb6 ) ? zpyindexed : zpxindexed;	// LDX ZP,Y special case
 	case 0x19:
 		return yindexed;
 	case 0x1c: case 0x1d: case 0x1e:

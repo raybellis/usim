@@ -19,9 +19,9 @@ void mos6502::help_asl(Byte& val)
 
 void mos6502::help_cmp(Byte reg, Byte val)
 {
-    uint16_t diff = (uint16_t)reg - (uint16_t)val;
-    p.c = (reg >= val);
-    set_nz((Byte)(diff & 0xff));
+	uint16_t diff = (uint16_t)reg - (uint16_t)val;
+	p.c = (reg >= val);
+	set_nz((Byte)(diff & 0xff));
 }
 
 void mos6502::help_ld(Byte& reg)
@@ -48,10 +48,10 @@ void mos6502::help_rol(Byte &val)
 
 void mos6502::help_ror(Byte &val)
 {
-        bool old_c = p.c;
-        p.c = (val & 0x01) != 0;
-        val = (val >> 1) | (old_c ? 0x80 : 0x00);
-        set_nz(val);
+	bool old_c = p.c;
+	p.c = (val & 0x01) != 0;
+	val = (val >> 1) | (old_c ? 0x80 : 0x00);
+	set_nz(val);
 }
 
 //
@@ -149,7 +149,7 @@ void mos6502::bpl()
 
 void mos6502::brk()
 {
-        do_brk();
+	do_brk();
 }
 
 void mos6502::bvc()
@@ -278,7 +278,7 @@ void mos6502::lsr()
 	if (mode == accumulator) {
 		help_lsr(a);
 	} else {
-		auto m  = fetch_effective_address();
+		auto m = fetch_effective_address();
 		Byte val = read(m);
 		help_lsr(val);
 		write(m, val);
