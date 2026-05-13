@@ -34,13 +34,15 @@ usim02:	$(LIB) main02.o term.o
 tests/test6502: $(LIB) tests/test6502.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) tests/test6502.o -L. -lusim -o $(@)
 
-tests/test6502.o: tests/test6502.cpp
+tests/test6502.o: tests/test6502.cpp mos6502.h usim.h memory.h wiring.h \
+		  device.h typedefs.h bits.h
 	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c tests/test6502.cpp -o $(@)
 
 tests/test6809: $(LIB) tests/test6809.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) tests/test6809.o -L. -lusim -o $(@)
 
-tests/test6809.o: tests/test6809.cpp
+tests/test6809.o: tests/test6809.cpp mc6809.h usim.h memory.h wiring.h \
+		  device.h typedefs.h bits.h
 	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c tests/test6809.cpp -o $(@)
 
 tests/test6809.bin: tests/test6809.asm

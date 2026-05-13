@@ -198,6 +198,19 @@ Word mos6502::fetch_effective_address()
 			}
 		}
 		break;
+	case absxindirect:
+		{
+			operand = fetch_word();
+			m = read_word((Word)(operand + x));
+		}
+		break;
+	case zpindirect:
+		{
+			operand = fetch();
+			Byte zp_addr = operand & 0x00ff;
+			m = read(zp_addr) | (read((zp_addr + 1) & 0x00ff) << 8);
+		}
+		break;
 	case zpxindirect:
 		{
 			operand = fetch();
@@ -575,6 +588,8 @@ std::string mos6502::disasm_operand(Word addr, mode_t mode)
 		return fmt("$%04X", operand);
 	case absindirect:
 		return fmt("($%04X)", operand);
+	case absxindirect:
+		return fmt("($%04X,X)", operand);
 	case zeropage:
 		return fmt("$%02X", operand);
 	case zpxindexed:
@@ -585,6 +600,8 @@ std::string mos6502::disasm_operand(Word addr, mode_t mode)
 		return fmt("$%04X,X", operand);
 	case yindexed:
 		return fmt("$%04X,Y", operand);
+	case zpindirect:
+		return fmt("($%02X)", operand);
 	case zpxindirect:
 		return fmt("($%02X,X)", operand);
 	case zpyindirect:

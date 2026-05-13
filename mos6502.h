@@ -43,9 +43,11 @@ protected: // Processor addressing modes
 				zpyindexed,
 				xindexed,
 				yindexed,
+				zpindirect,	// 65C02: (zp)
 				zpxindirect,
 				zpyindirect,
-				absindirect
+				absindirect,
+				absxindirect	// 65C02: (abs,X)
 	};
 
 	enum : uint16_t {
@@ -63,25 +65,26 @@ protected:	// Processor registers
 	mos6502_status		p;		// Processor status
 	Byte			ir;		// Instruction register
 
-private:	// Execution state
+protected:	// Execution state
 	mode_t			mode;
 	Word			operand;
+private:
 	bool			nmi_previous;
 
-private:	// instruction and operand fetch and decode
-	void			execute_instruction();
-        void			fetch_instruction();
-        mode_t			decode_mode(Byte ir);
-        Byte			fetch_operand();
-	Word			fetch_effective_address();
+protected:	// instruction and operand fetch and decode
+	virtual void		execute_instruction();
+	virtual void		fetch_instruction();
+	virtual mode_t		decode_mode(Byte ir);
+	virtual Byte		fetch_operand();
+	virtual Word		fetch_effective_address();
 
-private:	// instruction implementations
-	void			adc();
+protected:	// instruction implementations
+	virtual void		adc();
 	void			and_();
 	void			asl();
 	void			bcc(), bcs();
 	void			beq();
-	void			bit();
+	virtual void		bit();
 	void			bmi(), bne();
 	void			bpl();
 	void			brk();
@@ -91,16 +94,17 @@ private:	// instruction implementations
 	void			dec(), dex(), dey();
 	void			eor();
 	void			inc(), inx(), iny();
-	void			jmp(), jsr();
-        void			lda(), ldx(), ldy();
-        void			lsr();
+	virtual void		jmp();
+	void			jsr();
+	void			lda(), ldx(), ldy();
+	void			lsr();
 	void			nop();
 	void			ora();
 	void			pha(), php();
 	void			pla(), plp();
-        void			rol(), ror();
-        void			rti(), rts();
-	void			sbc();
+	void			rol(), ror();
+	void			rti(), rts();
+	virtual void		sbc();
 	void			sec(), sed(), sei();
 	void			sta(), stx(), sty();
 	void			tax(), tay();
@@ -133,8 +137,8 @@ protected:	// overloadable functions (e.g. for breakpoints)
 
 protected: 	// instruction tracing
 	Word			insn_pc;
-	const char *		disasm_opcode(Byte ir);
-	std::string		disasm_operand(Word addr, mode_t mode);
+	virtual const char *	disasm_opcode(Byte ir);
+	virtual std::string	disasm_operand(Word addr, mode_t mode);
 
 public:		// external signal pins
 	InputPin		IRQ, NMI;
