@@ -12,6 +12,15 @@
 
 class base65c02 : virtual public mos6502 {
 
+protected:	// dispatch overrides
+	virtual mode_t		decode_mode(Byte ir) override;
+	virtual void		execute_instruction() override;
+	virtual Word		fetch_effective_address() override;
+	virtual const char*	disasm_opcode(Byte ir) override;
+
+protected:	// CMOS-specific instruction implementations
+	void			bra();
+
 public:
 				base65c02();
 	virtual			~base65c02();
