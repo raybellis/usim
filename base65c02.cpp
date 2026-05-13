@@ -24,6 +24,9 @@ mos6502::mode_t base65c02::decode_mode(Byte ir)
 		return absxindirect;
 	case 0x9c:		// STZ abs (NMOS decoder would say xindexed)
 		return absolute;
+	case 0x12: case 0x32: case 0x52: case 0x72:	// ORA/AND/EOR/ADC (zp)
+	case 0x92: case 0xb2: case 0xd2: case 0xf2:	// STA/LDA/CMP/SBC (zp)
+		return zpindirect;
 	default:
 		return mos6502::decode_mode(ir);
 	}
@@ -52,6 +55,14 @@ void base65c02::execute_instruction()
 		dea(); break;
 	case 0x34: case 0x3c: case 0x89:
 		bit(); break;
+	case 0x12: ora(); break;
+	case 0x32: and_(); break;
+	case 0x52: eor(); break;
+	case 0x72: adc(); break;
+	case 0x92: sta(); break;
+	case 0xb2: lda(); break;
+	case 0xd2: cmp(); break;
+	case 0xf2: sbc(); break;
 	default:
 		mos6502::execute_instruction();
 		break;
@@ -101,6 +112,14 @@ const char* base65c02::disasm_opcode(Byte ir)
 		return "DEC";
 	case 0x34: case 0x3c: case 0x89:
 		return "BIT";
+	case 0x12: return "ORA";
+	case 0x32: return "AND";
+	case 0x52: return "EOR";
+	case 0x72: return "ADC";
+	case 0x92: return "STA";
+	case 0xb2: return "LDA";
+	case 0xd2: return "CMP";
+	case 0xf2: return "SBC";
 	default:
 		return mos6502::disasm_opcode(ir);
 	}
