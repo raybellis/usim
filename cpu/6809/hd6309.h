@@ -83,6 +83,15 @@ protected:	// MD register access
 	void			ldmd();
 	void			bitmd();
 
+protected:	// trap entry shared by the illegal-opcode and divide-by-zero
+		// traps. Pushes the entire state and vectors through $FFF0;
+		// the cause is identified via the MD.il / MD.dz status bits.
+	void			take_trap();
+
+public:		// USim::invalid override — convert illegal opcodes into
+		// the 6309 illegal-instruction trap instead of aborting.
+	virtual void		invalid(const char* msg) override;
+
 protected:	// load/store on the 6309 accumulators
 	void			lde(), ldf(), ldw(), ldq();
 	void			ste(), stf(), stw(), stq();

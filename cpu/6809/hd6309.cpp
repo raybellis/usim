@@ -844,6 +844,7 @@ void hd6309::divd()
 	if (divisor == 0) {
 		md.dz = 1;
 		cc.v = 1;
+		take_trap();
 		return;
 	}
 	int16_t dividend = (int16_t)d;
@@ -872,6 +873,7 @@ void hd6309::divq()
 	if (divisor == 0) {
 		md.dz = 1;
 		cc.v = 1;
+		take_trap();
 		return;
 	}
 	int32_t dividend = (int32_t)getq();
@@ -1212,4 +1214,30 @@ void hd6309::bitmd()
 		md.dz = 0;
 	}
 	cycles += 4;
+}
+
+//----------------------------------------------------------------------------
+// Illegal-instruction and divide-by-zero traps.
+//
+// Both traps share the same dispatch: push the entire state (the trap is
+// always "entire") and vector through $FFF0 with I and F set. The cause
+// can be identified by the trap handler reading MD (IL=1 -> illegal,
+// DZ=1 -> divide-by-zero). PC at trap entry points just past the offending
+// instruction, so RTI returns to whatever follows.
+//----------------------------------------------------------------------------
+
+void hd6309::take_trap()
+{
+	cc.e = 1;
+	push_entire(s);
+	cc.f = cc.i = 1;
+	pc = read_word(vector_reserved);
+	cycles += 20;
+}
+
+void hd6309::invalid(const char* msg)
+{
+	(void)msg;
+	md.il = 1;
+	take_trap();
 }
