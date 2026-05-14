@@ -151,6 +151,30 @@ void hd6309::execute_instruction()
 		case 0x10dd: case 0x10ed: case 0x10fd:
 			stq(); break;
 
+		// ADDE / ADDF / ADDW
+		case 0x118b: case 0x119b: case 0x11ab: case 0x11bb:
+			adde(); break;
+		case 0x11cb: case 0x11db: case 0x11eb: case 0x11fb:
+			addf(); break;
+		case 0x108b: case 0x109b: case 0x10ab: case 0x10bb:
+			addw(); break;
+
+		// SUBE / SUBF / SUBW
+		case 0x1180: case 0x1190: case 0x11a0: case 0x11b0:
+			sube(); break;
+		case 0x11c0: case 0x11d0: case 0x11e0: case 0x11f0:
+			subf(); break;
+		case 0x1080: case 0x1090: case 0x10a0: case 0x10b0:
+			subw(); break;
+
+		// CMPE / CMPF / CMPW
+		case 0x1181: case 0x1191: case 0x11a1: case 0x11b1:
+			cmpe(); break;
+		case 0x11c1: case 0x11d1: case 0x11e1: case 0x11f1:
+			cmpf(); break;
+		case 0x1081: case 0x1091: case 0x10a1: case 0x10b1:
+			cmpw(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -220,4 +244,62 @@ void hd6309::stq()
 	cc.n = (val & 0x80000000u) != 0;
 	cc.z = (val == 0);
 	cc.v = 0;
+}
+
+//----------------------------------------------------------------------------
+// ADD/SUB/CMP on the 6309 accumulators (E, F, W).
+//----------------------------------------------------------------------------
+
+void hd6309::adde()
+{
+	insn = "ADDE";
+	help_add(e);
+}
+
+void hd6309::addf()
+{
+	insn = "ADDF";
+	help_add(f);
+}
+
+void hd6309::addw()
+{
+	insn = "ADDW";
+	help_add(w);
+}
+
+void hd6309::sube()
+{
+	insn = "SUBE";
+	help_sub(e);
+}
+
+void hd6309::subf()
+{
+	insn = "SUBF";
+	help_sub(f);
+}
+
+void hd6309::subw()
+{
+	insn = "SUBW";
+	help_sub(w);
+}
+
+void hd6309::cmpe()
+{
+	insn = "CMPE";
+	help_cmp(e);
+}
+
+void hd6309::cmpf()
+{
+	insn = "CMPF";
+	help_cmp(f);
+}
+
+void hd6309::cmpw()
+{
+	insn = "CMPW";
+	help_cmp(w);
 }

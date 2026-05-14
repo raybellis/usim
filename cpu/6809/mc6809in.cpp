@@ -64,6 +64,27 @@ void mc6809::help_add(Byte& x)
 	cc.z = !x;
 }
 
+void mc6809::help_add(Word& x)
+{
+	Word	m = fetch_word_operand();
+
+	{
+		Word	t = (x & 0x7fff) + (m & 0x7fff);
+		cc.v = btst(t, 15);
+	}
+
+	{
+		DWord	t = (DWord)x + m;
+		cc.c = btst(t, 16);
+		x = (Word)(t & 0xffff);
+	}
+
+	cc.v ^= cc.c;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
 void mc6809::help_and(Byte& x)
 {
 	x = x & fetch_operand();
@@ -302,6 +323,19 @@ void mc6809::help_sub(Byte& x)
 	cc.z = !x;
 }
 
+void mc6809::help_sub(Word& x)
+{
+	Word m = fetch_word_operand();
+	int t = x - m;
+
+	cc.v = btst((DWord)(x ^ m ^ t ^ (t >> 1)), 15);
+	cc.c = btst((DWord)t, 16);
+	cc.n = btst((DWord)t, 15);
+	x = (Word)(t & 0xffff);
+	cc.z = !x;
+	++cycles;
+}
+
 void mc6809::help_tst(Byte x)
 {
 	cc.v = 0;
@@ -346,23 +380,7 @@ void mc6809::addb()
 void mc6809::addd()
 {
 	insn = "ADDD";
-	Word m = fetch_word_operand();
-
-	{
-		Word t = (d & 0x7fff) + (m & 0x7fff);
-		cc.v = btst(t, 15);
-	}
-
-	{
-		DWord t = (DWord)d + m;
-		cc.c = btst(t, 16);
-		d = (Word)(t & 0xffff);
-	}
-
-	cc.v ^= cc.c;
-	cc.n = btst(d, 15);
-	cc.z = !d;
-	++cycles;
+	help_add(d);
 }
 
 void mc6809::anda()
@@ -1178,15 +1196,7 @@ void mc6809::subb()
 void mc6809::subd()
 {
 	insn = "SUBD";
-	Word m = fetch_word_operand();
-	int t = d - m;
-
-	cc.v = btst((DWord)(d ^ m ^ t ^(t >> 1)), 15);
-	cc.c = btst((DWord)t, 16);
-	cc.n = btst((DWord)t, 15);
-	d = t & 0xffff;
-	cc.z = !d;
-	++cycles;
+	help_sub(d);
 }
 
 void mc6809::swi()

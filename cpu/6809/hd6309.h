@@ -67,6 +67,11 @@ protected:	// load/store on the 6309 accumulators
 	void			lde(), ldf(), ldw(), ldq();
 	void			ste(), stf(), stw(), stq();
 
+protected:	// ADD/SUB/CMP on the 6309 accumulators
+	void			adde(), addf(), addw();
+	void			sube(), subf(), subw();
+	void			cmpe(), cmpf(), cmpw();
+
 public:
 				hd6309();		// public constructor
 	virtual			~hd6309();		// public destructor
