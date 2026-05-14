@@ -124,7 +124,7 @@ protected:	// instruction implementations
 	void			cmpa(), cmpb();
 	void			cmpd(), cmpx(), cmpy(), cmpu(), cmps();
 	void			coma(), comb(), com();
-	void			cwai();
+	virtual void		cwai();
 	void			daa();
 	void			deca(), decb(), dec();
 	void			eora(), eorb();
@@ -145,7 +145,8 @@ protected:	// instruction implementations
 	void			puls(), pulu();
 	void			rola(), rolb(), rol();
 	void			rora(), rorb(), ror();
-	void			rti(), rts();
+	virtual void		rti();
+	void			rts();
 	void			sbca(), sbcb();
 	void			sex();
 	void			sta(), stb();

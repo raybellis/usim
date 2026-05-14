@@ -63,6 +63,26 @@ protected:	// dispatch overrides
 	virtual void		tfr() override;
 	virtual void		exg() override;
 
+protected:	// interrupt entry / exit (native mode adds E and F to the
+		// entire stack frame; FIRQ uses the entire frame when MD.fm
+		// is set)
+	virtual void		do_nmi() override;
+	virtual void		do_firq() override;
+	virtual void		do_irq() override;
+	virtual void		swi() override;
+	virtual void		swi2() override;
+	virtual void		swi3() override;
+	virtual void		cwai() override;
+	virtual void		rti() override;
+
+protected:	// shared entire-frame push/pull, 6309-aware
+	void			push_entire(Word& sp);
+	void			pull_entire(Word& sp);
+
+protected:	// MD register access
+	void			ldmd();
+	void			bitmd();
+
 protected:	// load/store on the 6309 accumulators
 	void			lde(), ldf(), ldw(), ldq();
 	void			ste(), stf(), stw(), stq();

@@ -257,6 +257,10 @@ void hd6309::execute_instruction()
 		case 0x1134: case 0x1135: case 0x1136: case 0x1137:
 			bit_transfer(); break;
 
+		// MD register access
+		case 0x113c: bitmd(); break;
+		case 0x113d: ldmd(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -1034,4 +1038,178 @@ void hd6309::bit_transfer()
 		bclr(reg, r_bit);
 	}
 	cycles += 7;
+}
+
+//----------------------------------------------------------------------------
+// Native-mode interrupt stack frames.
+//
+// In emulation mode the entire frame is identical to the MC6809:
+//     low addr  -> CC, A, B, DP, X, Y, U, PC <- high addr
+// In native mode (MD.nm = 1) the frame additionally carries E and F:
+//     low addr  -> CC, A, B, E, F, DP, X, Y, U, PC <- high addr
+//
+// FIRQ uses the entire frame when MD.fm = 1 (FIRQ "full stack") and the
+// short two-byte frame (CC, PC) otherwise, matching MC6809.
+//----------------------------------------------------------------------------
+
+void hd6309::push_entire(Word& sp)
+{
+	do_psh(sp, pc);
+	do_psh(sp, u);
+	do_psh(sp, y);
+	do_psh(sp, x);
+	do_psh(sp, dp);
+	if (md.nm) {
+		do_psh(sp, f);
+		do_psh(sp, e);
+	}
+	do_psh(sp, b);
+	do_psh(sp, a);
+	do_psh(sp, cc.value);
+}
+
+void hd6309::pull_entire(Word& sp)
+{
+	do_pul(sp, cc.value);
+	do_pul(sp, a);
+	do_pul(sp, b);
+	if (md.nm) {
+		do_pul(sp, e);
+		do_pul(sp, f);
+	}
+	do_pul(sp, dp);
+	do_pul(sp, x);
+	do_pul(sp, y);
+	do_pul(sp, u);
+	do_pul(sp, pc);
+}
+
+void hd6309::do_nmi()
+{
+	if (!waiting_cwai) {
+		cc.e = 1;
+		push_entire(s);
+	}
+	cc.f = cc.i = 1;
+	pc = read_word(vector_nmi);
+}
+
+void hd6309::do_irq()
+{
+	if (!waiting_cwai) {
+		cc.e = 1;
+		push_entire(s);
+	}
+	cc.f = cc.i = 1;
+	pc = read_word(vector_irq);
+}
+
+void hd6309::do_firq()
+{
+	if (!waiting_cwai) {
+		if (md.fm) {
+			cc.e = 1;
+			push_entire(s);
+		} else {
+			cc.e = 0;
+			help_psh(0x81, s, u);
+		}
+	}
+	cc.f = cc.i = 1;
+	pc = read_word(vector_firq);
+}
+
+void hd6309::swi()
+{
+	insn = "SWI";
+	cc.e = 1;
+	push_entire(s);
+	cc.f = cc.i = 1;
+	pc = read_word(vector_swi);
+	cycles += 4;
+}
+
+void hd6309::swi2()
+{
+	insn = "SWI2";
+	cc.e = 1;
+	push_entire(s);
+	pc = read_word(vector_swi2);
+	cycles += 4;
+}
+
+void hd6309::swi3()
+{
+	insn = "SWI3";
+	cc.e = 1;
+	push_entire(s);
+	pc = read_word(vector_swi3);
+	cycles += 4;
+}
+
+void hd6309::cwai()
+{
+	insn = "CWAI";
+	Byte mask = fetch_operand();
+	cc.value &= mask;
+	cc.e = 1;
+	push_entire(s);
+	cycles += 2;
+	waiting_cwai = true;
+}
+
+void hd6309::rti()
+{
+	insn = "RTI";
+	// Peek at CC.e first to decide which frame to pull. The byte at
+	// (s) is CC, since CC is pushed last and ends up at the lowest
+	// address.
+	mc6809_cc peek;
+	peek.value = read(s);
+	if (peek.e) {
+		pull_entire(s);
+	} else {
+		// Short frame: CC, PC only.
+		do_pul(s, cc.value);
+		do_pul(s, pc);
+	}
+	cycles += 2;
+}
+
+//----------------------------------------------------------------------------
+// MD register access.
+//
+// LDMD #imm  : writes the user-settable bits (NM and FM) of MD from the
+//              immediate and clears the trap-status bits IL and DZ.
+// BITMD #imm : tests bits in MD against the immediate. Z reflects the
+//              AND; the IL and DZ bits actually tested are cleared after
+//              being read (the standard mechanism for acknowledging a
+//              pending trap).
+//----------------------------------------------------------------------------
+
+void hd6309::ldmd()
+{
+	insn = "LDMD";
+	Byte v = fetch_operand();
+	md.nm = btst(v, 0);
+	md.fm = btst(v, 1);
+	md.il = 0;
+	md.dz = 0;
+	cycles += 5;
+}
+
+void hd6309::bitmd()
+{
+	insn = "BITMD";
+	Byte v = fetch_operand();
+	Byte t = md.value & v;
+	cc.z = (t == 0);
+	// Clear the trap-status bits that were just tested.
+	if (btst(v, 6)) {
+		md.il = 0;
+	}
+	if (btst(v, 7)) {
+		md.dz = 0;
+	}
+	cycles += 4;
 }
