@@ -80,7 +80,12 @@ protected:	// INC/DEC/NEG/COM/TST/CLR on the 6309 accumulators
 	void			tstd(), tste(), tstf(), tstw();
 	void			clrd(), clre(), clrf(), clrw();
 
-protected:	// 16-bit forms of the unary helpers (6309-only). The using
+protected:	// shift/rotate on D and W; sign-extend W into Q
+	void			asld(), asrd(), lsrd(), rold(), rord();
+	void			aslw(), asrw(), lsrw(), rolw(), rorw();
+	void			sexw();
+
+protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.
 	using mc6809::help_clr;
@@ -89,6 +94,11 @@ protected:	// 16-bit forms of the unary helpers (6309-only). The using
 	using mc6809::help_inc;
 	using mc6809::help_neg;
 	using mc6809::help_tst;
+	using mc6809::help_asr;
+	using mc6809::help_lsl;
+	using mc6809::help_lsr;
+	using mc6809::help_rol;
+	using mc6809::help_ror;
 
 	void			help_clr(Word&);
 	void			help_com(Word&);
@@ -96,6 +106,12 @@ protected:	// 16-bit forms of the unary helpers (6309-only). The using
 	void			help_inc(Word&);
 	void			help_neg(Word&);
 	void			help_tst(Word);
+
+	void			help_asr(Word&);
+	void			help_lsl(Word&);
+	void			help_lsr(Word&);
+	void			help_rol(Word&);
+	void			help_ror(Word&);
 
 public:
 				hd6309();		// public constructor

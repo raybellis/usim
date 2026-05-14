@@ -203,6 +203,23 @@ void hd6309::execute_instruction()
 		case 0x115f: clrf(); break;
 		case 0x105f: clrw(); break;
 
+		// Shifts and rotates on D (ASLD/LSLD share opcode)
+		case 0x1047: asrd(); break;
+		case 0x1044: lsrd(); break;
+		case 0x1048: asld(); break;
+		case 0x1049: rold(); break;
+		case 0x1046: rord(); break;
+
+		// Shifts and rotates on W (ASLW/LSLW share opcode)
+		case 0x1057: asrw(); break;
+		case 0x1054: lsrw(); break;
+		case 0x1058: aslw(); break;
+		case 0x1059: rolw(); break;
+		case 0x1056: rorw(); break;
+
+		// Sign-extend W into Q
+		case 0x0014: sexw(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -521,4 +538,145 @@ void hd6309::clrw()
 {
 	insn = "CLRW";
 	help_clr(w);
+}
+
+//----------------------------------------------------------------------------
+// 16-bit forms of the shift/rotate helpers (6309-only).
+//----------------------------------------------------------------------------
+
+void hd6309::help_asr(Word& x)
+{
+	cc.c = btst(x, 0);
+	x >>= 1;
+	if ((cc.n = btst(x, 14)) != 0) {
+		bset(x, 15);
+	}
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_lsl(Word& x)
+{
+	cc.c = btst(x, 15);
+	cc.v = btst(x, 15) ^ btst(x, 14);
+	x <<= 1;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_lsr(Word& x)
+{
+	cc.c = btst(x, 0);
+	x >>= 1;
+	cc.n = 0;
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_rol(Word& x)
+{
+	int oc = cc.c;
+	cc.v = btst(x, 15) ^ btst(x, 14);
+	cc.c = btst(x, 15);
+	x = x << 1;
+	if (oc) {
+		bset(x, 0);
+	}
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_ror(Word& x)
+{
+	int oc = cc.c;
+	cc.c = btst(x, 0);
+	x = x >> 1;
+	if (oc) {
+		bset(x, 15);
+	}
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+//----------------------------------------------------------------------------
+// Shift/rotate on D and W. ASL/LSL share opcodes so each has just one
+// implementation; alias mnemonics can be picked up by the assembler.
+//----------------------------------------------------------------------------
+
+void hd6309::asld()
+{
+	insn = "ASLD";
+	help_lsl(d);
+}
+
+void hd6309::asrd()
+{
+	insn = "ASRD";
+	help_asr(d);
+}
+
+void hd6309::lsrd()
+{
+	insn = "LSRD";
+	help_lsr(d);
+}
+
+void hd6309::rold()
+{
+	insn = "ROLD";
+	help_rol(d);
+}
+
+void hd6309::rord()
+{
+	insn = "RORD";
+	help_ror(d);
+}
+
+void hd6309::aslw()
+{
+	insn = "ASLW";
+	help_lsl(w);
+}
+
+void hd6309::asrw()
+{
+	insn = "ASRW";
+	help_asr(w);
+}
+
+void hd6309::lsrw()
+{
+	insn = "LSRW";
+	help_lsr(w);
+}
+
+void hd6309::rolw()
+{
+	insn = "ROLW";
+	help_rol(w);
+}
+
+void hd6309::rorw()
+{
+	insn = "RORW";
+	help_ror(w);
+}
+
+//----------------------------------------------------------------------------
+// Sign-extend W into Q: D becomes 0x0000 or 0xFFFF mirroring W's sign bit.
+// W is left unchanged. Z and N reflect the resulting Q value (since the
+// high word of Q is fully determined by W's MSB, Z = (W == 0) and N = W[15]).
+//----------------------------------------------------------------------------
+
+void hd6309::sexw()
+{
+	insn = "SEXW";
+	d = btst(w, 15) ? 0xffff : 0x0000;
+	cc.n = btst(w, 15);
+	cc.z = !w;
+	cycles += 4;
 }
