@@ -220,6 +220,12 @@ void hd6309::execute_instruction()
 		// Sign-extend W into Q
 		case 0x0014: sexw(); break;
 
+		// Push/pull W on the S and U stacks
+		case 0x1038: pshsw(); break;
+		case 0x1039: pulsw(); break;
+		case 0x103a: pshuw(); break;
+		case 0x103b: puluw(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -679,4 +685,37 @@ void hd6309::sexw()
 	cc.n = btst(w, 15);
 	cc.z = !w;
 	cycles += 4;
+}
+
+//----------------------------------------------------------------------------
+// Push/pull the W register on either stack. No postbyte: the register set
+// is fixed (just W), so these are simpler than the 6809 PSHS/PSHU.
+//----------------------------------------------------------------------------
+
+void hd6309::pshsw()
+{
+	insn = "PSHSW";
+	do_psh(s, w);
+	cycles += 2;
+}
+
+void hd6309::pulsw()
+{
+	insn = "PULSW";
+	do_pul(s, w);
+	cycles += 2;
+}
+
+void hd6309::pshuw()
+{
+	insn = "PSHUW";
+	do_psh(u, w);
+	cycles += 2;
+}
+
+void hd6309::puluw()
+{
+	insn = "PULUW";
+	do_pul(u, w);
+	cycles += 2;
 }

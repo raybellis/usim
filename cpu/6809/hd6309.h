@@ -85,6 +85,10 @@ protected:	// shift/rotate on D and W; sign-extend W into Q
 	void			aslw(), asrw(), lsrw(), rolw(), rorw();
 	void			sexw();
 
+protected:	// push/pull the W register on either stack
+	void			pshsw(), pulsw();
+	void			pshuw(), puluw();
+
 protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.
