@@ -223,8 +223,8 @@ public:
 
 	virtual void		print_regs();
 
-	Byte&			byterefreg(int);
-	Word&			wordrefreg(int);
+	virtual Byte&		byterefreg(int);
+	virtual Word&		wordrefreg(int);
 
 };
 

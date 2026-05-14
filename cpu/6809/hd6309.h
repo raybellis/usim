@@ -52,6 +52,16 @@ protected:	// 32-bit Q (D:W) accessors
 					w = (Word)val;
 				}
 
+protected:	// scratch for the "0 register" (TFR/EXG codes $C and $D, byte
+		// position only). Reset to 0 before each reference return so
+		// reads see zero; any write through the returned reference is
+		// discarded by the next reset.
+	Byte			zero_byte = 0;
+
+protected:	// dispatch overrides
+	virtual void		tfr() override;
+	virtual void		exg() override;
+
 public:
 				hd6309();		// public constructor
 	virtual			~hd6309();		// public destructor
@@ -59,4 +69,7 @@ public:
 	virtual void		reset() override;	// CPU reset
 
 	virtual void		print_regs() override;
+
+	virtual Byte&		byterefreg(int r) override;
+	virtual Word&		wordrefreg(int r) override;
 };
