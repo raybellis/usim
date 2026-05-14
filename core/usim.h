@@ -38,8 +38,10 @@ public:
 
 	virtual Byte		read(Word offset);
 	virtual Word		read_word(Word offset) = 0;
+	virtual DWord		read_dword(Word offset) = 0;
 	virtual void		write(Word offset, Byte val);
 	virtual void		write_word(Word offset, Word val) = 0;
+	virtual void		write_dword(Word offset, DWord val) = 0;
 	virtual Byte		fetch();
 
 // Device handling:
@@ -79,9 +81,12 @@ class USimBE : virtual public USim {
 // Memory access functions taking target byte order into account
 public:
 	virtual Word		fetch_word();
+	virtual DWord		fetch_dword();
 
 	virtual Word		read_word(Word offset);
+	virtual DWord		read_dword(Word offset);
 	virtual void		write_word(Word offset, Word val);
+	virtual void		write_dword(Word offset, DWord val);
 
 };
 
@@ -90,8 +95,11 @@ class USimLE : virtual public USim {
 // Memory access functions taking target byte order into account
 public:
 	virtual Word		fetch_word();
+	virtual DWord		fetch_dword();
 
 	virtual Word		read_word(Word offset);
+	virtual DWord		read_dword(Word offset);
 	virtual void		write_word(Word offset, Word val);
+	virtual void		write_dword(Word offset, DWord val);
 
 };

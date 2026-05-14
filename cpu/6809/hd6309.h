@@ -59,8 +59,13 @@ protected:	// scratch for the "0 register" (TFR/EXG codes $C and $D, byte
 	Byte			zero_byte = 0;
 
 protected:	// dispatch overrides
+	virtual void		execute_instruction() override;
 	virtual void		tfr() override;
 	virtual void		exg() override;
+
+protected:	// load/store on the 6309 accumulators
+	void			lde(), ldf(), ldw(), ldq();
+	void			ste(), stf(), stw(), stq();
 
 public:
 				hd6309();		// public constructor

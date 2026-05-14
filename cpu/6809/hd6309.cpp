@@ -122,3 +122,102 @@ void hd6309::exg()
 
 	cycles += 8;
 }
+
+//----------------------------------------------------------------------------
+// Instruction dispatch — handle 6309-specific opcodes, delegate the rest.
+//----------------------------------------------------------------------------
+
+void hd6309::execute_instruction()
+{
+	switch (ir) {
+		// LDE / LDF / LDW / LDQ
+		case 0x1186: case 0x1196: case 0x11a6: case 0x11b6:
+			lde(); break;
+		case 0x11c6: case 0x11d6: case 0x11e6: case 0x11f6:
+			ldf(); break;
+		case 0x1086: case 0x1096: case 0x10a6: case 0x10b6:
+			ldw(); break;
+		case 0x00cd: case 0x10dc: case 0x10ec: case 0x10fc:
+			// $CD is a no-prefix 1-byte opcode + 32-bit immediate
+			ldq(); break;
+
+		// STE / STF / STW / STQ (no immediate forms)
+		case 0x1197: case 0x11a7: case 0x11b7:
+			ste(); break;
+		case 0x11d7: case 0x11e7: case 0x11f7:
+			stf(); break;
+		case 0x1097: case 0x10a7: case 0x10b7:
+			stw(); break;
+		case 0x10dd: case 0x10ed: case 0x10fd:
+			stq(); break;
+
+		default:
+			mc6809::execute_instruction();
+			break;
+	}
+}
+
+//----------------------------------------------------------------------------
+// Load/store on the 6309 accumulators (E, F, W, Q).
+//----------------------------------------------------------------------------
+
+void hd6309::lde()
+{
+	insn = "LDE";
+	help_ld(e);
+}
+
+void hd6309::ldf()
+{
+	insn = "LDF";
+	help_ld(f);
+}
+
+void hd6309::ldw()
+{
+	insn = "LDW";
+	help_ld(w);
+}
+
+void hd6309::ldq()
+{
+	insn = "LDQ";
+	DWord val;
+	if (mode == immediate) {
+		val = fetch_dword();
+	} else {
+		val = read_dword(fetch_effective_address());
+	}
+	setq(val);
+	cc.n = (val & 0x80000000u) != 0;
+	cc.z = (val == 0);
+	cc.v = 0;
+}
+
+void hd6309::ste()
+{
+	insn = "STE";
+	help_st(e);
+}
+
+void hd6309::stf()
+{
+	insn = "STF";
+	help_st(f);
+}
+
+void hd6309::stw()
+{
+	insn = "STW";
+	help_st(w);
+}
+
+void hd6309::stq()
+{
+	insn = "STQ";
+	DWord val = getq();
+	write_dword(fetch_effective_address(), val);
+	cc.n = (val & 0x80000000u) != 0;
+	cc.z = (val == 0);
+	cc.v = 0;
+}

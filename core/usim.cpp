@@ -121,6 +121,18 @@ Word USimBE::fetch_word()
 	return tmp;
 }
 
+DWord USimBE::fetch_dword()
+{
+	DWord		tmp;
+
+	tmp  = (DWord)fetch() << 24;
+	tmp |= (DWord)fetch() << 16;
+	tmp |= (DWord)fetch() << 8;
+	tmp |= (DWord)fetch();
+
+	return tmp;
+}
+
 Word USimBE::read_word(Word offset)
 {
 	Word		tmp;
@@ -131,8 +143,28 @@ Word USimBE::read_word(Word offset)
 	return tmp;
 }
 
+DWord USimBE::read_dword(Word offset)
+{
+	DWord		tmp;
+
+	tmp  = (DWord)read(offset++) << 24;
+	tmp |= (DWord)read(offset++) << 16;
+	tmp |= (DWord)read(offset++) << 8;
+	tmp |= (DWord)read(offset);
+
+	return tmp;
+}
+
 void USimBE::write_word(Word offset, Word val)
 {
+	write(offset++, (Byte)(val >> 8));
+	write(offset, (Byte)val);
+}
+
+void USimBE::write_dword(Word offset, DWord val)
+{
+	write(offset++, (Byte)(val >> 24));
+	write(offset++, (Byte)(val >> 16));
 	write(offset++, (Byte)(val >> 8));
 	write(offset, (Byte)val);
 }
@@ -151,6 +183,18 @@ Word USimLE::fetch_word()
 	return tmp;
 }
 
+DWord USimLE::fetch_dword()
+{
+	DWord		tmp;
+
+	tmp  = (DWord)fetch();
+	tmp |= (DWord)fetch() << 8;
+	tmp |= (DWord)fetch() << 16;
+	tmp |= (DWord)fetch() << 24;
+
+	return tmp;
+}
+
 Word USimLE::read_word(Word offset)
 {
 	Word		tmp;
@@ -161,8 +205,28 @@ Word USimLE::read_word(Word offset)
 	return tmp;
 }
 
+DWord USimLE::read_dword(Word offset)
+{
+	DWord		tmp;
+
+	tmp  = (DWord)read(offset++);
+	tmp |= (DWord)read(offset++) << 8;
+	tmp |= (DWord)read(offset++) << 16;
+	tmp |= (DWord)read(offset)   << 24;
+
+	return tmp;
+}
+
 void USimLE::write_word(Word offset, Word val)
 {
 	write(offset++, (Byte)val);
 	write(offset, (Byte)(val >> 8));
+}
+
+void USimLE::write_dword(Word offset, DWord val)
+{
+	write(offset++, (Byte)val);
+	write(offset++, (Byte)(val >> 8));
+	write(offset++, (Byte)(val >> 16));
+	write(offset, (Byte)(val >> 24));
 }
