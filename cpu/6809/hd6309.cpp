@@ -907,7 +907,10 @@ void hd6309::divq()
 void hd6309::tfm()
 {
 	insn = "TFM";
-	Byte post = fetch_operand();
+	// fetch() directly: mc6809::decode_mode classifies $113x as inherent
+	// rather than immediate, so fetch_operand would route through
+	// fetch_effective_address and trap.
+	Byte post = fetch();
 	int r1_code = (post & 0xf0) >> 4;
 	int r2_code = (post & 0x0f);
 
@@ -1192,7 +1195,7 @@ void hd6309::rti()
 void hd6309::ldmd()
 {
 	insn = "LDMD";
-	Byte v = fetch_operand();
+	Byte v = fetch();		// immediate operand
 	md.nm = btst(v, 0);
 	md.fm = btst(v, 1);
 	md.il = 0;
@@ -1203,7 +1206,7 @@ void hd6309::ldmd()
 void hd6309::bitmd()
 {
 	insn = "BITMD";
-	Byte v = fetch_operand();
+	Byte v = fetch();		// immediate operand
 	Byte t = md.value & v;
 	cc.z = (t == 0);
 	// Clear the trap-status bits that were just tested.

@@ -19,7 +19,7 @@ LIB_SRCS	= core/usim.cpp core/memory.cpp \
 		  peripherals/mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim09 usim02 usim65c02 tests/test6502 tests/test6809 tests/test65c02
+BIN		= usim09 usim02 usim65c02 tests/test6502 tests/test6809 tests/test6309 tests/test65c02
 
 LIB		= libusim.a
 
@@ -44,16 +44,23 @@ tests/test6502: $(LIB) cpu/65xx/test6502.o
 tests/test6809: $(LIB) cpu/6809/test6809.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/6809/test6809.o -L. -lusim -o $(@)
 
+tests/test6309: $(LIB) cpu/6809/test6309.o
+	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/6809/test6309.o -L. -lusim -o $(@)
+
 tests/test65c02: $(LIB) cpu/65xx/test65c02.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/test65c02.o -L. -lusim -o $(@)
 
 tests/test6809.bin: cpu/6809/test6809.asm
 	asm6809 -B -o $(@) $(<)
 
+tests/test6309.bin: cpu/6809/test6309.asm
+	asm6809 --6309 -B -o $(@) $(<)
+
 .PHONY: test
-test: tests/test6502 tests/test6809 tests/test65c02 tests/test6809.bin
+test: tests/test6502 tests/test6809 tests/test6309 tests/test65c02 tests/test6809.bin tests/test6309.bin
 	tests/test6502
 	tests/test6809
+	tests/test6309
 	tests/test65c02
 
 %.o: %.cpp
@@ -61,7 +68,7 @@ test: tests/test6502 tests/test6809 tests/test65c02 tests/test6809.bin
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(LIB) core/*.o cpu/6809/*.o cpu/65xx/*.o peripherals/*.o tests/test6809.bin
+	$(RM) $(BIN) $(LIB) core/*.o cpu/6809/*.o cpu/65xx/*.o peripherals/*.o tests/test6809.bin tests/test6309.bin
 
 .PHONY: depend
 depend:
@@ -90,6 +97,9 @@ cpu/6809/main09.o: core/registers.h core/bits.h core/typedefs.h
 cpu/6809/test6809.o: cpu/6809/mc6809.h
 cpu/6809/test6809.o: core/usim.h core/memory.h core/device.h core/wiring.h
 cpu/6809/test6809.o: core/registers.h core/bits.h core/typedefs.h
+cpu/6809/test6309.o: cpu/6809/hd6309.h cpu/6809/mc6809.h
+cpu/6809/test6309.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/test6309.o: core/registers.h core/bits.h core/typedefs.h
 
 cpu/65xx/mos6502.o: cpu/65xx/mos6502.h
 cpu/65xx/mos6502.o: core/usim.h core/memory.h core/device.h core/wiring.h
