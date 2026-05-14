@@ -239,6 +239,14 @@ void hd6309::execute_instruction()
 		case 0x000b: case 0x006b: case 0x007b:
 			tim(); break;
 
+		// Multiply and divide
+		case 0x118f: case 0x119f: case 0x11af: case 0x11bf:
+			muld(); break;
+		case 0x118d: case 0x119d: case 0x11ad: case 0x11bd:
+			divd(); break;
+		case 0x118e: case 0x119e: case 0x11ae: case 0x11be:
+			divq(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -788,4 +796,83 @@ void hd6309::tim()
 	cc.n = btst(val, 7);
 	cc.z = !val;
 	cc.v = 0;
+}
+
+//----------------------------------------------------------------------------
+// Signed multiply and divide.
+//
+// MULD: 16-bit signed D * M -> 32-bit signed result in Q (D high, W low).
+// DIVD: 16-bit signed D / 8-bit signed M -> 8-bit quotient in B, remainder
+//       in A. V is set on /0 or quotient overflow; registers are untouched
+//       in those cases.
+// DIVQ: 32-bit signed Q / 16-bit signed M -> 16-bit quotient in W, remainder
+//       in D. Same overflow / divide-by-zero handling.
+//
+// Divide-by-zero also sets MD.dz; the actual trap dispatch is wired up in
+// the illegal-opcode-trap phase.
+//----------------------------------------------------------------------------
+
+void hd6309::muld()
+{
+	insn = "MULD";
+	int16_t multiplier = (int16_t)fetch_word_operand();
+	int32_t result = (int32_t)(int16_t)d * multiplier;
+	setq((DWord)(uint32_t)result);
+	cc.n = (result < 0);
+	cc.z = (result == 0);
+	cycles += 10;
+}
+
+void hd6309::divd()
+{
+	insn = "DIVD";
+	int8_t divisor = (int8_t)fetch_operand();
+	if (divisor == 0) {
+		md.dz = 1;
+		cc.v = 1;
+		return;
+	}
+	int16_t dividend = (int16_t)d;
+	int32_t quotient = dividend / divisor;
+	if (quotient > 127 || quotient < -128) {
+		// Range overflow: per datasheet, leave registers unchanged
+		// and signal via V.
+		cc.v = 1;
+	} else {
+		int8_t q = (int8_t)quotient;
+		int8_t r = (int8_t)(dividend % divisor);
+		b = (Byte)q;
+		a = (Byte)r;
+		cc.n = (q < 0);
+		cc.z = (q == 0);
+		cc.c = btst((Byte)q, 0);
+		cc.v = 0;
+	}
+	cycles += 24;
+}
+
+void hd6309::divq()
+{
+	insn = "DIVQ";
+	int16_t divisor = (int16_t)fetch_word_operand();
+	if (divisor == 0) {
+		md.dz = 1;
+		cc.v = 1;
+		return;
+	}
+	int32_t dividend = (int32_t)getq();
+	int64_t quotient = (int64_t)dividend / divisor;
+	if (quotient > 32767 || quotient < -32768) {
+		cc.v = 1;
+	} else {
+		int16_t q = (int16_t)quotient;
+		int16_t r = (int16_t)(dividend % divisor);
+		w = (Word)q;
+		d = (Word)r;
+		cc.n = (q < 0);
+		cc.z = (q == 0);
+		cc.c = btst((Word)q, 0);
+		cc.v = 0;
+	}
+	cycles += 32;
 }

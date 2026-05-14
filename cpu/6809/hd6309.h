@@ -92,6 +92,11 @@ protected:	// push/pull the W register on either stack
 protected:	// in-memory bit logic: AIM/OIM/EIM/TIM
 	void			aim(), oim(), eim(), tim();
 
+protected:	// signed multiply and divide
+	void			muld();
+	void			divd();
+	void			divq();
+
 protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.
