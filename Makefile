@@ -16,7 +16,7 @@ LIB_SRCS	= core/usim.cpp core/memory.cpp \
 		  peripherals/mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
-BIN		= usim09 usim02 usim65c02 tests/test6502 tests/test6809
+BIN		= usim09 usim02 tests/test6502 tests/test6809
 
 LIB		= libusim.a
 
@@ -31,9 +31,6 @@ usim09:	$(LIB) cpu/6809/main09.o peripherals/term.o
 
 usim02:	$(LIB) cpu/65xx/main02.o peripherals/term.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/main02.o peripherals/term.o -L. -lusim -o $(@)
-
-usim65c02: $(LIB) cpu/65xx/main65c02.o peripherals/term.o
-	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/main65c02.o peripherals/term.o -L. -lusim -o $(@)
 
 tests/test6502: $(LIB) cpu/65xx/test6502.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/test6502.o -L. -lusim -o $(@)
@@ -88,9 +85,6 @@ cpu/6809/main09.o: peripherals/term.h
 cpu/65xx/main02.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
 cpu/65xx/main02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
 cpu/65xx/main02.o: peripherals/term.h
-cpu/65xx/main65c02.o: cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
-cpu/65xx/main65c02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
-cpu/65xx/main65c02.o: peripherals/term.h
 peripherals/term.o: peripherals/term.h core/usim.h core/device.h core/typedefs.h core/memory.h
 peripherals/term.o: core/wiring.h core/bits.h peripherals/mc6850.h
 cpu/65xx/test6502.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h

@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build
 
 ```bash
-make          # build libusim.a, usim09 (MC6809), usim02 (NMOS 6502), usim65c02 (common 65C02)
+make          # build libusim.a, usim09 (MC6809), usim02 (NMOS 6502)
 make clean
 ```
 
@@ -30,7 +30,7 @@ Interactive ROM images (no automated pass/fail):
 ```bash
 ./usim09 samples/test_main.hex    # MC6809 test ROM
 ./usim09 samples/tbasic09.hex     # TinyBASIC for MC6809
-./usim02 samples/bbcbasic02.hex   # BBC BASIC v2 for MOS 6502 (also runs under usim65c02)
+./usim02 samples/bbcbasic02.hex   # BBC BASIC v2 for MOS 6502
 ```
 
 ## Architecture
@@ -72,9 +72,8 @@ Serial I/O chip used by both demo systems. The concrete I/O backend is abstracte
 |--------|-----|-----------|-----|
 | `usim09` (MC6809) | `0x0000–0x7FFF` | ACIA @ `0xC000`, FIRQ wired to ACIA IRQ | `0xE000–0xFFFF` |
 | `usim02` (MOS 6502) | `0x0000–0x7FFF` | ACIA @ `0xA000`, IRQ wired to ACIA IRQ | `0xC000–0xFFFF` |
-| `usim65c02` (common 65C02) | `0x0000–0x7FFF` | ACIA @ `0xA000`, IRQ wired to ACIA IRQ | `0xC000–0xFFFF` |
 
-`cpu/6809/main09.cpp`, `cpu/65xx/main02.cpp`, and `cpu/65xx/main65c02.cpp` are the canonical examples of how to wire a complete system using `cpu.attach()` and pin lambdas. The 6502 and 65C02 demo systems share the same memory map.
+`cpu/6809/main09.cpp` and `cpu/65xx/main02.cpp` are the canonical examples of how to wire a complete system using `cpu.attach()` and pin lambdas.
 
 ### Utilities
 
