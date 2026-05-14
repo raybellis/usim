@@ -40,20 +40,11 @@ usim65c02: $(LIB) cpu/65xx/main65c02.o peripherals/term.o
 tests/test6502: $(LIB) cpu/65xx/test6502.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/test6502.o -L. -lusim -o $(@)
 
-cpu/65xx/test6502.o: cpu/65xx/test6502.cpp
-	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c cpu/65xx/test6502.cpp -o $(@)
-
 tests/test6809: $(LIB) cpu/6809/test6809.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/6809/test6809.o -L. -lusim -o $(@)
 
-cpu/6809/test6809.o: cpu/6809/test6809.cpp
-	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c cpu/6809/test6809.cpp -o $(@)
-
 tests/test65c02: $(LIB) cpu/65xx/test65c02.o
 	$(CXX) $(CCFLAGS) $(LDFLAGS) cpu/65xx/test65c02.o -L. -lusim -o $(@)
-
-cpu/65xx/test65c02.o: cpu/65xx/test65c02.cpp
-	$(CXX) $(CPPFLAGS) $(CCFLAGS) -c cpu/65xx/test65c02.cpp -o $(@)
 
 tests/test6809.bin: cpu/6809/test6809.asm
 	asm6809 -B -o $(@) $(<)
@@ -69,7 +60,7 @@ test: tests/test6502 tests/test6809 tests/test65c02 tests/test6809.bin
 
 .PHONY: clean
 clean:
-	$(RM) $(BIN) $(LIB) *.o core/*.o cpu/6809/*.o cpu/65xx/*.o peripherals/*.o tests/*.o tests/test6809.bin
+	$(RM) $(BIN) $(LIB) core/*.o cpu/6809/*.o cpu/65xx/*.o peripherals/*.o tests/test6809.bin
 
 .PHONY: depend
 depend:
@@ -77,41 +68,57 @@ depend:
 
 # Manually defined dependencies
 
-core/usim.o: core/usim.h core/device.h core/typedefs.h core/memory.h core/wiring.h
-core/usim.o: core/bits.h
-core/memory.o: core/memory.h core/device.h core/typedefs.h
-cpu/6809/mc6809.o: cpu/6809/mc6809.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/6809/mc6809.o: core/memory.h core/bits.h core/registers.h
-cpu/6809/mc6809in.o: cpu/6809/mc6809.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/6809/mc6809in.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/mos6502.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/mos6502.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/mos6502in.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/mos6502in.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/cmos6502.o: cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/cmos6502.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/r65c02.o: cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/r65c02.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/w65c02s.o: cpu/65xx/w65c02s.h cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/w65c02s.o: core/memory.h core/bits.h core/registers.h
-peripherals/mc6850.o: peripherals/mc6850.h core/device.h core/typedefs.h core/wiring.h core/bits.h
-cpu/6809/main09.o: cpu/6809/mc6809.h core/wiring.h core/usim.h core/device.h
-cpu/6809/main09.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
-cpu/6809/main09.o: peripherals/term.h
-cpu/65xx/main02.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
-cpu/65xx/main02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
-cpu/65xx/main02.o: peripherals/term.h
-cpu/65xx/main65c02.o: cpu/65xx/w65c02s.h cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
-cpu/65xx/main65c02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
-cpu/65xx/main65c02.o: peripherals/term.h
-peripherals/term.o: peripherals/term.h core/usim.h core/device.h core/typedefs.h core/memory.h
-peripherals/term.o: core/wiring.h core/bits.h peripherals/mc6850.h
-cpu/65xx/test6502.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/test6502.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/test65c02.o: cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/test65c02.o: core/memory.h core/bits.h core/registers.h
-cpu/6809/test6809.o: cpu/6809/mc6809.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/6809/test6809.o: core/memory.h core/bits.h core/registers.h
+core/usim.o: core/usim.h
+core/usim.o: core/memory.h core/device.h core/wiring.h core/bits.h core/typedefs.h
+core/memory.o: core/memory.h
+core/memory.o: core/device.h core/typedefs.h
 
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+cpu/6809/mc6809.o: cpu/6809/mc6809.h
+cpu/6809/mc6809.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/mc6809.o: core/registers.h core/bits.h core/typedefs.h
+cpu/6809/mc6809in.o: cpu/6809/mc6809.h
+cpu/6809/mc6809in.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/mc6809in.o: core/registers.h core/bits.h core/typedefs.h
+cpu/6809/main09.o: cpu/6809/mc6809.h
+cpu/6809/main09.o: peripherals/mc6850.h peripherals/term.h
+cpu/6809/main09.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/main09.o: core/registers.h core/bits.h core/typedefs.h
+cpu/6809/test6809.o: cpu/6809/mc6809.h
+cpu/6809/test6809.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/test6809.o: core/registers.h core/bits.h core/typedefs.h
 
+cpu/65xx/mos6502.o: cpu/65xx/mos6502.h
+cpu/65xx/mos6502.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/mos6502.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/mos6502in.o: cpu/65xx/mos6502.h
+cpu/65xx/mos6502in.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/mos6502in.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/cmos6502.o: cpu/65xx/cmos6502.h cpu/65xx/mos6502.h
+cpu/65xx/cmos6502.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/cmos6502.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/r65c02.o: cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h
+cpu/65xx/r65c02.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/r65c02.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/w65c02s.o: cpu/65xx/w65c02s.h cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h
+cpu/65xx/w65c02s.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/w65c02s.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/main02.o: cpu/65xx/mos6502.h
+cpu/65xx/main02.o: peripherals/mc6850.h peripherals/term.h
+cpu/65xx/main02.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/main02.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/main65c02.o: cpu/65xx/w65c02s.h cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h
+cpu/65xx/main65c02.o: peripherals/mc6850.h peripherals/term.h
+cpu/65xx/main65c02.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/main65c02.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/test6502.o: cpu/65xx/mos6502.h
+cpu/65xx/test6502.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/test6502.o: core/registers.h core/bits.h core/typedefs.h
+cpu/65xx/test65c02.o: cpu/65xx/r65c02.h cpu/65xx/cmos6502.h cpu/65xx/mos6502.h
+cpu/65xx/test65c02.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/65xx/test65c02.o: core/registers.h core/bits.h core/typedefs.h
+
+peripherals/mc6850.o: peripherals/mc6850.h
+peripherals/mc6850.o: core/device.h core/wiring.h core/bits.h core/typedefs.h
+peripherals/term.o: peripherals/term.h peripherals/mc6850.h
+peripherals/term.o: core/usim.h core/memory.h core/device.h core/wiring.h
+peripherals/term.o: core/bits.h core/typedefs.h
