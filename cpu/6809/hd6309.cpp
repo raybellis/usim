@@ -175,6 +175,34 @@ void hd6309::execute_instruction()
 		case 0x1081: case 0x1091: case 0x10a1: case 0x10b1:
 			cmpw(); break;
 
+		// INC / DEC / NEG / COM / TST / CLR on accumulators
+		case 0x104c: incd(); break;
+		case 0x114c: ince(); break;
+		case 0x115c: incf(); break;
+		case 0x105c: incw(); break;
+
+		case 0x104a: decd(); break;
+		case 0x114a: dece(); break;
+		case 0x115a: decf(); break;
+		case 0x105a: decw(); break;
+
+		case 0x1040: negd(); break;
+
+		case 0x1043: comd(); break;
+		case 0x1143: come(); break;
+		case 0x1153: comf(); break;
+		case 0x1053: comw(); break;
+
+		case 0x104d: tstd(); break;
+		case 0x114d: tste(); break;
+		case 0x115d: tstf(); break;
+		case 0x105d: tstw(); break;
+
+		case 0x104f: clrd(); break;
+		case 0x114f: clre(); break;
+		case 0x115f: clrf(); break;
+		case 0x105f: clrw(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -302,4 +330,195 @@ void hd6309::cmpw()
 {
 	insn = "CMPW";
 	help_cmp(w);
+}
+
+//----------------------------------------------------------------------------
+// 16-bit forms of the unary CC-setting helpers. The 6809 has byte-only
+// versions in mc6809; the 6309 needs word versions for the new D/W ops.
+//----------------------------------------------------------------------------
+
+void hd6309::help_clr(Word& x)
+{
+	cc.value &= 0xf0;
+	cc.value |= 0x04;
+	x = 0;
+	++cycles;
+}
+
+void hd6309::help_com(Word& x)
+{
+	x = ~x;
+	cc.c = 1;
+	cc.v = 0;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_dec(Word& x)
+{
+	cc.v = (x == 0x8000);
+	x = x - 1;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_inc(Word& x)
+{
+	cc.v = (x == 0x7fff);
+	x = x + 1;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_neg(Word& x)
+{
+	int	t = 0 - x;
+
+	cc.v = btst((DWord)(x ^ t ^ (t >> 1)), 15);
+	cc.c = btst((DWord)t, 16);
+	cc.n = btst((DWord)t, 15);
+	x = (Word)(t & 0xffff);
+	cc.z = !x;
+	++cycles;
+}
+
+void hd6309::help_tst(Word x)
+{
+	cc.v = 0;
+	cc.n = btst(x, 15);
+	cc.z = !x;
+	++cycles;
+}
+
+//----------------------------------------------------------------------------
+// INC/DEC/NEG/COM/TST/CLR on the 6309 accumulators.
+//----------------------------------------------------------------------------
+
+void hd6309::incd()
+{
+	insn = "INCD";
+	help_inc(d);
+}
+
+void hd6309::ince()
+{
+	insn = "INCE";
+	help_inc(e);
+}
+
+void hd6309::incf()
+{
+	insn = "INCF";
+	help_inc(f);
+}
+
+void hd6309::incw()
+{
+	insn = "INCW";
+	help_inc(w);
+}
+
+void hd6309::decd()
+{
+	insn = "DECD";
+	help_dec(d);
+}
+
+void hd6309::dece()
+{
+	insn = "DECE";
+	help_dec(e);
+}
+
+void hd6309::decf()
+{
+	insn = "DECF";
+	help_dec(f);
+}
+
+void hd6309::decw()
+{
+	insn = "DECW";
+	help_dec(w);
+}
+
+void hd6309::negd()
+{
+	insn = "NEGD";
+	help_neg(d);
+}
+
+void hd6309::comd()
+{
+	insn = "COMD";
+	help_com(d);
+}
+
+void hd6309::come()
+{
+	insn = "COME";
+	help_com(e);
+}
+
+void hd6309::comf()
+{
+	insn = "COMF";
+	help_com(f);
+}
+
+void hd6309::comw()
+{
+	insn = "COMW";
+	help_com(w);
+}
+
+void hd6309::tstd()
+{
+	insn = "TSTD";
+	help_tst(d);
+}
+
+void hd6309::tste()
+{
+	insn = "TSTE";
+	help_tst(e);
+}
+
+void hd6309::tstf()
+{
+	insn = "TSTF";
+	help_tst(f);
+}
+
+void hd6309::tstw()
+{
+	insn = "TSTW";
+	help_tst(w);
+}
+
+void hd6309::clrd()
+{
+	insn = "CLRD";
+	help_clr(d);
+}
+
+void hd6309::clre()
+{
+	insn = "CLRE";
+	help_clr(e);
+}
+
+void hd6309::clrf()
+{
+	insn = "CLRF";
+	help_clr(f);
+}
+
+void hd6309::clrw()
+{
+	insn = "CLRW";
+	help_clr(w);
 }

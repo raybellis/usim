@@ -72,6 +72,31 @@ protected:	// ADD/SUB/CMP on the 6309 accumulators
 	void			sube(), subf(), subw();
 	void			cmpe(), cmpf(), cmpw();
 
+protected:	// INC/DEC/NEG/COM/TST/CLR on the 6309 accumulators
+	void			incd(), ince(), incf(), incw();
+	void			decd(), dece(), decf(), decw();
+	void			negd();
+	void			comd(), come(), comf(), comw();
+	void			tstd(), tste(), tstf(), tstw();
+	void			clrd(), clre(), clrf(), clrw();
+
+protected:	// 16-bit forms of the unary helpers (6309-only). The using
+		// declarations re-import the base's Byte overloads so callers
+		// in this class see both.
+	using mc6809::help_clr;
+	using mc6809::help_com;
+	using mc6809::help_dec;
+	using mc6809::help_inc;
+	using mc6809::help_neg;
+	using mc6809::help_tst;
+
+	void			help_clr(Word&);
+	void			help_com(Word&);
+	void			help_dec(Word&);
+	void			help_inc(Word&);
+	void			help_neg(Word&);
+	void			help_tst(Word);
+
 public:
 				hd6309();		// public constructor
 	virtual			~hd6309();		// public destructor
