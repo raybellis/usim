@@ -100,6 +100,10 @@ protected:	// signed multiply and divide
 protected:	// block transfer (TFM r+,r+ / r-,r- / r+,r / r,r+)
 	void			tfm();
 
+protected:	// CC/memory single-bit transfer family
+		// (BAND, BIAND, BOR, BIOR, BEOR, BIEOR, LDBT, STBT)
+	void			bit_transfer();
+
 protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.

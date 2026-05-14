@@ -251,6 +251,12 @@ void hd6309::execute_instruction()
 		case 0x1138: case 0x1139: case 0x113a: case 0x113b:
 			tfm(); break;
 
+		// CC/memory single-bit transfers (BAND/BIAND/BOR/BIOR/BEOR/
+		// BIEOR/LDBT/STBT) — all share postbyte format and dispatch.
+		case 0x1130: case 0x1131: case 0x1132: case 0x1133:
+		case 0x1134: case 0x1135: case 0x1136: case 0x1137:
+			bit_transfer(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -942,4 +948,90 @@ void hd6309::tfm()
 		pc -= 3;
 	}
 	cycles += 3;
+}
+
+//----------------------------------------------------------------------------
+// CC/memory single-bit transfer family.
+//
+// Postbyte layout:
+//   bits 7..6: register selector (00 = CC, 01 = A, 10 = B; 11 = invalid)
+//   bits 5..3: register bit index (0..7)
+//   bits 2..0: memory bit index  (0..7)
+// The address byte that follows is direct mode (combined with DP).
+//
+// All eight ops share the same postbyte parse and the same read-of-memory;
+// only the per-bit operation and write-back target differ.
+//----------------------------------------------------------------------------
+
+void hd6309::bit_transfer()
+{
+	Byte post = fetch();
+	int r_sel = (post >> 6) & 3;
+	int r_bit = (post >> 3) & 7;
+	int m_bit = post & 7;
+
+	if (r_sel == 3) {
+		invalid("invalid bit-transfer register");
+		return;
+	}
+
+	Byte addr_low = fetch();
+	Word addr = ((Word)dp << 8) | addr_low;
+
+	Byte& reg = (r_sel == 0) ? cc.value
+		  : (r_sel == 1) ? a
+		  :                b;	// r_sel == 2
+
+	Byte mem = read(addr);
+	bool r_b = btst(reg, r_bit);
+	bool m_b = btst(mem, m_bit);
+	bool result = false;
+
+	switch (ir) {
+	case 0x1130:
+		insn = "BAND";
+		result = r_b && m_b;
+		break;
+	case 0x1131:
+		insn = "BIAND";
+		result = r_b && !m_b;
+		break;
+	case 0x1132:
+		insn = "BOR";
+		result = r_b || m_b;
+		break;
+	case 0x1133:
+		insn = "BIOR";
+		result = r_b || !m_b;
+		break;
+	case 0x1134:
+		insn = "BEOR";
+		result = r_b != m_b;
+		break;
+	case 0x1135:
+		insn = "BIEOR";
+		result = r_b == m_b;
+		break;
+	case 0x1136:
+		insn = "LDBT";
+		result = m_b;
+		break;
+	case 0x1137:
+		insn = "STBT";
+		if (r_b) {
+			bset(mem, m_bit);
+		} else {
+			bclr(mem, m_bit);
+		}
+		write(addr, mem);
+		cycles += 7;
+		return;
+	}
+
+	if (result) {
+		bset(reg, r_bit);
+	} else {
+		bclr(reg, r_bit);
+	}
+	cycles += 7;
 }
