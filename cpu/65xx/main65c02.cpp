@@ -12,7 +12,7 @@
 #include <cstdio>
 #include <csignal>
 
-#include "base65c02.h"
+#include "cmos6502.h"
 #include "mc6850.h"
 #include "term.h"
 #include "memory.h"
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 	const Word rom_base = 0xc000;
 	const Word rom_size = 0x10000 - rom_base;
 
-	base65c02		cpu;
+	cmos6502		cpu;
 	Terminal		term(cpu);
 
 	auto ram = std::make_shared<RAM>(ram_size);

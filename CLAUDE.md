@@ -23,7 +23,7 @@ Two automated tests:
 
 - **MC6809** (`cpu/6809/test6809.cpp` + `cpu/6809/test6809.asm`): a custom MC6809 functional test suite. Assembled with `asm6809 -B`, loaded at `$0400`. Tests ALU, flags, shifts, EXG/TFR, PSHS/PULS, branches, BSR/JSR/RTS, RTI (E=0 and E=1 via SWI), SWI/SWI2/SWI3, MUL, DAA, SEX, ABX, LEA, and indexed addressing. Success address is `0x0986`.
 
-`base65c02` has no automated test yet. `tests/65C02_extended_opcodes_test.bin` (Klaus Dormann's 65C02 extended test, success PC `0x24F1`) is checked in for use once a concrete subclass adds RMB/SMB/BBR/BBS support.
+`cmos6502` has no automated test yet. `tests/65C02_extended_opcodes_test.bin` (Klaus Dormann's 65C02 extended test, success PC `0x24F1`) is checked in for use once a concrete subclass adds RMB/SMB/BBR/BBS support.
 
 Interactive ROM images (no automated pass/fail):
 
@@ -60,7 +60,7 @@ Each CPU splits across three files (e.g., `cpu/6809/mc6809.h`, `cpu/6809/mc6809.
 
 **MOS 6502** (`cpu/65xx/mos6502.*`) — full register set (A, X, Y, S, P, PC), all addressing modes, NMI/IRQ/BRK. Little-endian. Inherits `USimLE`. Internals are protected/virtual so derived CMOS classes can extend dispatch and override the handful of instructions whose semantics differ.
 
-**Common 65C02** (`cpu/65xx/base65c02.*`) — derives from `mos6502` and adds the CMOS additions shared by all 65C02 variants: BRA, JMP (abs,X), CMOS-clean JMP (abs), STZ, PHX/PHY/PLX/PLY, INC A / DEC A, BIT immediate/`zp,X`/`abs,X` (with the immediate-mode flag quirk), `(zp)` addressing for the ALU ops, TRB/TSB, decimal-mode ADC/SBC with N/V/Z from the corrected result, and D-clear on interrupt entry. Vendor-specific extensions (RMB/SMB/BBR/BBS, WAI, STP) are explicitly **not** in this class — they belong on concrete subclasses (R65C02, W65C02S, etc.) that derive from `base65c02`. Two CMOS-only addressing modes (`zpindirect`, `absxindirect`) were added to `mos6502::mode_t` so they're available to the derived class.
+**Common 65C02** (`cpu/65xx/cmos6502.*`) — derives from `mos6502` and adds the CMOS additions shared by all 65C02 variants: BRA, JMP (abs,X), CMOS-clean JMP (abs), STZ, PHX/PHY/PLX/PLY, INC A / DEC A, BIT immediate/`zp,X`/`abs,X` (with the immediate-mode flag quirk), `(zp)` addressing for the ALU ops, TRB/TSB, decimal-mode ADC/SBC with N/V/Z from the corrected result, and D-clear on interrupt entry. Vendor-specific extensions (RMB/SMB/BBR/BBS, WAI, STP) are explicitly **not** in this class — they belong on concrete subclasses (R65C02, W65C02S, etc.) that derive from `cmos6502`. Two CMOS-only addressing modes (`zpindirect`, `absxindirect`) were added to `mos6502::mode_t` so they're available to the derived class.
 
 ### Peripheral: MC6850 ACIA (`peripherals/mc6850.h/cpp`)
 

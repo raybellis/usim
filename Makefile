@@ -12,7 +12,7 @@ LDFLAGS		=
 LIB_SRCS	= core/usim.cpp core/memory.cpp \
 		  cpu/6809/mc6809.cpp cpu/6809/mc6809in.cpp \
 		  cpu/65xx/mos6502.cpp cpu/65xx/mos6502in.cpp \
-		  cpu/65xx/base65c02.cpp \
+		  cpu/65xx/cmos6502.cpp \
 		  peripherals/mc6850.cpp
 
 OBJS		= $(LIB_SRCS:.cpp=.o)
@@ -79,8 +79,8 @@ cpu/65xx/mos6502.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h c
 cpu/65xx/mos6502.o: core/memory.h core/bits.h core/registers.h
 cpu/65xx/mos6502in.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
 cpu/65xx/mos6502in.o: core/memory.h core/bits.h core/registers.h
-cpu/65xx/base65c02.o: cpu/65xx/base65c02.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
-cpu/65xx/base65c02.o: core/memory.h core/bits.h core/registers.h
+cpu/65xx/cmos6502.o: cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h core/typedefs.h
+cpu/65xx/cmos6502.o: core/memory.h core/bits.h core/registers.h
 peripherals/mc6850.o: peripherals/mc6850.h core/device.h core/typedefs.h core/wiring.h core/bits.h
 cpu/6809/main09.o: cpu/6809/mc6809.h core/wiring.h core/usim.h core/device.h
 cpu/6809/main09.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
@@ -88,7 +88,7 @@ cpu/6809/main09.o: peripherals/term.h
 cpu/65xx/main02.o: cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
 cpu/65xx/main02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
 cpu/65xx/main02.o: peripherals/term.h
-cpu/65xx/main65c02.o: cpu/65xx/base65c02.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
+cpu/65xx/main65c02.o: cpu/65xx/cmos6502.h cpu/65xx/mos6502.h core/wiring.h core/usim.h core/device.h
 cpu/65xx/main65c02.o: core/typedefs.h core/memory.h core/bits.h core/registers.h peripherals/mc6850.h
 cpu/65xx/main65c02.o: peripherals/term.h
 peripherals/term.o: peripherals/term.h core/usim.h core/device.h core/typedefs.h core/memory.h

@@ -1,21 +1,21 @@
 //
-// base65c02.cpp
+// cmos6502.cpp
 // Common 65C02 CMOS core emulation
 // (C) R.P.Bellis 2026 -
 // vim: ts=8 sw=8 noet:
 //
 
-#include "base65c02.h"
+#include "cmos6502.h"
 
-base65c02::base65c02()
+cmos6502::cmos6502()
 {
 }
 
-base65c02::~base65c02()
+cmos6502::~cmos6502()
 {
 }
 
-mos6502::mode_t base65c02::decode_mode(Byte ir)
+mos6502::mode_t cmos6502::decode_mode(Byte ir)
 {
 	switch (ir) {
 	case 0x80:		// BRA
@@ -36,7 +36,7 @@ mos6502::mode_t base65c02::decode_mode(Byte ir)
 	}
 }
 
-void base65c02::execute_instruction()
+void cmos6502::execute_instruction()
 {
 	switch (ir) {
 	case 0x80:
@@ -77,7 +77,7 @@ void base65c02::execute_instruction()
 	}
 }
 
-Word base65c02::fetch_effective_address()
+Word cmos6502::fetch_effective_address()
 {
 	switch (mode) {
 	case absindirect:
@@ -97,7 +97,7 @@ Word base65c02::fetch_effective_address()
 	}
 }
 
-const char* base65c02::disasm_opcode(Byte ir)
+const char* cmos6502::disasm_opcode(Byte ir)
 {
 	switch (ir) {
 	case 0x80:
@@ -137,52 +137,52 @@ const char* base65c02::disasm_opcode(Byte ir)
 	}
 }
 
-void base65c02::bra()
+void cmos6502::bra()
 {
 	do_br("BRA", true);
 }
 
-void base65c02::stz()
+void cmos6502::stz()
 {
 	auto m = fetch_effective_address();
 	write(m, 0);
 }
 
-void base65c02::phx()
+void cmos6502::phx()
 {
 	do_psh(x);
 }
 
-void base65c02::phy()
+void cmos6502::phy()
 {
 	do_psh(y);
 }
 
-void base65c02::plx()
+void cmos6502::plx()
 {
 	do_pul(x);
 	set_nz(x);
 }
 
-void base65c02::ply()
+void cmos6502::ply()
 {
 	do_pul(y);
 	set_nz(y);
 }
 
-void base65c02::ina()
+void cmos6502::ina()
 {
 	++a;
 	set_nz(a);
 }
 
-void base65c02::dea()
+void cmos6502::dea()
 {
 	--a;
 	set_nz(a);
 }
 
-void base65c02::bit()
+void cmos6502::bit()
 {
 	// CMOS BIT #imm sets only Z, leaving N and V untouched.
 	// Every other addressing form (existing zp/abs and the new zp,X
@@ -195,7 +195,7 @@ void base65c02::bit()
 	}
 }
 
-void base65c02::trb()
+void cmos6502::trb()
 {
 	auto m = fetch_effective_address();
 	Byte val = read(m);
@@ -203,7 +203,7 @@ void base65c02::trb()
 	write(m, val & ~a);
 }
 
-void base65c02::tsb()
+void cmos6502::tsb()
 {
 	auto m = fetch_effective_address();
 	Byte val = read(m);
@@ -211,7 +211,7 @@ void base65c02::tsb()
 	write(m, val | a);
 }
 
-void base65c02::adc()
+void cmos6502::adc()
 {
 	// Binary mode is identical to NMOS.
 	if (!p.d) {
@@ -237,7 +237,7 @@ void base65c02::adc()
 	++cycles;
 }
 
-void base65c02::sbc()
+void cmos6502::sbc()
 {
 	if (!p.d) {
 		mos6502::sbc();
@@ -263,19 +263,19 @@ void base65c02::sbc()
 	++cycles;
 }
 
-void base65c02::do_nmi()
+void cmos6502::do_nmi()
 {
 	mos6502::do_nmi();
 	p.d = false;
 }
 
-void base65c02::do_irq()
+void cmos6502::do_irq()
 {
 	mos6502::do_irq();
 	p.d = false;
 }
 
-void base65c02::do_brk()
+void cmos6502::do_brk()
 {
 	mos6502::do_brk();
 	p.d = false;

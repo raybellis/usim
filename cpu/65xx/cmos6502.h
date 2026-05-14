@@ -1,5 +1,5 @@
 //
-//	base65c02.h
+//	cmos6502.h
 //	(C) R.P.Bellis 2026 -
 //	Common 65C02 CMOS core (shared by all CMOS variants).
 //	Concrete vendor subclasses add their own extensions
@@ -11,7 +11,7 @@
 
 #include "mos6502.h"
 
-class base65c02 : virtual public mos6502 {
+class cmos6502 : virtual public mos6502 {
 
 protected:	// dispatch overrides
 	virtual mode_t		decode_mode(Byte ir) override;
@@ -38,6 +38,6 @@ protected:	// CMOS-specific instruction implementations
 	void			trb(), tsb();
 
 public:
-				base65c02();
-	virtual			~base65c02();
+				cmos6502();
+	virtual			~cmos6502();
 };

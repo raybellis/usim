@@ -18,7 +18,7 @@
 		"core/usim.h",
 		"cpu/6809/mc6809.h",
 		"cpu/65xx/mos6502.h",
-		"cpu/65xx/base65c02.h",
+		"cpu/65xx/cmos6502.h",
 		"peripherals/mc6850.h"
 	],
 	"build": {
@@ -38,7 +38,7 @@
 			"+<cpu/6809/mc6809in.cpp>",
 			"+<cpu/65xx/mos6502.cpp>",
 			"+<cpu/65xx/mos6502in.cpp>",
-			"+<cpu/65xx/base65c02.cpp>",
+			"+<cpu/65xx/cmos6502.cpp>",
 			"+<peripherals/mc6850.cpp>"
 		]
 	}
