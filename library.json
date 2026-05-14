@@ -19,6 +19,8 @@
 		"cpu/6809/mc6809.h",
 		"cpu/65xx/mos6502.h",
 		"cpu/65xx/cmos6502.h",
+		"cpu/65xx/r65c02.h",
+		"cpu/65xx/w65c02s.h",
 		"peripherals/mc6850.h"
 	],
 	"build": {
@@ -39,6 +41,8 @@
 			"+<cpu/65xx/mos6502.cpp>",
 			"+<cpu/65xx/mos6502in.cpp>",
 			"+<cpu/65xx/cmos6502.cpp>",
+			"+<cpu/65xx/r65c02.cpp>",
+			"+<cpu/65xx/w65c02s.cpp>",
 			"+<peripherals/mc6850.cpp>"
 		]
 	}

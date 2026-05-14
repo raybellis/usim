@@ -71,6 +71,45 @@ void cmos6502::execute_instruction()
 		trb(); break;
 	case 0x04: case 0x0c:
 		tsb(); break;
+
+	// CMOS-defined NOP slots. NMOS had undocumented opcodes here;
+	// CMOS turns every unused encoding into a deterministic NOP of
+	// the documented length and cycle count.
+	//
+	// 1-byte NOPs at the $x3 and $xB columns (32 opcodes; w65c02s
+	// reuses $CB and $DB for WAI/STP, r65c02 reuses the $x7 and
+	// $xF columns).
+	case 0x03: case 0x13: case 0x23: case 0x33:
+	case 0x43: case 0x53: case 0x63: case 0x73:
+	case 0x83: case 0x93: case 0xa3: case 0xb3:
+	case 0xc3: case 0xd3: case 0xe3: case 0xf3:
+	case 0x0b: case 0x1b: case 0x2b: case 0x3b:
+	case 0x4b: case 0x5b: case 0x6b: case 0x7b:
+	case 0x8b: case 0x9b: case 0xab: case 0xbb:
+	case 0xcb: case 0xdb: case 0xeb: case 0xfb:
+	// 1-byte NOPs at the $x7 and $xF columns (overridden in r65c02
+	// where they become RMB/SMB/BBR/BBS).
+	case 0x07: case 0x17: case 0x27: case 0x37:
+	case 0x47: case 0x57: case 0x67: case 0x77:
+	case 0x87: case 0x97: case 0xa7: case 0xb7:
+	case 0xc7: case 0xd7: case 0xe7: case 0xf7:
+	case 0x0f: case 0x1f: case 0x2f: case 0x3f:
+	case 0x4f: case 0x5f: case 0x6f: case 0x7f:
+	case 0x8f: case 0x9f: case 0xaf: case 0xbf:
+	case 0xcf: case 0xdf: case 0xef: case 0xff:
+		nop(); break;
+
+	// 2-byte NOPs (immediate-style operand).
+	case 0x02: case 0x22: case 0x42: case 0x62:
+	case 0x82: case 0xc2: case 0xe2:
+	// 2-byte NOPs (zero-page style operand).
+	case 0x44: case 0x54: case 0xd4: case 0xf4:
+		fetch(); nop(); break;
+
+	// 3-byte NOPs (absolute-style operand).
+	case 0x5c: case 0xdc: case 0xfc:
+		fetch_word(); nop(); break;
+
 	default:
 		mos6502::execute_instruction();
 		break;

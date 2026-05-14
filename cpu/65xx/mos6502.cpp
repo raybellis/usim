@@ -608,6 +608,11 @@ std::string mos6502::disasm_operand(Word addr, mode_t mode)
 		return fmt("($%02X),Y", operand);
 	case relative:
 		return fmt("$%04X", (Word)(addr + extend8(operand) + 2));
+	case zprel:
+		// operand: low byte = zp address, high byte = signed offset
+		return fmt("$%02X,$%04X",
+			operand & 0xff,
+			(Word)(addr + extend8(operand >> 8) + 3));
 	default:
 		return "";
 	}

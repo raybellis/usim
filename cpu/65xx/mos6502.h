@@ -47,7 +47,8 @@ protected: // Processor addressing modes
 				zpxindirect,
 				zpyindirect,
 				absindirect,
-				absxindirect	// 65C02: (abs,X)
+				absxindirect,	// 65C02: (abs,X)
+				zprel		// Rockwell 65C02: zp,offset (BBR/BBS)
 	};
 
 	enum : uint16_t {
@@ -68,7 +69,6 @@ protected:	// Processor registers
 protected:	// Execution state
 	mode_t			mode;
 	Word			operand;
-private:
 	bool			nmi_previous;
 
 protected:	// instruction and operand fetch and decode
