@@ -32,14 +32,15 @@ class mc6809 : virtual public USimBE {
 
 protected:	// Processor addressing modes
 
-	enum {
+	enum mode_t : uint8_t {
 				immediate,
 				direct,
 				indexed,
 				extended,
 				inherent,
 				relative
-	} mode;
+	};
+	mode_t			mode;
 
 public:		// useful addresses
 
@@ -77,25 +78,25 @@ protected:	// Processor registers
 		};
 	};
 
-private:	// internal processor state
+protected:	// internal processor state
 	bool			waiting_sync;
 	bool			waiting_cwai;
 	bool			nmi_previous;
 
-private:	// instruction and operand fetch and decode
+protected:	// instruction and operand fetch and decode
 	Word&			ix_refreg(Byte);
 
-	void			fetch_instruction();
-	Byte			fetch_operand();
-	Word			fetch_word_operand();
-	Word			fetch_effective_address();
-	Word			fetch_indexed_operand();
-	void			execute_instruction();
+	virtual void		fetch_instruction();
+	virtual Byte		fetch_operand();
+	virtual Word		fetch_word_operand();
+	virtual Word		fetch_effective_address();
+	virtual Word		fetch_indexed_operand();
+	virtual void		execute_instruction();
 
 	void			do_predecrement();
 	void			do_postincrement();
 
-private:	// instruction implementations
+protected:	// instruction implementations
 	void			abx();
 	void			adca(), adcb();
 	void			adda(), addb(), addd();
@@ -127,7 +128,7 @@ private:	// instruction implementations
 	void			daa();
 	void			deca(), decb(), dec();
 	void			eora(), eorb();
-	void			exg();
+	virtual void		exg();
 	void			inca(), incb(), inc();
 	void			jmp();
 	void			jsr();
@@ -151,9 +152,9 @@ private:	// instruction implementations
 	void			std(), stx(), sty(), sts(), stu();
 	void			suba(), subb();
 	void			subd();
-	void			swi(), swi2(), swi3();
+	virtual void		swi(), swi2(), swi3();
 	void			sync();
-	void			tfr();
+	virtual void		tfr();
 	void			tsta(), tstb(), tst();
 
 protected:	// helper functions

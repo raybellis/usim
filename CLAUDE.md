@@ -56,7 +56,9 @@ Each CPU splits across three files (e.g., `cpu/6809/mc6809.h`, `cpu/6809/mc6809.
 - `.cpp` — reset, tick loop, interrupt handling, addressing mode helpers
 - `in.cpp` — individual instruction implementations
 
-**MC6809** (`cpu/6809/mc6809.*`) — full register set (A, B, D, X, Y, U, S, DP, CC, PC), all addressing modes, NMI/FIRQ/IRQ/SWI interrupts. Big-endian. Inherits `USimBE`.
+**MC6809** (`cpu/6809/mc6809.*`) — full register set (A, B, D, X, Y, U, S, DP, CC, PC), all addressing modes, NMI/FIRQ/IRQ/SWI interrupts. Big-endian. Inherits `USimBE`. Internals are protected/virtual so derived 6309-style classes can extend dispatch and override the handful of instructions whose semantics differ.
+
+**Hitachi HD6309** (`cpu/6809/hd6309.*`) — superset of `mc6809`. Adds the E and F (8-bit) accumulators, W (E:F, 16-bit) and Q (D:W, 32-bit) accumulator views, V (16-bit scratch), and MD (mode/trap status register). After reset the CPU is in emulation mode (MD bit 0 = 0) and is identical to an MC6809 at the opcode level; native mode and the new instructions are layered on top in subsequent phases of the implementation.
 
 **MOS 6502** (`cpu/65xx/mos6502.*`) — full register set (A, X, Y, S, P, PC), all addressing modes, NMI/IRQ/BRK. Little-endian. Inherits `USimLE`. Internals are protected/virtual so derived CMOS classes can extend dispatch and override the handful of instructions whose semantics differ.
 

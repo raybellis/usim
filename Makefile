@@ -11,6 +11,7 @@ LDFLAGS		=
 
 LIB_SRCS	= core/usim.cpp core/memory.cpp \
 		  cpu/6809/mc6809.cpp cpu/6809/mc6809in.cpp \
+		  cpu/6809/hd6309.cpp \
 		  cpu/65xx/mos6502.cpp cpu/65xx/mos6502in.cpp \
 		  cpu/65xx/cmos6502.cpp \
 		  cpu/65xx/r65c02.cpp \
@@ -79,6 +80,9 @@ cpu/6809/mc6809.o: core/registers.h core/bits.h core/typedefs.h
 cpu/6809/mc6809in.o: cpu/6809/mc6809.h
 cpu/6809/mc6809in.o: core/usim.h core/memory.h core/device.h core/wiring.h
 cpu/6809/mc6809in.o: core/registers.h core/bits.h core/typedefs.h
+cpu/6809/hd6309.o: cpu/6809/hd6309.h cpu/6809/mc6809.h
+cpu/6809/hd6309.o: core/usim.h core/memory.h core/device.h core/wiring.h
+cpu/6809/hd6309.o: core/registers.h core/bits.h core/typedefs.h
 cpu/6809/main09.o: cpu/6809/mc6809.h
 cpu/6809/main09.o: peripherals/mc6850.h peripherals/term.h
 cpu/6809/main09.o: core/usim.h core/memory.h core/device.h core/wiring.h
