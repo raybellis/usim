@@ -89,6 +89,9 @@ protected:	// push/pull the W register on either stack
 	void			pshsw(), pulsw();
 	void			pshuw(), puluw();
 
+protected:	// in-memory bit logic: AIM/OIM/EIM/TIM
+	void			aim(), oim(), eim(), tim();
+
 protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.

@@ -226,6 +226,19 @@ void hd6309::execute_instruction()
 		case 0x103a: pshuw(); break;
 		case 0x103b: puluw(); break;
 
+		// In-memory bit logic. The base class treats some of these
+		// opcodes (e.g. $0B, $62, $6B) as undocumented NMOS variants
+		// of DEC/COM/etc.; on the 6309 they are AIM/OIM/EIM/TIM and
+		// must be caught here before falling through to mc6809.
+		case 0x0001: case 0x0061: case 0x0071:
+			oim(); break;
+		case 0x0002: case 0x0062: case 0x0072:
+			aim(); break;
+		case 0x0005: case 0x0065: case 0x0075:
+			eim(); break;
+		case 0x000b: case 0x006b: case 0x007b:
+			tim(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -718,4 +731,61 @@ void hd6309::puluw()
 	insn = "PULUW";
 	do_pul(u, w);
 	cycles += 2;
+}
+
+//----------------------------------------------------------------------------
+// In-memory bit logic: AIM, OIM, EIM, TIM.
+//
+// Encoding: opcode, mask byte, then a standard direct / indexed / extended
+// address. The mask is fetched first; fetch_effective_address resolves the
+// memory operand afterwards. AIM/OIM/EIM read-modify-write the location;
+// TIM only sets flags from (mem & mask) without writing back. All four
+// clear V and update N and Z from the masked result.
+//----------------------------------------------------------------------------
+
+void hd6309::aim()
+{
+	insn = "AIM";
+	Byte mask = fetch();
+	Word addr = fetch_effective_address();
+	Byte val = read(addr) & mask;
+	cc.n = btst(val, 7);
+	cc.z = !val;
+	cc.v = 0;
+	write(addr, val);
+}
+
+void hd6309::oim()
+{
+	insn = "OIM";
+	Byte mask = fetch();
+	Word addr = fetch_effective_address();
+	Byte val = read(addr) | mask;
+	cc.n = btst(val, 7);
+	cc.z = !val;
+	cc.v = 0;
+	write(addr, val);
+}
+
+void hd6309::eim()
+{
+	insn = "EIM";
+	Byte mask = fetch();
+	Word addr = fetch_effective_address();
+	Byte val = read(addr) ^ mask;
+	cc.n = btst(val, 7);
+	cc.z = !val;
+	cc.v = 0;
+	write(addr, val);
+}
+
+void hd6309::tim()
+{
+	insn = "TIM";
+	Byte mask = fetch();
+	Word addr = fetch_effective_address();
+	Byte val = read(addr) & mask;
+	cc.n = btst(val, 7);
+	cc.z = !val;
+	cc.v = 0;
 }
