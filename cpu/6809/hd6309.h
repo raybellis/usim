@@ -97,6 +97,9 @@ protected:	// signed multiply and divide
 	void			divd();
 	void			divq();
 
+protected:	// block transfer (TFM r+,r+ / r-,r- / r+,r / r,r+)
+	void			tfm();
+
 protected:	// 16-bit forms of the byte helpers (6309-only). The using
 		// declarations re-import the base's Byte overloads so callers
 		// in this class see both.

@@ -247,6 +247,10 @@ void hd6309::execute_instruction()
 		case 0x118e: case 0x119e: case 0x11ae: case 0x11be:
 			divq(); break;
 
+		// Block transfer (interruptible: one byte per dispatch)
+		case 0x1138: case 0x1139: case 0x113a: case 0x113b:
+			tfm(); break;
+
 		default:
 			mc6809::execute_instruction();
 			break;
@@ -875,4 +879,67 @@ void hd6309::divq()
 		cc.v = 0;
 	}
 	cycles += 32;
+}
+
+//----------------------------------------------------------------------------
+// Block transfer: TFM r+,r+ / r-,r- / r+,r / r,r+.
+//
+// W is the byte count; src and dst are encoded by the postbyte using the
+// standard 16-bit register codes (0..7). The instruction is interruptible:
+// we transfer one byte per dispatch and back PC up to the TFM opcode while
+// W != 0, so any interrupt naturally lands between bytes and RTI resumes
+// the loop. When W reaches 0 we leave PC pointing at the next instruction
+// and the loop exits.
+//----------------------------------------------------------------------------
+
+void hd6309::tfm()
+{
+	insn = "TFM";
+	Byte post = fetch_operand();
+	int r1_code = (post & 0xf0) >> 4;
+	int r2_code = (post & 0x0f);
+
+	// TFM operands must be 16-bit registers (codes 0..7).
+	if (r1_code > 7 || r2_code > 7) {
+		invalid("invalid TFM operand");
+		return;
+	}
+
+	Word& src = wordrefreg(r1_code);
+	Word& dst = wordrefreg(r2_code);
+
+	if (w == 0) {
+		// Empty transfer: nothing to do but consume cycles.
+		cycles += 6;
+		return;
+	}
+
+	// Transfer one byte
+	write(dst, read(src));
+
+	// Adjust src/dst per variant.
+	switch (ir) {
+		case 0x1138:	// r+, r+
+			++src; ++dst;
+			break;
+		case 0x1139:	// r-, r-
+			--src; --dst;
+			break;
+		case 0x113a:	// r+, r (dst constant)
+			++src;
+			break;
+		case 0x113b:	// r, r+ (src constant)
+			++dst;
+			break;
+	}
+
+	--w;
+
+	if (w != 0) {
+		// More bytes pending: rewind PC to re-fetch the TFM opcode
+		// and postbyte on the next tick. The instruction is 3 bytes
+		// (prefix $11, opcode, postbyte).
+		pc -= 3;
+	}
+	cycles += 3;
 }
