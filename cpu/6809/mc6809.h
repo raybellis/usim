@@ -211,7 +211,7 @@ protected: 	// instruction tracing
 	Byte			post;
 	Word			operand;
 
-	std::string		disasm_operand();
+	virtual std::string	disasm_operand();
 	std::string		disasm_indexed();
 
 public:		// external signal pins

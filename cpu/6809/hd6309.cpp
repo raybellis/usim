@@ -295,6 +295,7 @@ void hd6309::ldq()
 	DWord val;
 	if (mode == immediate) {
 		val = fetch_dword();
+		operand32 = val;	// retained for disasm
 	} else {
 		val = read_dword(fetch_effective_address());
 	}
@@ -768,9 +769,9 @@ void hd6309::puluw()
 void hd6309::aim()
 {
 	insn = "AIM";
-	Byte mask = fetch();
+	mask_byte = fetch();
 	Word addr = fetch_effective_address();
-	Byte val = read(addr) & mask;
+	Byte val = read(addr) & mask_byte;
 	cc.n = btst(val, 7);
 	cc.z = !val;
 	cc.v = 0;
@@ -780,9 +781,9 @@ void hd6309::aim()
 void hd6309::oim()
 {
 	insn = "OIM";
-	Byte mask = fetch();
+	mask_byte = fetch();
 	Word addr = fetch_effective_address();
-	Byte val = read(addr) | mask;
+	Byte val = read(addr) | mask_byte;
 	cc.n = btst(val, 7);
 	cc.z = !val;
 	cc.v = 0;
@@ -792,9 +793,9 @@ void hd6309::oim()
 void hd6309::eim()
 {
 	insn = "EIM";
-	Byte mask = fetch();
+	mask_byte = fetch();
 	Word addr = fetch_effective_address();
-	Byte val = read(addr) ^ mask;
+	Byte val = read(addr) ^ mask_byte;
 	cc.n = btst(val, 7);
 	cc.z = !val;
 	cc.v = 0;
@@ -804,9 +805,9 @@ void hd6309::eim()
 void hd6309::tim()
 {
 	insn = "TIM";
-	Byte mask = fetch();
+	mask_byte = fetch();
 	Word addr = fetch_effective_address();
-	Byte val = read(addr) & mask;
+	Byte val = read(addr) & mask_byte;
 	cc.n = btst(val, 7);
 	cc.z = !val;
 	cc.v = 0;
@@ -907,10 +908,11 @@ void hd6309::divq()
 void hd6309::tfm()
 {
 	insn = "TFM";
-	// fetch() directly: mc6809::decode_mode classifies $113x as inherent
-	// rather than immediate, so fetch_operand would route through
-	// fetch_effective_address and trap.
-	Byte post = fetch();
+	// fetch() directly: mc6809::fetch_instruction sets mode=inherent for
+	// $113x, so fetch_operand would route through fetch_effective_address
+	// and trap. We also store the postbyte in the inherited `post` member
+	// so disasm_operand can render the source/destination registers.
+	post = fetch();
 	int r1_code = (post & 0xf0) >> 4;
 	int r2_code = (post & 0x0f);
 
@@ -974,7 +976,7 @@ void hd6309::tfm()
 
 void hd6309::bit_transfer()
 {
-	Byte post = fetch();
+	post = fetch();				// store in inherited member for disasm
 	int r_sel = (post >> 6) & 3;
 	int r_bit = (post >> 3) & 7;
 	int m_bit = post & 7;
@@ -985,6 +987,7 @@ void hd6309::bit_transfer()
 	}
 
 	Byte addr_low = fetch();
+	operand = addr_low;			// retain for disasm
 	Word addr = ((Word)dp << 8) | addr_low;
 
 	Byte& reg = (r_sel == 0) ? cc.value
@@ -1196,6 +1199,7 @@ void hd6309::ldmd()
 {
 	insn = "LDMD";
 	Byte v = fetch();		// immediate operand
+	operand = v;			// retain for disasm
 	md.nm = btst(v, 0);
 	md.fm = btst(v, 1);
 	md.il = 0;
@@ -1207,6 +1211,7 @@ void hd6309::bitmd()
 {
 	insn = "BITMD";
 	Byte v = fetch();		// immediate operand
+	operand = v;			// retain for disasm
 	Byte t = md.value & v;
 	cc.z = (t == 0);
 	// Clear the trap-status bits that were just tested.
@@ -1243,4 +1248,94 @@ void hd6309::invalid(const char* msg)
 	(void)msg;
 	md.il = 1;
 	take_trap();
+}
+
+//----------------------------------------------------------------------------
+// Disassembly operand rendering for the 6309-specific instructions.
+//
+// Falls through to mc6809::disasm_operand for any opcode we don't need to
+// reformat. The base routine already covers EXG/TFR (with the new register
+// codes picked up by the extended regnames table) and every standard
+// addressing mode used by the 6309 load/store/ALU additions.
+//----------------------------------------------------------------------------
+
+namespace {
+
+	template<typename ... Args>
+	std::string disasm_fmt(const std::string& format, Args ... args)
+	{
+		int size = ::snprintf(nullptr, 0, format.c_str(), args ...) + 1;
+		if (size <= 0) {
+			return "string formatting error";
+		}
+		std::unique_ptr<char[]> buf(new char[size]);
+		::snprintf(buf.get(), size, format.c_str(), args ...);
+		return std::string(buf.get(), buf.get() + size - 1);
+	}
+
+	const char* tfm_dir_pair(Word ir)
+	{
+		// (src_suffix, dst_suffix)
+		switch (ir) {
+		case 0x1138: return "+,+";	// r+,r+
+		case 0x1139: return "-,-";	// r-,r-
+		case 0x113a: return "+, ";	// r+,r
+		case 0x113b: return " ,+";	// r,r+
+		}
+		return " , ";
+	}
+
+}  // namespace
+
+std::string hd6309::disasm_operand()
+{
+	static const char* tfm_regs[] = {
+		"D", "X", "Y", "U", "S", "PC", "W", "V"
+	};
+	static const char* bit_regs[] = {
+		"CC", "A", "B", "?"
+	};
+
+	switch (ir) {
+	// TFM r+,r+ / r-,r- / r+,r / r,r+
+	case 0x1138: case 0x1139: case 0x113a: case 0x113b: {
+		int rs = (post >> 4) & 0x0f;
+		int rd = post & 0x0f;
+		const char* sname = (rs < 8) ? tfm_regs[rs] : "?";
+		const char* dname = (rd < 8) ? tfm_regs[rd] : "?";
+		const char* dirs = tfm_dir_pair(ir);
+		// dirs is "S,D" where S in [0], D in [2]
+		return disasm_fmt("%s%c,%s%c", sname, dirs[0], dname, dirs[2]);
+	}
+
+	// BAND / BIAND / BOR / BIOR / BEOR / BIEOR / LDBT / STBT
+	case 0x1130: case 0x1131: case 0x1132: case 0x1133:
+	case 0x1134: case 0x1135: case 0x1136: case 0x1137: {
+		int r_sel = (post >> 6) & 3;
+		int r_bit = (post >> 3) & 7;
+		int m_bit = post & 7;
+		return disasm_fmt("%s.%d,<$%02X.%d",
+			bit_regs[r_sel], r_bit, operand & 0xff, m_bit);
+	}
+
+	// AIM / OIM / EIM / TIM: show "#$mask,<addr>" with the address
+	// rendered in the inherited style for direct / indexed / extended.
+	case 0x0001: case 0x0061: case 0x0071:	// OIM
+	case 0x0002: case 0x0062: case 0x0072:	// AIM
+	case 0x0005: case 0x0065: case 0x0075:	// EIM
+	case 0x000b: case 0x006b: case 0x007b:	// TIM
+		return disasm_fmt("#$%02X,%s",
+			mask_byte, mc6809::disasm_operand().c_str());
+
+	// LDMD / BITMD: immediate stored in operand; mc6809 thinks the mode
+	// is inherent for these, so render directly here.
+	case 0x113c: case 0x113d:
+		return disasm_fmt("#$%02X", operand & 0xff);
+
+	// LDQ #imm: 32-bit immediate retained in operand32.
+	case 0x00cd:
+		return disasm_fmt("#$%08X", operand32);
+	}
+
+	return mc6809::disasm_operand();
 }

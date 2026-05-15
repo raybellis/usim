@@ -58,6 +58,11 @@ protected:	// scratch for the "0 register" (TFR/EXG codes $C and $D, byte
 		// discarded by the next reset.
 	Byte			zero_byte = 0;
 
+protected:	// retained operand bytes for disasm of instructions whose
+		// operand pattern doesn't fit the mc6809 single-Word slot.
+	Byte			mask_byte;	// AIM/OIM/EIM/TIM mask
+	DWord			operand32;	// LDQ immediate value
+
 protected:	// dispatch overrides
 	virtual void		execute_instruction() override;
 	virtual void		tfr() override;
@@ -160,6 +165,9 @@ protected:	// 16-bit forms of the byte helpers (6309-only). The using
 	void			help_lsr(Word&);
 	void			help_rol(Word&);
 	void			help_ror(Word&);
+
+protected:	// disasm
+	virtual std::string	disasm_operand() override;
 
 public:
 				hd6309();		// public constructor

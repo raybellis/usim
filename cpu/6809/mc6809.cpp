@@ -715,9 +715,13 @@ static std::string disasm_reglist(Byte w, const char *other_sr)
 
 static std::string disasm_regpair(Byte w)
 {
+	// 16-bit half on top, 8-bit half on bottom. The 6309 entries (W, V,
+	// 0, E, F) live in slots the 6809 never produces, so the base
+	// rendering is correct whether the postbyte came from a 6809 or
+	// a 6309.
 	static const char* regnames[] = {
-		"D", "X", "Y", "U", "S", "PC", "", "",
-		"A", "B", "CC", "DP", "", "", "", ""
+		"D", "X",  "Y",  "U",  "S",  "PC", "W", "V",
+		"A", "B",  "CC", "DP", "0",  "0",  "E", "F"
 	};
 
 	int r1 = (w & 0xf0) >> 4;
