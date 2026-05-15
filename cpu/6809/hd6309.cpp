@@ -1273,18 +1273,6 @@ namespace {
 		return std::string(buf.get(), buf.get() + size - 1);
 	}
 
-	const char* tfm_dir_pair(Word ir)
-	{
-		// (src_suffix, dst_suffix)
-		switch (ir) {
-		case 0x1138: return "+,+";	// r+,r+
-		case 0x1139: return "-,-";	// r-,r-
-		case 0x113a: return "+, ";	// r+,r
-		case 0x113b: return " ,+";	// r,r+
-		}
-		return " , ";
-	}
-
 }  // namespace
 
 std::string hd6309::disasm_operand()
@@ -1303,9 +1291,16 @@ std::string hd6309::disasm_operand()
 		int rd = post & 0x0f;
 		const char* sname = (rs < 8) ? tfm_regs[rs] : "?";
 		const char* dname = (rd < 8) ? tfm_regs[rd] : "?";
-		const char* dirs = tfm_dir_pair(ir);
-		// dirs is "S,D" where S in [0], D in [2]
-		return disasm_fmt("%s%c,%s%c", sname, dirs[0], dname, dirs[2]);
+		const char* s_suffix = "";
+		const char* d_suffix = "";
+		switch (ir) {
+		case 0x1138: s_suffix = "+"; d_suffix = "+"; break;
+		case 0x1139: s_suffix = "-"; d_suffix = "-"; break;
+		case 0x113a: s_suffix = "+";                 break;
+		case 0x113b:                 d_suffix = "+"; break;
+		}
+		return disasm_fmt("%s%s,%s%s",
+			sname, s_suffix, dname, d_suffix);
 	}
 
 	// BAND / BIAND / BOR / BIOR / BEOR / BIEOR / LDBT / STBT
