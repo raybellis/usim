@@ -316,7 +316,7 @@ void mc6809::abx()
 {
 	insn = "ABX";
 	x += b;
-	++cycles;
+	cycles += 2;
 }
 
 void mc6809::adca()
